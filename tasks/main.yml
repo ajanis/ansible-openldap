@@ -1,0 +1,19 @@
+---
+
+- include: ldap_server.yml
+  when: "'ldapservers' in group_names"
+
+- include: configure_ldap.yml
+  when: "'ldapservers' in group_names"
+
+- include: ldap_client.yml
+  when: ansible_os_family == 'Debian'
+
+- include: ldap_client_RedHat.yml
+  when: ansible_os_family == 'RedHat'
+
+- include: ldap_automount.yml
+  when: "'ldapservers' in group_names"
+
+- include: ldap_users.yml
+  when: "'ldapservers' in group_names"

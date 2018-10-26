@@ -1,0 +1,72 @@
+---
+
+- name: Add the OS specific varibles
+  include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Add /etc/hosts entry for ldap server
+  lineinfile:
+    dest: /etc/hosts
+    state: present
+    line: "{{openldap_server_ip}} {{openldap_server_domain_name}}"
+    
+- name: Install the openldap client and required Packages for RedHat
+  yum: name={{ item }} state=installed
+  with_items: "{{ openldap_client_pkgs }}"
+
+- name: Install ssh-ldap-pubkey pip package
+  pip:
+    name: ssh-ldap-pubkey
+    state: present
+
+- name: Append ssh-ldap-pubkey wrapper configs to sshd_config
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    state: present
+    line: 'AuthorizedKeysCommand /usr/bin/ssh-ldap-pubkey-wrapper'
+  notify: 
+   - restart sshd
+   - restart systemd-logind
+
+- name: Append ssh-ldap-pubkey user configs to sshd_config
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    state: present
+    line: 'AuthorizedKeysCommandUser nobody'
+  notify:
+   - restart sshd
+   - restart systemd-logind
+
+- name: Copy /etc/ldap.conf for client
+  template: src=client_ldap.conf.j2 dest=/etc/ldap.conf
+
+
+- name: "LDAP Authentication | Enable LDAP PAM modules"
+  command: "authconfig --enableldap --enableldapauth --enablemkhomedir --update"
+  tags:
+    - "ldap"
+ 
+- name: Copy nslcd.conf
+  template:
+    src: nslcd.j2
+    dest: /etc/nslcd.conf
+  notify: restart nslcd
+
+- name : autofs packages
+  yum:
+    name: autofs
+    state: latest
+    update_cache: yes
+
+- name: Copy autofs supporting file
+  template:
+    src: autofs.j2
+    dest: /etc/default/autofs
+    mode: 0755
+  notify:
+   - restart autofs
+
+- name: Ensure rpcbind is running
+  action: service name=rpcbind state=started enabled=yes
+
+- meta: flush_handlers
+

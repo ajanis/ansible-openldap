@@ -1,0 +1,34 @@
+---
+openldap_server_pkgs:
+  - slapd
+  - ldap-utils
+  - python-selinux
+  - openssl
+  - python-pip
+  - libsasl2-dev
+  - python-dev
+  - libldap2-dev
+  - libssl-dev
+  - autofs-ldap
+  - python-ldap
+  - python-ldap3
+  - python-pexpect
+
+openldap_client_pkgs:
+  - libnss-ldapd
+  - libsasl2-dev
+  - python-dev
+  - libldap2-dev
+  - libssl-dev
+  - libpam-ldap
+  - nscd
+  - ldap-utils
+  - python-pip
+  - python-ldap
+  - python-ldap3
+  - autofs-ldap
+  
+openldap_server_app_path: "/etc/ldap/"
+openldap_server_user: "openldap"
+openldap_nslcd_group: "nslcd"
+

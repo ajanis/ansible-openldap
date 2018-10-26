@@ -1,0 +1,31 @@
+#
+# Init system options
+#
+# If the kernel supports using the autofs miscellanous device
+# and you wish to use it you must set this configuration option
+# to "yes" otherwise it will not be used.
+#
+USE_MISC_DEVICE="yes"
+#
+# Use OPTIONS to add automount(8) command line options that
+# will be used when the daemon is started.
+#
+#OPTIONS=""
+MASTER_MAP_NAME="{{ auto_master_ou }}"
+LOGGING="verbose"
+LDAP_URI="ldap://{{openldap_server_ip}}"
+SEARCH_BASE="{{ automount_ou }}"
+# Define the LDAP schema to used for lookups
+#
+# If no schema is set autofs will check each of the schemas
+# below in the order given to try and locate an appropriate
+# basdn for lookups. If you want to minimize the number of
+# queries to the server set the values here.
+#
+# (...)
+#
+MAP_OBJECT_CLASS="automountMap"
+ENTRY_OBJECT_CLASS="automount"
+MAP_ATTRIBUTE="ou"
+ENTRY_ATTRIBUTE="cn"
+VALUE_ATTRIBUTE="automountInformation"

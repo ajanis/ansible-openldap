@@ -1,0 +1,24 @@
+---
+- name: Deploy LDAP Client configurations
+  hosts: all
+  become: True
+  tasks:
+    - import_role:
+        name: common
+    - import_role:
+        name: openldap
+
+#- name: Deploy LDAP Client configurations with NFS or CephFS storage backend
+#  hosts: all
+#  become: True
+#  tasks:
+#    - import_role:
+#        name: common
+#    - import_role:
+#        name: openldap
+#    - import_role:
+#        name: ceph-fs
+#      when: storage_backend == "cephfs"
+#    - import_role:
+#        name: nfs
+#      when: storage_backend == "nfs"

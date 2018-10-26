@@ -1,0 +1,24 @@
+---
+- name: Deploy OpenLDAP Server with users, ssh keys, autoFS configurations
+  hosts: ldapservers
+  become: True
+  tasks:
+    - import_role:
+        name: common
+    - import_role:
+        name: openldap
+
+#- name: Deploy OpenLDAP Server with users, ssh keys, autoFS configurations with NFS or CephFS storage backend
+#  hosts: ldapservers
+#  become: True
+#  tasks:
+#    - import_role:
+#        name: common
+#    - import_role:
+#        name: openldap
+#    - import_role:
+#        name: ceph-fs
+#      when: storage_backend == "cephfs"
+#    - import_role:
+#        name: nfs
+#      when: storage_backend == "nfs"
