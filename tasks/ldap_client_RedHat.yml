@@ -10,8 +10,9 @@
     line: "{{openldap_server_ip}} {{openldap_server_domain_name}}"
     
 - name: Install the openldap client and required Packages for RedHat
-  yum: name={{ item }} state=installed
-  with_items: "{{ openldap_client_pkgs }}"
+  yum:
+    name: "{{ openldap_client_pkgs }}"
+    state: installed
 
 - name: Install ssh-ldap-pubkey pip package
   pip:
