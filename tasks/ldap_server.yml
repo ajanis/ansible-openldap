@@ -20,7 +20,6 @@
     name: "{{ openldap_server_pkgs }}"
     state: installed
     update_cache: yes
-  environment: env
   when: ansible_os_family == 'Debian'
 
 - name: copy openssh-lpk schema file

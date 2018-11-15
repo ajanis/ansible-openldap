@@ -15,7 +15,6 @@
     name: "{{ openldap_client_pkgs }}"
     state: installed
     update_cache: yes
-  environment: env
 
 - name: Install ssh-ldap-pubkey pip package
   pip:
