@@ -1,19 +1,19 @@
 ---
 
-- include: ldap_server.yml
+- include_tasks: ldap_server.yml
   when: "'ldapservers' in group_names"
 
-- include: configure_ldap.yml
+- include_tasks: configure_ldap.yml
   when: "'ldapservers' in group_names"
 
-- include: ldap_client.yml
+- include_tasks: ldap_client.yml
   when: ansible_os_family == 'Debian'
 
-- include: ldap_client_RedHat.yml
+- include_tasks: ldap_client_RedHat.yml
   when: ansible_os_family == 'RedHat'
 
-- include: ldap_automount.yml
+- include_tasks: ldap_automount.yml
   when: "'ldapservers' in group_names"
 
-- include: ldap_users.yml
+- include_tasks: ldap_users.yml
   when: "'ldapservers' in group_names"
