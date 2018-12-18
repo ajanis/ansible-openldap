@@ -92,7 +92,7 @@
       - automount
     attributes:
       cn: "/data"
-      automountInformation: "-fstype=ceph,name=admin,secretfile=/etc/ceph/secret.key {{cephfs_server_ip}}:/"
+      automountInformation: "-fstype=ceph {{ groups['mdss'] | join(':6789,') }}:6789:/"
     state: present
   notify: restart nscd
   when: storage_backend == "cephfs"
@@ -150,7 +150,7 @@
       - automount
     attributes:
       cn: "{{item.key}}"
-      automountInformation: "-fstype=ceph,name=admin,secretfile=/etc/ceph/secret.key {{ cephfs_server_ip }}:/{{ ldap_user_home_directory }}/{{ item.key }}" 
+      automountInformation: "-fstype=ceph {{ groups['mdss'] | join(':6789,') }}:6789:/"
     state: present
   notify: restart nscd
   with_dict: "{{ssh_users}}"
