@@ -150,7 +150,7 @@
       - automount
     attributes:
       cn: "{{item.key}}"
-      automountInformation: "-fstype=ceph {{ groups['mdss'] | join(':6789,') }}:6789:/"
+      automountInformation: "-fstype=ceph {{ groups['mdss'] | join(':6789,') }}:6789:/{{ ldap_user_home_directory }}/{{ item.key }}"
     state: present
   notify: restart nscd
   with_dict: "{{ssh_users}}"
