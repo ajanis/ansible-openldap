@@ -164,6 +164,7 @@
     group: "{{ item.value.gid }}"
     mode: 0755
   with_dict: "{{ ssh_users }}"
+  when: storage_backend == "nfs"
 
 - name: User Directory CNs
   ldap_entry:
