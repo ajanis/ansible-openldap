@@ -59,7 +59,7 @@
       gidNumber: "{{ item.value.gid }}"
       uidNumber: "{{ item.value.uid }}"
       homeDirectory: "/home/{{ item.key }}"
-      loginShell: "/bin/bash"
+      loginShell: "{{ item.value.shell | default('/bin/bash') }}"
       givenName: "{{ item.value.givenname}}"
       sn: "{{ item.value.sn }}"
       mail: "{{ item.value.mail }}"
