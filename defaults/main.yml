@@ -1,5 +1,8 @@
 ### LDAP SERVER CONFIG
 
+# shared storage flag
+shared_storage: False
+
 #The ldif file
 openldap_server_ldif: domain.ldif
 
