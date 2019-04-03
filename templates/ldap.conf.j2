@@ -17,6 +17,8 @@ URI     ldap://{{ openldap_server_domain_name }}
 #SIZELIMIT      12
 #TIMELIMIT      15
 #DEREF          never
+
+{% if openldap_server_enable_ssl %}
 {% if ansible_os_family == 'RedHat' %}
 TLS_CACERTDIR /etc/openldap/cacerts
 TLS_CACERT /etc/openldap/certs/{{ openldap_server_domain_name }}.crt
@@ -24,4 +26,5 @@ TLS_CACERT /etc/openldap/certs/{{ openldap_server_domain_name }}.crt
 {% if ansible_os_family == 'Debian' %}
 TLS_CACERTDIR /etc/ldap/certs
 TLS_CACERT /etc/ldap/certs/{{ openldap_server_domain_name }}.crt
+{% endif %}
 {% endif %}
