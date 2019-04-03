@@ -18,4 +18,5 @@
     - shared_storage
 
 - include_tasks: ldap_users.yml
-  when: "'ldapservers' in group_names"
+  when:
+    - "'ldapservers' in group_names"
