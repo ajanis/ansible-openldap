@@ -102,12 +102,16 @@
     name: autofs
     state: latest
     update_cache: yes
+  when:
+    - shared_storage
 
 - name: Copy autofs supporting file
   template:
     src: autofs.j2
     dest: /etc/default/autofs
     mode: 0755
+  when:
+    - shared_storage
   notify:
    - restart autofs
 
