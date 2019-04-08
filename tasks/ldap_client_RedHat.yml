@@ -12,7 +12,7 @@
 - name: Install the openldap client and required Packages for RedHat
   yum:
     name: "{{ openldap_client_pkgs }}"
-    state: installed
+    state: present
 
 - name: Install ssh-ldap-pubkey pip package
   pip:

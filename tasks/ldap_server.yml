@@ -11,14 +11,14 @@
 - name: Install the openldap and required Packages for RedHat
   yum:
     name: "{{ openldap_server_pkgs }}"
-    state: installed
+    state: present
   when: ansible_os_family == 'RedHat'
 
 
 - name: Install the openldap and required Packages for Ubuntu
   apt:
     name: "{{ openldap_server_pkgs }}"
-    state: installed
+    state: present
     update_cache: yes
   when: ansible_os_family == 'Debian'
 
