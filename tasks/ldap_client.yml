@@ -22,7 +22,7 @@
     name: ssh-ldap-pubkey
     state: present
 
-- name: Disable Pam in SSHD config
+- name: Enable Pam in SSHD config
   lineinfile:
     dest: /etc/ssh/sshd_config
     state: present
