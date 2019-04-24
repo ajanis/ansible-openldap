@@ -43,6 +43,8 @@
 
 - name: "LDAP Authentication | Enable LDAP PAM modules"
   command: "authconfig --enableldap --enableldapauth --enablemkhomedir --update"
+  args:
+    creates: /var/log/ldap_configured
   tags:
     - "ldap"
 
