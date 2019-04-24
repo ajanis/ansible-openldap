@@ -31,10 +31,14 @@
    - restart slapd
 
 - name: Delete the configuration directory
-  file: path={{ openldap_server_app_path }}/slapd.d state=absent
+  file:
+    path: "{{ openldap_server_app_path }}/slapd.d"
+    state: absent
 
 - name: Generate the root password for ldap
-  command: slappasswd -s {{ openldap_server_rootpw }}
+  command: "slappasswd -s {{ openldap_server_rootpw }}"
+  args:
+    creates: /var/log/ldap_configured
   register: root_password
   no_log: True
 
