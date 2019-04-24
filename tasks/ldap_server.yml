@@ -6,8 +6,8 @@
   lineinfile:
     dest: /etc/hosts
     state: present
-    line: "{{openldap_server_ip}} {{openldap_server_domain_name}}"
-    
+    line: "{{ openldap_server_ip }} {{ openldap_server_domain_name }}"
+
 - name: Install the openldap and required Packages for RedHat
   yum:
     name: "{{ openldap_server_pkgs }}"
@@ -34,22 +34,22 @@
   file: path={{ openldap_server_app_path }}/slapd.d state=absent
 
 - name: Generate the root password for ldap
-  shell: slappasswd -s {{ openldap_server_rootpw }} 
+  command: slappasswd -s {{ openldap_server_rootpw }}
   register: root_password
   no_log: True
 
 - name: Copy the slapd.conf configuration file for Redhat
-  template: 
+  template:
     src: slapd.conf.j2
     dest: "{{ openldap_server_app_path }}/slapd.conf"
   when: ansible_os_family == "RedHat"
-  notify: 
+  notify:
    - restart slapd
 
 - name: Copy the slapd.conf configuration file
   template: src=slapd.conf_ubuntu.j2 dest={{ openldap_server_app_path }}/slapd.conf
   when: ansible_os_family == "Debian"
-  notify: 
+  notify:
    - restart slapd
 
 - name: Copy the ldap.conf configuration file

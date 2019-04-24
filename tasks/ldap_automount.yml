@@ -5,7 +5,7 @@
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
     dn: "{{ admin_ou }}"
-    objectClass: 
+    objectClass:
       - top
       - organizationalUnit
     attributes:
@@ -18,7 +18,7 @@
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
     dn: "{{ automount_ou }}"
-    objectClass: 
+    objectClass:
       - top
       - organizationalUnit
     attributes:
@@ -31,7 +31,7 @@
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
     dn: "{{ auto_master_ou }}"
-    objectClass: 
+    objectClass:
       - top
       - automountMap
     attributes:
@@ -44,7 +44,7 @@
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
     dn: "cn=/-,{{ auto_master_ou }}"
-    objectClass: 
+    objectClass:
       - top
       - automount
     attributes:
@@ -58,8 +58,8 @@
   ldap_entry:
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
-    dn: "cn={{ data_mount_root}},{{ auto_master_ou }}"
-    objectClass: 
+    dn: "cn={{ data_mount_root }},{{ auto_master_ou }}"
+    objectClass:
       - top
       - automount
     attributes:
@@ -74,7 +74,7 @@
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
     dn: "{{ auto_data_ou }}"
-    objectClass: 
+    objectClass:
       - top
       - automountMap
     attributes:
@@ -87,7 +87,7 @@
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
     dn: "cn=/data,{{ auto_data_ou }}"
-    objectClass: 
+    objectClass:
       - top
       - automount
     attributes:
@@ -102,7 +102,7 @@
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
     dn: "cn={{ item.key }},{{ auto_data_ou }}"
-    objectClass: 
+    objectClass:
       - top
       - automount
     attributes:
@@ -118,7 +118,7 @@
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
     dn: "cn=/home,{{ auto_master_ou }}"
-    objectClass: 
+    objectClass:
       - top
       - automount
     attributes:
@@ -132,7 +132,7 @@
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
     dn: "{{ auto_home_ou }}"
-    objectClass: 
+    objectClass:
       - top
       - automountMap
     attributes:
@@ -144,16 +144,16 @@
   ldap_entry:
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
-    dn: "cn={{item.key}},{{ auto_home_ou }}"
-    objectClass: 
+    dn: "cn={{ item.key }},{{ auto_home_ou }}"
+    objectClass:
       - top
       - automount
     attributes:
-      cn: "{{item.key}}"
+      cn: "{{ item.key }}"
       automountInformation: "-fstype=ceph {{ groups['mdss'] | join(':6789,') }}:6789:/{{ ldap_user_home_directory }}/{{ item.key }}"
     state: present
   notify: restart nscd
-  with_dict: "{{ssh_users}}"
+  with_dict: "{{ ssh_users }}"
   when: storage_backend == "cephfs"
 
 - name: create user home directories
@@ -170,16 +170,16 @@
   ldap_entry:
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
-    dn: "cn={{item.key}},{{ auto_home_ou }}"
-    objectClass: 
+    dn: "cn={{ item.key }},{{ auto_home_ou }}"
+    objectClass:
       - top
       - automount
     attributes:
-      cn: "{{item.key}}"
+      cn: "{{ item.key }}"
       automountInformation: "-fstype=nfs,{{ nfs_exports.homedirs.mount_opts }} {{ nfs_server_ip }}:{{ nfs_exports.homedirs.nfs_export }}/{{ item.key }}"
     state: present
   notify: restart nscd
-  with_dict: "{{ssh_users}}"
+  with_dict: "{{ ssh_users }}"
   when: storage_backend == "nfs"
 
 - meta: flush_handlers

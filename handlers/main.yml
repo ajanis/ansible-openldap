@@ -1,26 +1,26 @@
 ---
 - name: restart iptables
-  service: 
-    name: iptables 
-    state: restarted 
+  service:
+    name: iptables
+    state: restarted
     enabled: yes
 
 - name: restart slapd
-  service: 
-    name: slapd 
-    state: restarted 
+  service:
+    name: slapd
+    state: restarted
     enabled: yes
 
 - name: restart httpd
-  service: 
-    name: httpd 
-    state: restarted 
+  service:
+    name: httpd
+    state: restarted
     enabled: yes
 
 - name: restart nscd
-  service: 
-    name: nscd 
-    state: restarted 
+  service:
+    name: nscd
+    state: restarted
     enabled: yes
 
 - name: restart nslcd
@@ -30,22 +30,22 @@
     enabled: yes
 
 - name: restart sshd
-  service: 
-    name: sshd 
-    state: restarted 
+  service:
+    name: sshd
+    state: restarted
     enabled: yes
 
 - name: restart systemd-logind
-  service: 
-    name: systemd-logind 
-    state: restarted 
+  service:
+    name: systemd-logind
+    state: restarted
     enabled: yes
 
 - name: restart autofs
-  service: 
-    name: autofs 
-    state: restarted 
+  service:
+    name: autofs
+    state: restarted
     enabled: yes
 
 - name: reload exports
-  shell: exportfs -ra
+  command: exportfs -ra

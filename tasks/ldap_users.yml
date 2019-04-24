@@ -47,7 +47,7 @@
   ldap_entry:
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
-    dn: "uid={{item.key}},{{ users_ou }}"
+    dn: "uid={{ item.key }},{{ users_ou }}"
     objectClass:
       - top
       - posixAccount
@@ -60,7 +60,7 @@
       uidNumber: "{{ item.value.uid }}"
       homeDirectory: "/home/{{ item.key }}"
       loginShell: "{{ item.value.shell | default('/bin/bash') }}"
-      givenName: "{{ item.value.givenname}}"
+      givenName: "{{ item.value.givenname }}"
       sn: "{{ item.value.sn }}"
       mail: "{{ item.value.mail }}"
       gecos: "{{ item.value.gecos }}"
@@ -68,7 +68,7 @@
       cn: "{{ item.value.cn }}"
       sshPublicKey: "{{ item.value.pubkey }}"
     state: "{{ item.value.state }}"
-  with_dict: "{{ssh_users}}"
+  with_dict: "{{ ssh_users }}"
   tags:
     - user_setup
   notify: restart nscd

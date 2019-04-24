@@ -7,8 +7,8 @@
   lineinfile:
     dest: /etc/hosts
     state: present
-    line: "{{openldap_server_ip}} {{openldap_server_domain_name}}"
-    
+    line: "{{ openldap_server_ip }} {{ openldap_server_domain_name }}"
+
 
 - name: Install the openldap client and required Packages for Ubuntu
   apt:
@@ -37,7 +37,7 @@
     dest: /etc/ssh/sshd_config
     state: present
     line: 'AuthorizedKeysCommand /usr/local/bin/ssh-ldap-pubkey-wrapper'
-  notify: 
+  notify:
    - restart sshd
    - restart systemd-logind
 
@@ -57,8 +57,8 @@
   template: src=ldap.conf.j2 dest={{ openldap_server_app_path }}/ldap.conf
 
 - name: Fix common-auth
-  lineinfile: 
-    dest: /etc/pam.d/common-auth 
+  lineinfile:
+    dest: /etc/pam.d/common-auth
     state: present
     line: 'account required    pam_access.so'
   notify: restart nscd
@@ -69,7 +69,7 @@
     state: present
     line: 'session required    pam_mkhomedir.so skel=/etc/skel umask=0022'
   notify: restart nscd
-    
+
 - name: Fix common-password
   replace:
     path: /etc/pam.d/common-password
@@ -100,7 +100,7 @@
 - name : autofs packages
   apt:
     name: autofs
-    state: latest
+    state: present
     update_cache: yes
   when:
     - shared_storage

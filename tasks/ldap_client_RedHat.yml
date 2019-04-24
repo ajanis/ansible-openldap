@@ -7,8 +7,8 @@
   lineinfile:
     dest: /etc/hosts
     state: present
-    line: "{{openldap_server_ip}} {{openldap_server_domain_name}}"
-    
+    line: "{{ openldap_server_ip }} {{ openldap_server_domain_name }}"
+
 - name: Install the openldap client and required Packages for RedHat
   yum:
     name: "{{ openldap_client_pkgs }}"
@@ -24,7 +24,7 @@
     dest: /etc/ssh/sshd_config
     state: present
     line: 'AuthorizedKeysCommand /usr/bin/ssh-ldap-pubkey-wrapper'
-  notify: 
+  notify:
    - restart sshd
    - restart systemd-logind
 
@@ -45,7 +45,7 @@
   command: "authconfig --enableldap --enableldapauth --enablemkhomedir --update"
   tags:
     - "ldap"
- 
+
 - name: Copy nslcd.conf
   template:
     src: nslcd.j2
@@ -55,7 +55,7 @@
 - name : autofs packages
   yum:
     name: autofs
-    state: latest
+    state: present
     update_cache: yes
 
 - name: Copy autofs supporting file
