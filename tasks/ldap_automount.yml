@@ -86,12 +86,12 @@
   ldap_entry:
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
-    dn: "cn=/data,{{ auto_data_ou }}"
+    dn: "cn={{ data_mount_root }},{{ auto_data_ou }}"
     objectClass:
       - top
       - automount
     attributes:
-      cn: "/data"
+      cn: "{{ data_mount_root }}"
       automountInformation: "-fstype=ceph {{ groups['mdss'] | join(':6789,') }}:6789:/"
     state: present
   notify: restart nscd
