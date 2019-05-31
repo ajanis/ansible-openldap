@@ -21,6 +21,7 @@
     executable: pip
     name: ssh-ldap-pubkey
     state: present
+    version: 1.3.0
 
 - name: Enable Pam in SSHD config
   lineinfile:
