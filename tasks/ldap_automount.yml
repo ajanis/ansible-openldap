@@ -11,7 +11,7 @@
     attributes:
       ou: admin
     state: present
-  notify: restart nscd
+  notify: restart nslcd
 
 - name: Automount OU
   ldap_entry:
@@ -24,7 +24,7 @@
     attributes:
       ou: automount
     state: present
-  notify: restart nscd
+  notify: restart nslcd
 
 - name: auto.master OU
   ldap_entry:
@@ -37,7 +37,7 @@
     attributes:
       ou: auto.master
     state: present
-  notify: restart nscd
+  notify: restart nslcd
 
 - name: CephFS data automount CN
   ldap_entry:
@@ -51,7 +51,7 @@
       cn: "/-"
       automountInformation: "ldap:ou=auto.data,ou=automount,ou=admin,{{ openldap_server_dc }} --ghost"
     state: present
-  notify: restart nscd
+  notify: restart nslcd
   when: storage_backend == "cephfs"
 
 - name: NFS data automount CN
@@ -66,7 +66,7 @@
       cn: "{{ data_mount_root }}"
       automountInformation: "ldap:ou=auto.data,ou=automount,ou=admin,{{ openldap_server_dc }} --ghost"
     state: present
-  notify: restart nscd
+  notify: restart nslcd
   when: storage_backend == "nfs"
 
 - name: auto.data OU
@@ -80,7 +80,7 @@
     attributes:
       ou: auto.data
     state: present
-  notify: restart nscd
+  notify: restart nslcd
 
 - name: CephFS Data Directory CNs
   ldap_entry:
@@ -94,7 +94,7 @@
       cn: "{{ data_mount_root }}"
       automountInformation: "-fstype=ceph {{ groups['mdss'] | join(':6789,') }}:6789:/"
     state: present
-  notify: restart nscd
+  notify: restart nslcd
   when: storage_backend == "cephfs"
 
 - name: NFS Data Directory CNs
@@ -109,7 +109,7 @@
       cn: "{{ item.key }}"
       automountInformation: "-fstype=nfs,{{ item.value.mount_opts }} {{ nfs_server_ip }}:{{ item.value.nfs_export }}"
     state: present
-  notify: restart nscd
+  notify: restart nslcd
   with_dict: "{{ nfs_exports }}"
   when: storage_backend == "nfs"
 
@@ -125,7 +125,7 @@
       cn: /home
       automountInformation: "ldap:ou=auto.home,ou=automount,ou=admin,{{ openldap_server_dc }} --timeout=60 --ghost"
     state: present
-  notify: restart nscd
+  notify: restart nslcd
 
 - name: auto.home OU
   ldap_entry:
@@ -138,7 +138,7 @@
     attributes:
       ou: auto.home
     state: present
-  notify: restart nscd
+  notify: restart nslcd
 
 - name: User Directory CNs
   ldap_entry:
@@ -152,7 +152,7 @@
       cn: "{{ item.key }}"
       automountInformation: "-fstype=ceph {{ groups['mdss'] | join(':6789,') }}:6789:/{{ ldap_user_home_directory }}/{{ item.key }}"
     state: present
-  notify: restart nscd
+  notify: restart nslcd
   with_dict: "{{ ssh_users }}"
   when: storage_backend == "cephfs"
 
@@ -178,7 +178,7 @@
       cn: "{{ item.key }}"
       automountInformation: "-fstype=nfs,{{ nfs_exports.homedirs.mount_opts }} {{ nfs_server_ip }}:{{ nfs_exports.homedirs.nfs_export }}/{{ item.key }}"
     state: present
-  notify: restart nscd
+  notify: restart nslcd
   with_dict: "{{ ssh_users }}"
   when: storage_backend == "nfs"
 

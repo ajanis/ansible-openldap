@@ -62,14 +62,14 @@
     dest: /etc/pam.d/common-auth
     state: present
     line: 'account required    pam_access.so'
-  notify: restart nscd
+  notify: restart nslcd
 
 - name: Fix common-session
   lineinfile:
     dest: /etc/pam.d/common-session
     state: present
     line: 'session required    pam_mkhomedir.so skel=/etc/skel umask=0022'
-  notify: restart nscd
+  notify: restart nslcd
 
 - name: Fix common-password
   replace:
@@ -77,20 +77,20 @@
     backup: yes
     regexp: '^.*use_authtok.*$'
     replace: 'password [success=1 user_unknown=ignore default=die] pam_ldap.so try_first_pass'
-  notify: restart nscd
+  notify: restart nslcd
 
 - name: Fix access.conf
   lineinfile:
     dest: /etc/security/access.conf
     state: absent
     line: '-:ALL EXCEPT root (admin):ALL EXCEPT LOCAL'
-  notify: restart nscd
+  notify: restart nslcd
 
 - name: Copy nsswitch.conf
   copy:
     src: nsswitch.conf
     dest: /etc/nsswitch.conf
-  notify: restart nscd
+  notify: restart nslcd
 
 - name: Copy nslcd.conf
   template:
