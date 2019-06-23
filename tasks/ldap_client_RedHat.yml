@@ -59,6 +59,16 @@
     name: autofs
     state: present
     update_cache: yes
+  when:
+    - shared_storage and use_ldap_automount
+
+- name : autofs-ldap packages
+  apt:
+    name: autofs-ldap
+    state: present
+    update_cache: yes
+  when:
+    - shared_storage and use_ldap_automount
 
 - name: Copy autofs supporting file
   template:
@@ -67,6 +77,8 @@
     mode: 0755
   notify:
    - restart autofs
+  when:
+    - shared_storage and use_ldap_automount
 
 - name: Ensure rpcbind is running
   action: service name=rpcbind state=started enabled=yes
