@@ -87,14 +87,14 @@
   notify: restart nslcd
 
 - name: Copy nsswitch.conf
-  copy:
-    src: nsswitch.conf
+  template:
+    src: nsswitch.conf.j2
     dest: /etc/nsswitch.conf
   notify: restart nslcd
 
 - name: Copy nslcd.conf
   template:
-    src: nslcd.j2
+    src: nslcd.conf.j2
     dest: /etc/nslcd.conf
   notify: restart nslcd
 
@@ -104,7 +104,15 @@
     state: present
     update_cache: yes
   when:
-    - shared_storage
+    - shared_storage and use_ldap_automount
+
+- name : autofs-ldap packages
+  apt:
+    name: autofs-ldap
+    state: present
+    update_cache: yes
+  when:
+    - shared_storage and use_ldap_automount
 
 - name: Copy autofs supporting file
   template:
@@ -112,7 +120,7 @@
     dest: /etc/default/autofs
     mode: 0755
   when:
-    - shared_storage
+    - shared_storage and use_ldap_automount
   notify:
    - restart autofs
 

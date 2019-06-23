@@ -4,14 +4,11 @@
 # If you have the `glibc-doc-reference' and `info' packages installed, try:
 # `info libc "Name Service Switch"' for information about this file.
 
-# pre_auth-client-config # passwd:         compat
 passwd: compat ldap
-# pre_auth-client-config # group:          compat
 group: compat ldap
-# pre_auth-client-config # shadow:         compat
 shadow: compat ldap
 
-hosts:	files dns
+hosts:          files dns
 networks:       files
 
 protocols:      db files
@@ -19,4 +16,8 @@ services:       db files
 ethers:         db files
 rpc:            db files
 
+{% if shared_storage %}
 automount:      files ldap
+{% else %}
+automount:      files
+{% endif %}
