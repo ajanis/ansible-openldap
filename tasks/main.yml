@@ -6,11 +6,13 @@
 - include_tasks: configure_ldap.yml
   when: "'ldapservers' in group_names"
 
-- include_tasks: ldap_client.yml
-  when: ansible_os_family == 'Debian'
+- name: OpenLDAP :: Configure LDAP Client [Debian]
+  include_tasks: ldap_client_debian.yml
+  when: ansible_os_family == "Debian"
 
-- include_tasks: ldap_client_RedHat.yml
-  when: ansible_os_family == 'RedHat'
+- name: OpenLDAP :: Configure LDAP Client [RedHat]
+  include_tasks: ldap_client_redhat.yml
+  when: ansible_os_family == "RedHat"
 
 - include_tasks: ldap_automount.yml
   when:
