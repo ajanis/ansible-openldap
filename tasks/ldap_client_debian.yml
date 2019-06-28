@@ -62,14 +62,18 @@
     dest: /etc/pam.d/common-auth
     state: present
     line: 'account required    pam_access.so'
-  notify: restart nslcd
+  notify:
+    - restart nslcd
+    - restart nscd
 
 - name: Fix common-session
   lineinfile:
     dest: /etc/pam.d/common-session
     state: present
     line: 'session required    pam_mkhomedir.so skel=/etc/skel umask=0022'
-  notify: restart nslcd
+  notify:
+    - restart nslcd
+    - restart nscd
 
 - name: Fix common-password
   replace:
@@ -77,26 +81,34 @@
     backup: yes
     regexp: '^.*use_authtok.*$'
     replace: 'password [success=1 user_unknown=ignore default=die] pam_ldap.so try_first_pass'
-  notify: restart nslcd
+  notify:
+    - restart nslcd
+    - restart nscd
 
 - name: Fix access.conf
   lineinfile:
     dest: /etc/security/access.conf
     state: absent
     line: '-:ALL EXCEPT root (admin):ALL EXCEPT LOCAL'
-  notify: restart nslcd
+  notify:
+    - restart nslcd
+    - restart nscd
 
 - name: Copy nsswitch.conf
   template:
     src: nsswitch.conf.j2
     dest: /etc/nsswitch.conf
-  notify: restart nslcd
+  notify:
+    - restart nslcd
+    - restart nscd
 
 - name: Copy nslcd.conf
   template:
     src: nslcd.conf.j2
     dest: /etc/nslcd.conf
-  notify: restart nslcd
+  notify:
+    - restart nslcd
+    - restart nscd
 
 - name : autofs packages
   apt:
