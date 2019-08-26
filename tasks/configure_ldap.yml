@@ -102,9 +102,47 @@
   notify:
    - restart slapd
 
+- meta: flush_handlers
 
-- name: start the slapd service
-  service: name=slapd state=restarted enabled=yes
+- name: stop slapd
+  service:
+    name: slapd
+    state: stopped
+  when: slapd_rebuild is defined and slapd_rebuild
+
+- name: Delete the configuration directory
+  file:
+    path: "{{ openldap_server_app_path }}/slapd.d"
+    state: absent
+  when: slapd_rebuild is defined and slapd_rebuild
+
+- name: Create the configuration directory
+  file:
+    path: "{{ openldap_server_app_path }}/slapd.d"
+    state: directory
+    owner: openldap
+    group: openldap
+  when: slapd_rebuild is defined and slapd_rebuild
+
+- name: Rebuild slapd OLC Directory
+  shell: "slaptest -f {{ openldap_server_app_path }}/slapd.conf -F {{ openldap_server_app_path }}/slapd.d"
+  when: slapd_rebuild is defined and slapd_rebuild
+
+- name: fix slapd.d permissions
+  file:
+    path: "{{ openldap_server_app_path }}/slapd.d"
+    state: directory
+    recurse: yes
+    owner: openldap
+    group: openldap
+  when: slapd_rebuild is defined and slapd_rebuild
+   
+- name: start slapd
+  service:
+    name: slapd
+    state: started
+    enabled: yes
+  when: slapd_rebuild is defined and slapd_rebuild
 
 - name: Copy the template for creating base dn
   template: src={{ openldap_server_ldif }} dest=/tmp/
