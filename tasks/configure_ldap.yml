@@ -146,12 +146,24 @@
 
 - name: Copy the template for creating base dn
   template: src={{ openldap_server_ldif }} dest=/tmp/
-  register: result
-  notify:
-    - restart slapd
+  register: rootdn
 
 - name: add the base domain
   shell: >
     ldapadd -x -D "cn=Manager,{{ openldap_server_dc }}" -w {{ openldap_server_rootpw }}
-    -f {{ result.dest|default(result.path) }} && touch {{ openldap_server_app_path }}/rootdn_created
-    creates={{ openldap_server_app_path }}/rootdn_created
+    -f {{ rootdn.dest|default(rootdn.path) }} && touch {{ openldap_server_app_path }}/rootdn_created
+  args:
+    creates: "{{ openldap_server_app_path }}/rootdn_created"
+
+- name: Copy the template for creating samba indices
+  copy:
+    src: samba_indices.ldif
+    dest: /tmp/
+  register: smbindices
+
+- name: add the samba indices
+  shell: >
+    ldapmodify -x -D "cn=admin,cn=config" -w {{ openldap_server_rootpw }}
+    -f {{ smbindices.dest|default(smbindices.path) }} && touch {{ openldap_server_app_path }}/smbindices_created
+  args:
+    creates: "{{ openldap_server_app_path }}/smbindices_created"
