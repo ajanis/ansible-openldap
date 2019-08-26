@@ -76,9 +76,8 @@
       cn: "{{ item.value.cn }}"
       sshPublicKey: "{{ item.value.pubkey }}"
     state: "{{ item.value.state }}"
-  with_dict: "{{ ssh_users }}"
-  tags:
-    - user_setup
+  loop: "{{ ssh_users|dict2items }}"
+  register: ssh_users_added
   notify:
     - restart nslcd
     - restart nscd
