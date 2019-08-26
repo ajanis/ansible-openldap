@@ -4,6 +4,7 @@ include         /etc/openldap/schema/inetorgperson.schema
 include         /etc/openldap/schema/nis.schema
 include         /etc/ldap/schema/openssh-lpk.schema
 include         /etc/ldap/schema/autofs.schema
+include			/etc/ldap/schema/samba.schema
 pidfile         /var/run/openldap/slapd.pid
 argsfile        /var/run/openldap/slapd.args
 modulepath      /usr/lib64/openldap
@@ -20,6 +21,10 @@ access to attrs=userPassword
 access to attrs=shadowLastChange
                 by self write
                 by * read
+
+database config
+rootdn "cn=admin,cn=config"
+rootpw {{ root_password.stdout }}
 
 database        bdb
 suffix          "{{ openldap_server_dc }}"

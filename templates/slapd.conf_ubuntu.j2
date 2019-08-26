@@ -2,7 +2,8 @@ include         /etc/ldap/schema/core.schema
 include         /etc/ldap/schema/cosine.schema
 include         /etc/ldap/schema/inetorgperson.schema
 include         /etc/ldap/schema/nis.schema
-include		      /etc/ldap/schema/openssh-lpk.schema
+include         /etc/ldap/schema/openssh-lpk.schema
+include         /etc/ldap/schema/samba.schema
 include         /etc/ldap/schema/autofs.schema
 pidfile         /var/run/slapd/slapd.pid
 
@@ -26,6 +27,10 @@ access to attrs=userPassword
 access to attrs=shadowLastChange
                 by self write
                 by * read
+
+database config
+rootdn "cn=admin,cn=config"
+rootpw {{ root_password.stdout }}
 
 database        bdb
 suffix          "{{ openldap_server_dc }}"
