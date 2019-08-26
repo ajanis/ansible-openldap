@@ -22,3 +22,7 @@
 - include_tasks: ldap_users.yml
   when:
     - "'ldapservers' in group_names"
+
+- include_tasks: configure_smb.yml
+  when:
+    - "'ldapservers' in group_names"
