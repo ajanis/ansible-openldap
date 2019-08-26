@@ -1,5 +1,55 @@
 ---
 
+- name: copy openssh-lpk schema file
+  copy:
+    src: openssh-lpk
+    dest: "{{ openldap_server_app_path }}/schema/openssh-lpk.schema"
+    mode: 0644
+  notify: slapd rebuild
+
+- name: copy samba ldap schema file
+  copy:
+    src: samba.schema
+    dest: "{{ openldap_server_app_path }}/schema/samba.schema"
+    mode: 0644
+  notify: slapd rebuild
+
+- name: Check for ldap root password change
+  copy:
+    dest: "{{ openldap_server_app_path }}/rootpw_configured"
+    content: "{{ openldap_server_rootpw | checksum }}"
+  register: rootpw_updated
+
+- name: Generate the root password for ldap
+  shell: "slappasswd -s {{ openldap_server_rootpw }}"
+  register: root_password
+  when: rootpw_updated is changed
+  no_log: True
+
+- name: Copy the slapd.conf configuration file for Redhat
+  template:
+    src: slapd.conf.j2
+    dest: "{{ openldap_server_app_path }}/slapd.conf"
+  when:
+    - ansible_os_family == "RedHat"
+    - rootpw_updated is changed
+  notify: slapd rebuild
+
+- name: Copy the slapd.conf configuration file for Ubuntu
+  template:
+    src: slapd.conf_ubuntu.j2
+    dest: "{{ openldap_server_app_path }}/slapd.conf"
+  when:
+    - ansible_os_family == "Debian"
+    - rootpw_updated is changed
+  notify: slapd rebuild
+
+- name: Copy the ldap.conf configuration file
+  template:
+    src: ldap.conf.j2
+    dest: "{{ openldap_server_app_path }}/ldap.conf"
+  notify: restart slapd
+
 - name: Create the directory for ldap database
   file: path=/var/lib/ldap/{{ openldap_server_domain_name }}/ state=directory owner={{ openldap_server_user }} group={{ openldap_server_user }}
 
