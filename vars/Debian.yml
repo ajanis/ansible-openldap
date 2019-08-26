@@ -12,6 +12,8 @@ openldap_server_pkgs:
   - python-ldap
   - python-ldap3
   - python-pexpect
+  - smbldap-tools
+  - samba
 
 openldap_client_pkgs:
   - libnss-ldapd
@@ -29,4 +31,3 @@ openldap_client_pkgs:
 openldap_server_app_path: "/etc/ldap/"
 openldap_server_user: "openldap"
 openldap_nslcd_group: "nslcd"
-
