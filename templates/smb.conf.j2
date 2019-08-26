@@ -1,0 +1,69 @@
+# # Primary Domain Controller smb.conf
+
+# # Global parameters
+[global]
+workgroup = WORKGROUP
+netbios name = ldap
+#passdb backend = ldapsam:ldap://127.0.0.1
+#passdb backend = ldapsam:"ldap://192.168.0.2 ldap://192.168.0.3"
+passdb backend =ldapsam:"ldap://ldap.home.prettybaked.com"
+username map = /etc/samba/smbusers
+log level = 1
+#syslog = 1
+log file = /var/log/samba/%m
+max log size = 0
+add user script = /usr/sbin/smbldap-useradd -m '%u'
+delete user script = /usr/sbin/smbldap-userdel '%u'
+add group script = /usr/sbin/smbldap-groupadd -p '%g'
+delete group script = /usr/sbin/smbldap-groupdel '%g'
+add user to group script = /usr/sbin/smbldap-groupmod -m '%g' '%u'
+delete user from group script = /usr/sbin/smbldap-groupmod -x '%g' '%u'
+set primary group script = /usr/sbin/smbldap-usermod -g '%g' '%u'
+add machine script = /usr/sbin/smbldap-useradd -w '%u'
+#shutdown script = /var/lib/samba/scripts/shutdown.sh
+#abort shutdown script = /sbin/shutdown -c
+#logon script = %u.bat
+#logon path = \\192.168.0.4\profiles\%u
+#logon path = \\nodes.differentialdesign.org\profiles\%u
+#ldapsam:trusted = yes
+ldap suffix = dc=ldap,dc=home,dc=prettybaked,dc=com
+ldap machine suffix = ou=computers
+ldap user suffix = ou=users
+ldap group suffix = ou=groups
+ldap idmap suffix = ou=Idmap
+ldap admin dn = cn=Manager,dc=ldap,dc=home,dc=prettybaked,dc=com
+#idmap backend = ldap://ldap.home.prettybaked.com
+ldap ssl = off
+ldap passwd sync = yes
+#========================Share Definitions=========================
+
+[homes]
+ comment = Home Directories
+ valid users = %S
+ browseable = yes
+ writable = yes
+ create mask = 0600
+ directory mask = 0700
+
+#[netlogon]
+#comment = Network Logon Service
+#path = /data/samba/netlogon
+#writeable = yes
+#browseable = yes
+#read only = no
+
+#[profiles]
+#path = /data/samba/profiles
+#writeable = yes
+#browseable = no
+#read only = no
+#create mode = 0777
+#directory mode = 0777
+
+[data]
+comment = CephFS Data
+path = /data
+writeable = yes
+browseable = yes
+read only = no
+valid users = "@admin"
