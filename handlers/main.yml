@@ -49,3 +49,22 @@
 
 - name: reload exports
   command: exportfs -ra
+
+- name: restart samba
+  service:
+    name: smbd
+    state: restarted
+    enabled: yes
+
+- name: restart nmbd
+  service:
+    name: nmbd
+    state: restarted
+    enabled: yes
+
+- name: smbldap populate
+  command: smbldap-populate
+
+- name: slapd rebuild
+  set_fact:
+    slapd_rebuild: True
