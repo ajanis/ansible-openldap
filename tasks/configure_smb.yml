@@ -1,0 +1,30 @@
+---
+
+- name: Copy smbldap.conf
+  template:
+    src: smbldap.conf.j2
+    dest: /etc/smbldap-tools/smbldap.conf
+  notify: smbldap populate
+
+- name: Copy smbldap_bind.conf
+  template:
+    src: smbldap_bind.conf.j2
+    dest: /etc/smbldap-tools/smbldap_bind.j2
+  notify: smbldap populate
+
+- name: Copy Samba configuration
+  template:
+    src: smb.conf.j2
+    dest: /etc/samba/smb.conf
+  notify:
+    - restart samba
+    - restart nmbd
+
+- name: Inform Samba about RootDN password
+  shell: "smbpasswd -w {{ openldap_server_rootpw }}"
+  when: rootpw_updated is changed
+
+- name: "Add users to Samba"
+  shell: "smbpasswd -a {{ item.item.key }} -w {{ item.item.value.password }}"
+  loop: "{{ ssh_users_added.results }}"
+  when: item.changed or slapd_rebuild is defined and slapd_rebuild
