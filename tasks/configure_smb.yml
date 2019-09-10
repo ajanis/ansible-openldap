@@ -20,7 +20,7 @@
 - name: Copy smbldap_bind.conf
   template:
     src: smbldap_bind.conf.j2
-    dest: /etc/smbldap-tools/smbldap_bind.j2
+    dest: /etc/smbldap-tools/smbldap_bind.conf
   notify: smbldap populate
 
 - name: Copy Samba configuration
