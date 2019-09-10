@@ -3,11 +3,8 @@
 # # Global parameters
 [global]
 workgroup = WORKGROUP
-netbios name = {{ openldap_server_domain_name.split('.')[0] }}
-passdb backend =ldapsam:"ldap://{{ openldap_server_domain_name }}"
-username map = /etc/samba/smbusers
+passdb backend = ldapsam:"ldap://{{ openldap_server_domain_name }}"
 log level = 1
-#syslog = 1
 log file = /var/log/samba/%m
 max log size = 0
 add user script = /usr/sbin/smbldap-useradd -m '%u'
@@ -18,12 +15,6 @@ add user to group script = /usr/sbin/smbldap-groupmod -m '%g' '%u'
 delete user from group script = /usr/sbin/smbldap-groupmod -x '%g' '%u'
 set primary group script = /usr/sbin/smbldap-usermod -g '%g' '%u'
 add machine script = /usr/sbin/smbldap-useradd -w '%u'
-#shutdown script = /var/lib/samba/scripts/shutdown.sh
-#abort shutdown script = /sbin/shutdown -c
-#logon script = %u.bat
-#logon path = \\192.168.0.4\profiles\%u
-#logon path = \\nodes.differentialdesign.org\profiles\%u
-#ldapsam:trusted = yes
 ldap suffix = dc={{ openldap_server_domain_name.split('.')[0] }},dc={{ openldap_server_domain_name.split('.')[1] }},dc={{ openldap_server_domain_name.split('.')[2] }},dc={{ openldap_server_domain_name.split('.')[3] }}
 ldap machine suffix = ou=computers
 ldap user suffix = ou=users
