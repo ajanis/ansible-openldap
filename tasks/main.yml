@@ -23,6 +23,10 @@
   when:
     - "'ldapservers' in group_names"
 
+- include_tasks: smbd_server.yml
+  when:
+    - "'samba' in group_names"
+
 - include_tasks: configure_smb.yml
   when:
-    - "'ldapservers' in group_names"
+    - "'samba' in group_names"
