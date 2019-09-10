@@ -127,13 +127,33 @@
     state: stopped
   when: slapd_rebuild is defined and slapd_rebuild
 
-- name: Delete the configuration directory
+- name: Delete the ldap database
+  file:
+    path: /var/lib/ldap/{{ openldap_server_domain_name }}"
+    state: absent
+  when: slapd_rebuild is defined and slapd_rebuild
+
+- name: Recreate the ldap database directory
+  file:
+    path: "/var/lib/ldap/{{ openldap_server_domain_name }}"
+    state: directory
+    owner: "{{ openldap_server_user }}"
+    group: "{{ openldap_server_user }}"
+  when: slapd_rebuild is defined and slapd_rebuild
+
+- name: Delete the ldap configuration directory
   file:
     path: "{{ openldap_server_app_path }}/slapd.d"
     state: absent
   when: slapd_rebuild is defined and slapd_rebuild
 
-- name: Create the configuration directory
+- name: restart slapd
+  service:
+    name: slapd
+    state: restarted
+  when: slapd_rebuild is defined and slapd_rebuild
+
+- name: Recreate the ldap configuration directory
   file:
     path: "{{ openldap_server_app_path }}/slapd.d"
     state: directory
@@ -154,10 +174,10 @@
     group: openldap
   when: slapd_rebuild is defined and slapd_rebuild
    
-- name: start slapd
+- name: restart slapd
   service:
     name: slapd
-    state: started
+    state: restarted
     enabled: yes
   when: slapd_rebuild is defined and slapd_rebuild
 
