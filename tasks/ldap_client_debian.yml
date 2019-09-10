@@ -140,3 +140,13 @@
   action: service name=rpcbind state=started enabled=yes
 
 - meta: flush_handlers
+
+- name: create user home directories
+  file:
+    state: directory
+    path: "/home/{{ item.key }}"
+    owner: "{{ item.value.uid }}"
+    group: "{{ item.value.gid }}"
+    mode: 0755
+  with_dict: "{{ ssh_users }}"
+  when: not shared_storage
