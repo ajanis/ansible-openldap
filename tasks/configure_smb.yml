@@ -30,9 +30,15 @@
   when: smbldap_populate is defined and smbldap_populate
 
 - name: "Add users to Samba"
-  shell: "smbpasswd -a {{ item.item.key }} -w {{ item.item.value.password }}"
-  loop: "{{ ssh_users_added.results }}"
-  when: item.changed or smbldap_populate is defined and smbldap_populate
+  shell: |
+    smbpasswd -s -a {{ item.key }} <<EOF
+    {{ item.value.password }}
+    {{ item.value.password }}
+    EOF
+  args:
+    executable: /bin/bash
+  loop: "{{ ssh_users | dict2items }}"
+  when: smbldap_populate is defined and smbldap_populate
 
 - name: Inform Samba about RootDN password
   shell: "smbpasswd -w {{ openldap_server_rootpw }}"
