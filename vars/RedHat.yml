@@ -5,19 +5,31 @@ openldap_server_pkgs:
   - compat-openldap
   - libselinux-python
   - openssl
+  - openssl-devel
+  - python-pip
+  - python-ldap
+  - python-ldap3
+  - python-pexpect
+
 
 openldap_client_pkgs:
   - nss-pam-ldapd
   - nscd
   - compat-openldap
   - python-devel
-  - python-pip
-  - python-ldap
   - gcc
   - openldap-devel
   - cyrus-sasl
   - cyrus-sasl-ldap
   - cyrus-sasl-devel
+  - ldap-utils
+  - python-pip
+  - python-ldap
+  - python-ldap3
+
+samba_pkgs:
+  - smbldap-tools
+  - samba
 
 openldap_server_app_path: "/etc/openldap"
 openldap_server_user: ldap
