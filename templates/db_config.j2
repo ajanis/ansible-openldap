@@ -1,6 +1,6 @@
 # replaces lockdetect directive
-set_lk_detect DB_LOCK_EXPIRE
-# OR set lk_detect DB_LOCK_DEFAULT
+#set_lk_detect DB_LOCK_EXPIRE
+#set lk_detect DB_LOCK_DEFAULT
 
 # uncomment if dbnosync required
 # set_flags DB_TXN_NOSYNC
@@ -14,8 +14,3 @@ set_cachesize 0 5242880 1
 # allows fragmentation
 # does NOT replace slapd.conf cachesize 
 # this is a database parameter
-
-txn_checkpoint 128 15 0
-# replaces checkpoint in slap.conf
-# writes checkpoint if 128K written or every 15 mins
-# 0 = no writes - no update
