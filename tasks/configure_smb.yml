@@ -1,10 +1,4 @@
 ---
-- name: Create samba config directory
-  file:
-    path: /etc/samba
-    state: directory
-    mode: 755
-
 - name: Copy Samba configuration
   template:
     src: smb.conf.j2
