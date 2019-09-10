@@ -25,11 +25,31 @@
 
 - meta: flush_handlers
 
-- name: Inform Samba about RootDN password
-  shell: "smbpasswd -w {{ openldap_server_rootpw }}"
-  when: rootpw_updated is changed
+- name: Populate smbldap database
+  shell: |
+    smbldap-populate <<EOF
+    {{ openldap_server_rootpw }}
+    {{ openldap_server_rootpw }}
+    EOF
+  args:
+    executable: /bin/bash
+  when: smbldap_populate is defined and smbldap_populate
 
 - name: "Add users to Samba"
   shell: "smbpasswd -a {{ item.item.key }} -w {{ item.item.value.password }}"
   loop: "{{ ssh_users_added.results }}"
-  when: item.changed or slapd_rebuild is defined and slapd_rebuild
+  when: item.changed or smbldap_populate is defined and smbldap_populate
+
+- name: Inform Samba about RootDN password
+  shell: "smbpasswd -w {{ openldap_server_rootpw }}"
+  when: smbldap_populate is defined and smbldap_populate
+
+- name: restart samba services
+  service:
+    name: "{{ item }}"
+    state: restarted
+    enabled: yes
+  loop:
+    - nmbd
+    - smbd
+  when: smbldap_populate is defined and smbldap_populate
