@@ -77,6 +77,7 @@
     state: directory
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_user }}"
+  when: openldap_server_enable_ssl
 
 - name: "[OpenLDAP] :: Install SSL Key"
   copy:
@@ -85,6 +86,7 @@
     owner: root
     group: root
     mode: 0640
+  when: openldap_server_enable_ssl
   notify:
     - restart slapd
 
@@ -95,6 +97,7 @@
     owner: root
     group: root
     mode: 0640
+  when: openldap_server_enable_ssl
   notify:
     - restart slapd
 
