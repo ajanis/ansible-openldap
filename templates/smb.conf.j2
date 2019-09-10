@@ -39,20 +39,15 @@ ldap passwd sync = yes
  create mask = 0600
  directory mask = 0700
 
-#[netlogon]
-#comment = Network Logon Service
-#path = /data/samba/netlogon
-#writeable = yes
-#browseable = yes
-#read only = no
-
-#[profiles]
-#path = /data/samba/profiles
-#writeable = yes
-#browseable = no
-#read only = no
-#create mode = 0777
-#directory mode = 0777
+{% for share in smb_shares %}
+[{{ share.name }}]
+comment = {{ share.comment }}
+path = {{ share.path }}
+writeable = {{ share.writeable }}
+browseable = {{ share.browseable }}
+read only = {{ share.read_only }}
+valid users = {{ share.valid_users }}
+{% endfor %}
 
 {% if shared_storage %}
 [data]
