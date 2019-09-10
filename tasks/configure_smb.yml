@@ -1,4 +1,15 @@
 ---
+- name: Create samba config directory
+  file:
+    path: /etc/samba
+    state: directory
+    mode: 755
+
+- name: Copy Samba configuration
+  template:
+    src: smb.conf.j2
+    dest: /etc/samba/smb.conf
+  notify: smbldap populate
 
 - name: Copy smbldap.conf
   template:
