@@ -3,10 +3,8 @@
 # # Global parameters
 [global]
 workgroup = WORKGROUP
-netbios name = ldap
-#passdb backend = ldapsam:ldap://127.0.0.1
-#passdb backend = ldapsam:"ldap://192.168.0.2 ldap://192.168.0.3"
-passdb backend =ldapsam:"ldap://ldap.home.prettybaked.com"
+netbios name = {{ openldap_server_domain_name.split('.')[0] }}
+passdb backend =ldapsam:"ldap://{{ openldap_server_domain_name }}"
 username map = /etc/samba/smbusers
 log level = 1
 #syslog = 1
@@ -26,14 +24,19 @@ add machine script = /usr/sbin/smbldap-useradd -w '%u'
 #logon path = \\192.168.0.4\profiles\%u
 #logon path = \\nodes.differentialdesign.org\profiles\%u
 #ldapsam:trusted = yes
-ldap suffix = dc=ldap,dc=home,dc=prettybaked,dc=com
+ldap suffix = dc={{ openldap_server_domain_name.split('.')[0] }},dc={{ openldap_server_domain_name.split('.')[1] }},dc={{ openldap_server_domain_name.split('.')[2] }},dc={{ openldap_server_domain_name.split('.')[3] }}
 ldap machine suffix = ou=computers
 ldap user suffix = ou=users
 ldap group suffix = ou=groups
 ldap idmap suffix = ou=Idmap
-ldap admin dn = cn=Manager,dc=ldap,dc=home,dc=prettybaked,dc=com
-#idmap backend = ldap://ldap.home.prettybaked.com
+ldap admin dn = cn=Manager,{{ openldap_server_dc }}
+
+{% if openldap_server_enable_ssl %}
+ldap ssl = on
+{% else %}
 ldap ssl = off
+{% endif %}
+
 ldap passwd sync = yes
 #========================Share Definitions=========================
 
@@ -60,6 +63,7 @@ ldap passwd sync = yes
 #create mode = 0777
 #directory mode = 0777
 
+{% if shared_storage %}
 [data]
 comment = CephFS Data
 path = /data
@@ -67,3 +71,4 @@ writeable = yes
 browseable = yes
 read only = no
 valid users = "@admin"
+{% endif %}

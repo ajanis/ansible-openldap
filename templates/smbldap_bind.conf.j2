@@ -6,7 +6,7 @@
 # master ldap for writing access and a slave ldap server for reading access
 # By default, we will use the same DN (so it will work for standard Samba
 # release)
-slaveDN="cn=Manager,dc=ldap,dc=home,dc=prettybaked,dc=com"
-slavePw="throve_shutoff_stubb_anon_invert"
-masterDN="cn=Manager,dc=ldap,dc=home,dc=prettybaked,dc=com"
-masterPw="throve_shutoff_stubb_anon_invert"
+slaveDN="cn=Manager,{{ openldap_server_dc }}"
+slavePw="{{ openldap_server_rootpw }}"
+masterDN="cn=Manager,{{ openldap_server_dc }}"
+masterPw="{{ openldap_server_rootpw }}"

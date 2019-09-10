@@ -56,7 +56,7 @@ sambaDomain="WORKGROUP"
 # Slave LDAP server
 # Ex: slaveLDAP=127.0.0.1
 # If not defined, parameter is set to "127.0.0.1"
-slaveLDAP="ldap://ldap.home.prettybaked.com"
+slaveLDAP="ldap://{{ openldap_server_domain_name }}"
 
 # Slave LDAP port
 # If not defined, parameter is set to "389"
@@ -65,7 +65,7 @@ slavePort="389"
 # Master LDAP server: needed for write operations
 # Ex: masterLDAP=127.0.0.1
 # If not defined, parameter is set to "127.0.0.1"
-masterLDAP="ldap://ldap.home.prettybaked.com"
+masterLDAP="ldap://{{ openldap_server_domain_name }}"
 
 # Master LDAP port
 # If not defined, parameter is set to "389"
@@ -75,7 +75,12 @@ masterPort="389"
 # If set to 1, this option will use start_tls for connection
 # (you should also used the port 389)
 # If not defined, parameter is set to "1"
+{% if openldap_server_enable_ssl %}
+ldapTLS="1"
+{% else %}
 ldapTLS="0"
+{% endif %}
+
 
 # How to verify the server's certificate (none, optional or require)
 # see "man Net::LDAP" in start_tls section for more details
@@ -95,7 +100,7 @@ clientkey=""
 
 # LDAP Suffix
 # Ex: suffix=dc=IDEALX,dc=ORG
-suffix="dc=ldap,dc=home,dc=prettybaked,dc=com"
+suffix="dc={{ openldap_server_domain_name.split('.')[0] }},dc={{ openldap_server_domain_name.split('.')[1] }},dc={{ openldap_server_domain_name.split('.')[2] }},dc={{ openldap_server_domain_name.split('.')[3] }}"
 
 # Where are stored Users
 # Ex: usersdn="ou=Users,dc=IDEALX,dc=ORG"
@@ -156,7 +161,7 @@ userHomeDirectoryMode="700"
 userGecos="System User"
 
 # Default User (POSIX and Samba) GID
-defaultUserGid="2002"
+defaultUserGid="{{ ssh_groups.users.gid }}"
 
 # Default Computer (Samba) GID
 defaultComputerGid="2003"
@@ -201,7 +206,7 @@ userScript=""
 # Domain appended to the users "mail"-attribute
 # when smbldap-useradd -M is used
 # Ex: mailDomain="idealx.com"
-mailDomain="home.prettybaked.com"
+mailDomain="{{ www_domain }}"
 
 ##############################################################################
 #
