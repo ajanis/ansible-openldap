@@ -23,13 +23,7 @@
     dest: /etc/smbldap-tools/smbldap_bind.conf
   notify: smbldap populate
 
-- name: Copy Samba configuration
-  template:
-    src: smb.conf.j2
-    dest: /etc/samba/smb.conf
-  notify:
-    - restart samba
-    - restart nmbd
+- meta: flush_handlers
 
 - name: Inform Samba about RootDN password
   shell: "smbpasswd -w {{ openldap_server_rootpw }}"
