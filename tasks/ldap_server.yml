@@ -6,7 +6,7 @@
   lineinfile:
     dest: /etc/hosts
     state: present
-    line: "{{ openldap_server_ip }} {{ openldap_server_domain_name }}"
+    line: "{{ openldap_server_ip }} {{ openldap_server_domain_name }} {{ openldap_server_domain_name.split('.')[0] }}"
 
 - name: Install the openldap and required Packages for RedHat
   yum:

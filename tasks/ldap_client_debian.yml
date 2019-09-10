@@ -7,7 +7,7 @@
   lineinfile:
     dest: /etc/hosts
     state: present
-    line: "{{ openldap_server_ip }} {{ openldap_server_domain_name }}"
+    line: "{{ openldap_server_ip }} {{ openldap_server_domain_name }} {{ openldap_server_domain_name.split('.')[0] }}"
 
 
 - name: Install the openldap client and required Packages for Ubuntu
@@ -140,4 +140,3 @@
   action: service name=rpcbind state=started enabled=yes
 
 - meta: flush_handlers
-
