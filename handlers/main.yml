@@ -63,7 +63,8 @@
     enabled: yes
 
 - name: smbldap populate
-  command: smbldap-populate
+  set_fact:
+    smbldap_populate: True
 
 - name: slapd rebuild
   set_fact:
