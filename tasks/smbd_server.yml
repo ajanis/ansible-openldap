@@ -1,0 +1,25 @@
+---
+- name: Install samba and required Packages for RedHat
+  yum:
+    name: "{{ samba_pkgs }}"
+    state: present
+  when: ansible_os_family == 'RedHat'
+
+- name: Install samba and required Packages for Ubuntu
+  apt:
+    name: "{{ samba_pkgs }}"
+    state: present
+    update_cache: yes
+  when: ansible_os_family == 'Debian'
+
+- name: Create samba config directory
+  file:
+    path: /etc/samba
+    state: directory
+    mode: 755
+
+- name: Create smbldap config directory
+  file:
+    path: /etc/smbldap-tools
+    state: directory
+    mode: 755
