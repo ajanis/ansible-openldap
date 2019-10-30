@@ -1,32 +1,128 @@
 ---
+- name: Add the OS specific varibles
+  include_vars: "{{ ansible_os_family }}.yml"
+  tags: always
 
-- include_tasks: ldap_server.yml
+- name: Add /etc/hosts entry for ldap server
+  lineinfile:
+    dest: /etc/hosts
+    state: present
+    line: "{{ openldap_server_ip }} {{ openldap_server_domain_name }} {{ openldap_server_domain_name.split('.')[0] }}"
+  tags: always
+
+- include_tasks:
+    file: ldap_server.yml
+    apply:
+      tags:
+        - ldap_all
+        - ldapserver
+        - ldapserver_install
+  tags:
+    - ldap_all
+    - ldapserver
+    - ldapserver_install
   when: "'ldapservers' in group_names"
 
-- include_tasks: configure_ldap.yml
+- include_tasks:
+    file: configure_ldap.yml
+    apply:
+      tags:
+        - ldap_all
+        - ldapserver
+        - ldapserver_configure
+  tags:
+    - ldap_all
+    - ldapserver
+    - ldapserver_configure
   when: "'ldapservers' in group_names"
 
-- name: "OpenLDAP :: Configure LDAP Client [Debian]"
-  include_tasks: ldap_client_debian.yml
+- name: "Configure LDAP Client [Debian]"
+  include_tasks:
+    file: ldap_client_debian.yml
+    apply:
+      tags:
+        - ldap_all
+        - ldapclient
+  tags:
+    - ldap_all
+    - ldapclient
   when: ansible_os_family == "Debian"
 
-- name: "OpenLDAP :: Configure LDAP Client [RedHat]"
-  include_tasks: ldap_client_redhat.yml
+- name: "Configure LDAP Client [RedHat]"
+  include_tasks:
+    file: ldap_client_redhat.yml
+    apply:
+      tags:
+        - ldap_all
+        - ldapclient
+  tags:
+    - ldap_all
+    - ldapclient
   when: ansible_os_family == "RedHat"
 
-- include_tasks: ldap_automount.yml
+- include_tasks:
+    file: ldap_automount.yml
+    apply:
+      tags:
+        - ldap_all
+        - automount
+        - ldapserver
+        - ldapserver_configure
+  tags:
+    - ldap_all
+    - automount
+    - ldapserver
+    - ldapserver_configure
   when:
     - "'ldapservers' in group_names"
     - shared_storage
 
-- include_tasks: ldap_users.yml
+- include_tasks:
+    file: ldap_users.yml
+    apply:
+      tags:
+        - ldap_all
+        - users
+        - ldapserver
+        - ldapserver_configure
+  tags:
+    - ldap_all
+    - users
+    - ldapserver
+    - ldapserver_configure
   when:
     - "'ldapservers' in group_names"
 
-- include_tasks: smbd_server.yml
+- include_tasks:
+    file: smbd_server.yml
+    apply:
+      tags:
+        - samba
+        - samba_install
+  tags:
+    - samba
+    - samba_install
   when:
     - "'samba' in group_names"
 
-- include_tasks: configure_smb.yml
+- include_tasks:
+    file: configure_smb.yml
+    apply:
+      tags:
+        - samba
+        - samba_configure
+  tags:
+    - samba
+    - samba_configure
   when:
     - "'samba' in group_names"
+
+- include_tasks:
+    file: afpd.yml
+    apply:
+      tags:
+        - afpd
+  tags:
+    - afpd
+  when:
+    - "'afpd' in group_names"
