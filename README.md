@@ -1,5 +1,18 @@
-openldap
-===============
+# openldap
+
+<!-- MarkdownTOC -->
+
+- Requirements
+- Role Variables
+  - defaults/main.yml
+  - vars/Debian.yml
+  - vars/RedHat.yml
+- Example Group Variables
+- Example Playbooks
+    - Configure an OpenLDAP server:
+- Dependencies
+
+<!-- /MarkdownTOC -->
 
 This roles installs the OpenLDAP server or client the target machine.
 
@@ -13,8 +26,7 @@ The following installation / configuration options are available:
 - Optionally, configure AutoFS mounts for home directories and shared storage (NFS or CephFS)
 
 
-Requirements
-------------
+## Requirements
 
 This role requires Ansible 2.8 or higher, and platform requirements are listed
 in the metadata file.
@@ -24,8 +36,7 @@ Inventory Groups required for deploying Server components:
 - samba: Samba Server
 
 
-Role Variables
---------------
+## Role Variables
 
 The variables that can be passed to this role and a brief description about
 them are as follows:
@@ -191,8 +202,7 @@ openldap_server_user: ldap
 openldap_nslcd_group: ldap
 ```
 
-Example Group Variables
------------------------
+## Example Group Variables
 
 ```
 shared_storage: False
@@ -233,8 +243,7 @@ ssh_groups:
 
 ```
 
-Example Playbooks
------------------
+## Example Playbooks
 
 ##### Configure an OpenLDAP server:
 
@@ -262,7 +271,6 @@ Example Playbooks
 ```
 
 
-Dependencies
-------------
+## Dependencies
 
 None
