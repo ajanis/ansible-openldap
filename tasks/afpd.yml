@@ -1,0 +1,61 @@
+---
+- name: install afpd required packages
+  apt:
+    name: "{{ afpd_pkgs }}"
+    update_cache: yes
+    state: present
+
+- name: copy afpd defaults file
+  copy:
+    src: netatalk
+    dest: /etc/default/netatalk
+  notify:
+    - restart netatalk
+
+- name: copy afpd shares configuration
+  copy:
+    src: AppleVolumes.default
+    dest: /etc/netatalk/AppleVolumes.default
+  notify:
+    - restart netatalk
+
+- name: update hosts entry in nsswitch config
+  lineinfile:
+    dest: /etc/nsswitch.conf
+    regexp: '^hosts:.*'
+    line: 'hosts: files mdns4_minimal dns mdns4 mdns'
+  notify:
+    - restart netatalk
+
+- name: set system model for afpd
+  lineinfile:
+    dest: /etc/netatalk/afpd.conf
+    line: '-mimicmodel Xserve'
+  notify:
+    - restart netatalk
+
+- name: template afpd config for ldap authentication
+  template:
+    src: afp_ldap.conf.j2
+    dest: /etc/netatalk/afp_ldap.conf
+  notify:
+    - restart avahi-daemon
+    - restart netatalk
+  when: afp_ldap_auth
+
+- name: add afpd service to local avahi daemon
+  copy:
+    src: afpd.service
+    dest: /etc/avahi/services/afpd.service
+  notify:
+    - restart avahi-daemon
+
+- name: enable afpd service
+  service:
+    name: netatalk
+    state: started
+
+- name: enable avahi service
+  service:
+    name: avahi-daemon
+    state: started
