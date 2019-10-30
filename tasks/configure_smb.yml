@@ -19,6 +19,9 @@
 
 - meta: flush_handlers
 
+- name: Generate password db
+  command: "smbpasswd -w {{ openldap_server_rootpw }}"
+
 - name: Populate smbldap database
   shell: |
     smbldap-populate -g 10000 -u 10000 -r 10000 <<EOF
