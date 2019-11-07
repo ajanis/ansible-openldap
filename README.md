@@ -2,6 +2,7 @@
 
 <!-- MarkdownTOC -->
 
+- Dependencies
 - Requirements
 - Role Variables
   - defaults/main.yml
@@ -10,7 +11,8 @@
 - Example Group Variables
 - Example Playbooks
     - Configure an OpenLDAP server:
-- Dependencies
+- License
+- Author Information
 
 <!-- /MarkdownTOC -->
 
@@ -25,6 +27,8 @@ The following installation / configuration options are available:
 - Optionally, configure SSH users and groups
 - Optionally, configure AutoFS mounts for home directories and shared storage (NFS or CephFS)
 
+## Dependencies
+None
 
 ## Requirements
 
@@ -34,7 +38,7 @@ in the metadata file.
 Inventory Groups required for deploying Server components:
 - ldapserver: OpenLDAP Server
 - samba: Samba Server
-
+- afpd: Apple File Protocol Daemon (Netatalk) + Avahi
 
 ## Role Variables
 
@@ -152,7 +156,7 @@ openldap_client_pkgs:
   - python-pip
   - python-ldap
   - python-ldap3
-  
+
 samba_pkgs:
   - smbldap-tools
   - samba
@@ -271,6 +275,10 @@ ssh_groups:
 ```
 
 
-## Dependencies
+## License
 
-None
+MIT
+
+## Author Information
+
+Created by Alan Janis
