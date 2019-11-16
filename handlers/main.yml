@@ -69,3 +69,13 @@
 - name: slapd rebuild
   set_fact:
     slapd_rebuild: True
+
+- name: restart avahi-daemon
+  service:
+    name: avahi-daemon
+    state: restarted
+
+- name: restart netatalk
+  service:
+    name: netatalk
+    state: restarted
