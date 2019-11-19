@@ -1,4 +1,5 @@
 # The line below sets some DEFAULT, starting with Netatalk 2.1.
+{% raw %}
 :DEFAULT: options:upriv,usedots
 
 # The "~" below indicates that Home directories are visible by default.
@@ -7,3 +8,4 @@
 
 /data "$v" options:noadouble,invisibledots,upriv,tm,dperm:0774,fperm:0774 rwlist:@admin,@media,@users
 ~ "$d" options:noadouble
+{% endraw %}
