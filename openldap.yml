@@ -3,9 +3,9 @@
   hosts: all
   become: True
   tasks:
-    - include_role:
+    - import_role:
         name: common
-    - include_role:
+    - import_role:
         name: openldap
       when:  openldap_server_ip is defined and openldap_server_ip != None
       tags:
@@ -21,16 +21,16 @@
         - samba_configure
         - afpd
 
-    - include_role:
+    - import_role:
         name: ceph-fs
       when:
         - shared_storage
         - storage_backend == "cephfs"
-    - include_role:
+    - import_role:
         name: nfs
       when:
         - shared_storage
         - storage_backend == "nfs"
-    - include_role:
+    - import_role:
         name: telegraf
       when: "'telegraf' in group_names"
