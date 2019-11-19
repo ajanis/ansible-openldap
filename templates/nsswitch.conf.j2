@@ -7,8 +7,11 @@
 passwd: compat ldap
 group: compat ldap
 shadow: compat ldap
-
+{% if 'afpd' in group_names %}
+hosts: files mdns4_minimal dns mdns4 mdns
+{% else %}
 hosts:          files dns
+{% endif %}
 networks:       files
 
 protocols:      db files
@@ -16,7 +19,7 @@ services:       db files
 ethers:         db files
 rpc:            db files
 
-{% if shared_storage %}
+{% if shared_storage is defined and shared_storage %}
 automount:      files ldap
 {% else %}
 automount:      files
