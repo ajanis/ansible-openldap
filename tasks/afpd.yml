@@ -13,19 +13,19 @@
     - restart netatalk
 
 - name: copy afpd shares configuration
-  copy:
+  template:
     src: AppleVolumes.default
     dest: /etc/netatalk/AppleVolumes.default
   notify:
     - restart netatalk
 
-- name: update hosts entry in nsswitch config
-  lineinfile:
-    dest: /etc/nsswitch.conf
-    regexp: '^hosts:.*'
-    line: 'hosts: files mdns4_minimal dns mdns4 mdns'
-  notify:
-    - restart netatalk
+#- name: update hosts entry in nsswitch config
+#  lineinfile:
+#    dest: /etc/nsswitch.conf
+#    regexp: '^hosts:.*'
+#    line: 'hosts: files mdns4_minimal dns mdns4 mdns'
+#  notify:
+#    - restart netatalk
 
 - name: set system model for afpd
   lineinfile:
