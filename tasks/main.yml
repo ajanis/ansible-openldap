@@ -1,14 +1,12 @@
 ---
 - name: Add the OS specific varibles
   include_vars: "{{ ansible_os_family }}.yml"
-  tags: always
 
 - name: Add /etc/hosts entry for ldap server
   lineinfile:
     dest: /etc/hosts
     state: present
     line: "{{ openldap_server_ip }} {{ openldap_server_domain_name }} {{ openldap_server_domain_name.split('.')[0] }}"
-  tags: always
 
 - import_tasks: ldap_server.yml
   tags:
