@@ -15,8 +15,7 @@
     state: present
     line: 'AuthorizedKeysCommand /usr/bin/ssh-ldap-pubkey-wrapper'
   notify:
-   - restart sshd
-   - restart systemd-logind
+    - restart_login_services
 
 - name: Append ssh-ldap-pubkey user configs to sshd_config
   lineinfile:
@@ -24,8 +23,7 @@
     state: present
     line: 'AuthorizedKeysCommandUser nobody'
   notify:
-   - restart sshd
-   - restart systemd-logind
+    - restart_login_services
 
 - name: Copy /etc/ldap.conf for client
   template: src=client_ldap.conf.j2 dest=/etc/ldap.conf
@@ -40,7 +38,8 @@
   template:
     src: nslcd.j2
     dest: /etc/nslcd.conf
-  notify: restart nslcd
+  notify:
+    - restart_ns_daemons
 
 - name : autofs packages
   yum:
@@ -64,7 +63,7 @@
     dest: /etc/default/autofs
     mode: 0755
   notify:
-   - restart autofs
+    - restart_autofs
   when:
     - shared_storage and use_ldap_automount
 
