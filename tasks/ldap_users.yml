@@ -7,8 +7,7 @@
     objectClass: organizationalUnit
     state: present
   notify:
-    - restart nslcd
-    - restart nscd
+    - restart_ns_daemons
 
 - name: Groups OU
   ldap_entry:
@@ -18,8 +17,7 @@
     objectClass: organizationalUnit
     state: present
   notify:
-    - restart nslcd
-    - restart nscd
+    - restart_ns_daemons
 
 - name: Create Groups
   ldap_entry:
@@ -34,8 +32,7 @@
       gidNumber: "{{ item.value.gid }}"
     state: present
   notify:
-    - restart nslcd
-    - restart nscd
+    - restart_ns_daemons
   with_dict: "{{ ssh_groups }}"
 
 - name: Set Group Membership
@@ -47,8 +44,7 @@
     values: "{{ item.value.members }}"
     state: exact
   notify:
-    - restart nslcd
-    - restart nscd
+    - restart_ns_daemons
   with_dict: "{{ ssh_groups }}"
 
 - name: "Set up SSH users"
@@ -79,7 +75,6 @@
   loop: "{{ ssh_users|dict2items }}"
   register: ssh_users_added
   notify:
-    - restart nslcd
-    - restart nscd
+    - restart_ns_daemons
 
 - meta: flush_handlers
