@@ -19,8 +19,7 @@
     regexp: '^UsePAM.*'
     line: 'UsePAM yes'
   notify:
-   - restart sshd
-   - restart systemd-logind
+    - restart_login_services
 
 - name: Append ssh-ldap-pubkey wrapper configs to sshd_config
   lineinfile:
@@ -28,8 +27,7 @@
     state: present
     line: 'AuthorizedKeysCommand /usr/local/bin/ssh-ldap-pubkey-wrapper'
   notify:
-   - restart sshd
-   - restart systemd-logind
+    - restart_login_services
 
 - name: Append ssh-ldap-pubkey user configs to sshd_config
   lineinfile:
@@ -37,8 +35,7 @@
     state: present
     line: 'AuthorizedKeysCommandUser nobody'
   notify:
-   - restart sshd
-   - restart systemd-logind
+    - restart_login_services
 
 - name: Copy /etc/ldap.conf for client
   template: src=client_ldap.conf.j2 dest=/etc/ldap.conf
@@ -52,8 +49,7 @@
     state: present
     line: 'account required    pam_access.so'
   notify:
-    - restart nslcd
-    - restart nscd
+    - restart_ns_daemons
 
 - name: Fix common-session
   lineinfile:
@@ -61,8 +57,7 @@
     state: present
     line: 'session required    pam_mkhomedir.so skel=/etc/skel umask=0022'
   notify:
-    - restart nslcd
-    - restart nscd
+    - restart_ns_daemons
 
 - name: Fix common-password
   replace:
@@ -71,8 +66,7 @@
     regexp: '^.*use_authtok.*$'
     replace: 'password [success=1 user_unknown=ignore default=die] pam_ldap.so try_first_pass'
   notify:
-    - restart nslcd
-    - restart nscd
+    - restart_ns_daemons
 
 - name: Fix access.conf
   lineinfile:
@@ -80,24 +74,21 @@
     state: absent
     line: '-:ALL EXCEPT root (admin):ALL EXCEPT LOCAL'
   notify:
-    - restart nslcd
-    - restart nscd
+    - restart_ns_daemons
 
 - name: Copy nsswitch.conf
   template:
     src: nsswitch.conf.j2
     dest: /etc/nsswitch.conf
   notify:
-    - restart nslcd
-    - restart nscd
+    - restart_ns_daemons
 
 - name: Copy nslcd.conf
   template:
     src: nslcd.conf.j2
     dest: /etc/nslcd.conf
   notify:
-    - restart nslcd
-    - restart nscd
+    - restart_ns_daemons
 
 - name : autofs packages
   apt:
@@ -123,7 +114,7 @@
   when:
     - shared_storage and use_ldap_automount
   notify:
-   - restart autofs
+    - restart_autofs
 
 - name: Ensure rpcbind is running
   action: service name=rpcbind state=started enabled=yes
