@@ -8,7 +8,7 @@ ldap_user_home_directory: "homedirs"
 #The ldif file
 openldap_server_ldif: domain.ldif
 
-openldap_server_dc: "dc={{ openldap_server_domain_name.split('.')[0] }},dc={{ openldap_server_domain_name.split('.')[1] }},dc={{ openldap_server_domain_name.split('.')[2] }},dc={{ openldap_server_domain_name.split('.')[3] }}"
+openldap_server_dc: "dc={{ ',dc='.join( openldap_server_domain_name.split('.') ) }}"
 
 openldap_server_bind_dn: "cn=Manager,{{ openldap_server_dc }}"
 
