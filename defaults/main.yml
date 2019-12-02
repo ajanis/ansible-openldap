@@ -32,7 +32,7 @@ ssl_keypath:
 ssl_privkey:
 ssl_certchain:
 
-ssh_users: []
+ssh_users: {}
 ssh_groups: []
 smb_shares: []
 nfs_shares: []
