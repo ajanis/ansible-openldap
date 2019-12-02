@@ -12,6 +12,7 @@ openldap_server_pkgs:
   - python-ldap
   - python-ldap3
   - python-pexpect
+  - rpcbind
 
 openldap_client_pkgs:
   - libnss-ldapd
