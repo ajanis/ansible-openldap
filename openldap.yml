@@ -1,36 +1,19 @@
 ---
 - name: Deploy OpenLDAP Server with users, ssh keys, autoFS configurations
   hosts: all
-  become: True
+  remote_user: root
+  gather_facts: yes
   tasks:
     - import_role:
         name: common
     - import_role:
         name: openldap
       when:  openldap_server_ip is defined and openldap_server_ip != None
-      tags:
-        - ldap_all
-        - ldapserver
-        - ldapserver_install
-        - ldapserver_configure
-        - ldapclient
-        - automount
-        - users
-        - samba
-        - samba_install
-        - samba_configure
-        - afpd
-
     - import_role:
         name: ceph-fs
       when:
         - shared_storage
         - storage_backend == "cephfs"
-    - import_role:
-        name: nfs
-      when:
-        - shared_storage
-        - storage_backend == "nfs"
     - import_role:
         name: telegraf
       when: "'telegraf' in group_names"
