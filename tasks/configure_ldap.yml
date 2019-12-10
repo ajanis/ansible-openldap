@@ -125,13 +125,13 @@
   service:
     name: slapd
     state: stopped
-  when: slapd_rebuild is defined and slapd_rebuild
+  when: slapd_rebuild | default(False)
 
 - name: Delete the ldap database
   file:
     path: /var/lib/ldap/{{ openldap_server_domain_name }}"
     state: absent
-  when: slapd_rebuild is defined and slapd_rebuild
+  when: slapd_rebuild | default(False)
 
 - name: Recreate the ldap database directory
   file:
@@ -139,19 +139,19 @@
     state: directory
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_user }}"
-  when: slapd_rebuild is defined and slapd_rebuild
+  when: slapd_rebuild | default(False)
 
 - name: Delete the ldap configuration directory
   file:
     path: "{{ openldap_server_app_path }}/slapd.d"
     state: absent
-  when: slapd_rebuild is defined and slapd_rebuild
+  when: slapd_rebuild | default(False)
 
 - name: restart slapd
   service:
     name: slapd
     state: restarted
-  when: slapd_rebuild is defined and slapd_rebuild
+  when: slapd_rebuild | default(False)
 
 - name: Recreate the ldap configuration directory
   file:
@@ -159,11 +159,11 @@
     state: directory
     owner: openldap
     group: openldap
-  when: slapd_rebuild is defined and slapd_rebuild
+  when: slapd_rebuild | default(False)
 
 - name: Rebuild slapd OLC Directory
   shell: "slaptest -f {{ openldap_server_app_path }}/slapd.conf -F {{ openldap_server_app_path }}/slapd.d"
-  when: slapd_rebuild is defined and slapd_rebuild
+  when: slapd_rebuild | default(False)
 
 - name: fix slapd.d permissions
   file:
@@ -172,14 +172,14 @@
     recurse: yes
     owner: openldap
     group: openldap
-  when: slapd_rebuild is defined and slapd_rebuild
+  when: slapd_rebuild | default(False)
 
 - name: restart slapd
   service:
     name: slapd
     state: restarted
     enabled: yes
-  when: slapd_rebuild is defined and slapd_rebuild
+  when: slapd_rebuild | default(False)
 
 - name: Copy the template for creating base dn
   template: src={{ openldap_server_ldif }} dest=/tmp/

@@ -21,6 +21,7 @@
 
 - name: Generate password db
   command: "smbpasswd -w {{ openldap_server_rootpw }}"
+  when: smbldap_populate | default(False)
 
 - name: Populate smbldap database
   shell: |
@@ -30,7 +31,7 @@
     EOF
   args:
     executable: /bin/bash
-  when: smbldap_populate is defined and smbldap_populate
+  when: smbldap_populate | default(False)
 
 - name: "Add users to Samba"
   shell: |
@@ -41,11 +42,11 @@
   args:
     executable: /bin/bash
   loop: "{{ ssh_users | dict2items }}"
-  when: smbldap_populate is defined and smbldap_populate
+  when: smbldap_populate | default(False)
 
 - name: Inform Samba about RootDN password
   shell: "smbpasswd -w {{ openldap_server_rootpw }}"
-  when: smbldap_populate is defined and smbldap_populate
+  when: smbldap_populate | default(False)
 
 - name: restart samba services
   service:
@@ -55,4 +56,4 @@
   loop:
     - nmbd
     - smbd
-  when: smbldap_populate is defined and smbldap_populate
+  when: smbldap_populate | default(False)
