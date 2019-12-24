@@ -8,7 +8,6 @@ openldap_server_pkgs:
   - openssl-devel
   - python-pip
   - python-ldap
-  - python-ldap3
   - python-pexpect
 
 
@@ -22,10 +21,8 @@ openldap_client_pkgs:
   - cyrus-sasl
   - cyrus-sasl-ldap
   - cyrus-sasl-devel
-  - ldap-utils
   - python-pip
   - python-ldap
-  - python-ldap3
 
 samba_pkgs:
   - smbldap-tools
