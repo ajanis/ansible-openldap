@@ -29,6 +29,7 @@ openldap_client_pkgs:
 
 common_uninstall_pkgs:
   - python-setuptools
+  - python3-setuptools
 
 common_python_pkgs:
   - setuptools
