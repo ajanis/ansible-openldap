@@ -8,6 +8,26 @@
     state: present
     line: "{{ openldap_server_ip }} {{ openldap_server_domain_name }} {{ openldap_server_domain_name.split('.')[0] }}"
 
+- name: "Uninstall any Python requirements currently installed via OS package manager"
+  package:
+    name: "{{ common_uninstall_pkgs }}"
+    state: absent
+  when: common_uninstall_pkgs is defined
+
+- name: "Install all Python2 requirements via Pip"
+  pip:
+    name: "{{ common_python_pkgs }}"
+    state: latest
+    executable: pip2
+  when: common_python_pkgs is defined
+
+- name: "Install all Python3 requirements via Pip"
+  pip:
+    name: "{{ common_python3_pkgs }}"
+    state: latest
+    executable: pip3
+  when: common_python3_pkgs is defined
+
 - import_tasks: ldap_server.yml
   when: "'ldapservers' in group_names"
 
