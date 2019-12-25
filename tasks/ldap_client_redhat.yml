@@ -28,15 +28,9 @@
 - name: Copy /etc/ldap.conf for client
   template: src=client_ldap.conf.j2 dest=/etc/ldap.conf
 
-
-- name: "LDAP Authentication | Enable LDAP PAM modules"
-  command: "authconfig --enableldap --enableldapauth --enablemkhomedir --update"
-  args:
-    creates: /var/log/ldap_configured
-
 - name: Copy nslcd.conf
   template:
-    src: nslcd.j2
+    src: nslcd.conf.j2
     dest: /etc/nslcd.conf
   notify:
     - restart_ns_daemons
@@ -49,18 +43,17 @@
   when:
     - shared_storage and use_ldap_automount
 
-- name : autofs-ldap packages
-  apt:
-    name: autofs-ldap
-    state: present
-    update_cache: yes
-  when:
-    - shared_storage and use_ldap_automount
+#- name : autofs-ldap packages
+#  yum:
+#    name: autofs-ldap
+#    state: present
+#  when:
+#    - shared_storage and use_ldap_automount
 
 - name: Copy autofs supporting file
   template:
     src: autofs.j2
-    dest: /etc/default/autofs
+    dest: /etc/sysconfig/autofs
     mode: 0755
   notify:
     - restart_autofs
