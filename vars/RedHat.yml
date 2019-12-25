@@ -7,9 +7,6 @@ openldap_server_pkgs:
   - openssl
   - openssl-devel
   - python-pip
-  - python-ldap
-  - python-pexpect
-
 
 openldap_client_pkgs:
   - nss-pam-ldapd
@@ -25,6 +22,21 @@ openldap_client_pkgs:
   - python-ldap
   - openssh-ldap
   - rpcbind
+
+common_uninstall_pkgs:
+  - python-ldap
+
+common_python_pkgs:
+  - setuptools
+  - pip
+  - ldap3
+  - pexpect
+
+common_python3_pkgs:
+  - setuptools
+  - pip
+  - ldap3
+  - pexpect
 
 samba_pkgs:
   - smbldap-tools
