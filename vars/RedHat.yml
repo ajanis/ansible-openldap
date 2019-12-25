@@ -29,14 +29,16 @@ common_uninstall_pkgs:
 common_python_pkgs:
   - setuptools
   - pip
+  - ldap
   - ldap3
   - pexpect
 
-common_python3_pkgs:
-  - setuptools
-  - pip
-  - ldap3
-  - pexpect
+#common_python3_pkgs:
+#  - setuptools
+#  - pip
+#  - ldap
+#  - ldap3
+#  - pexpect
 
 samba_pkgs:
   - smbldap-tools
