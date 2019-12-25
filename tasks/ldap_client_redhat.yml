@@ -3,11 +3,23 @@
   yum:
     name: "{{ openldap_client_pkgs }}"
     state: present
+    update_cache: yes
 
 - name: Install ssh-ldap-pubkey pip package
   pip:
+    executable: pip
     name: ssh-ldap-pubkey
     state: present
+    version: 1.3.0
+
+- name: Enable Pam in SSHD config
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    state: present
+    regexp: '^UsePAM.*'
+    line: 'UsePAM yes'
+  notify:
+    - restart_login_services
 
 - name: Append ssh-ldap-pubkey wrapper configs to sshd_config
   lineinfile:
@@ -28,6 +40,13 @@
 - name: Copy /etc/ldap.conf for client
   template: src=client_ldap.conf.j2 dest=/etc/ldap.conf
 
+- name: Copy nsswitch.conf
+  template:
+    src: nsswitch.conf.j2
+    dest: /etc/nsswitch.conf
+  notify:
+    - restart_ns_daemons
+
 - name: Copy nslcd.conf
   template:
     src: nslcd.conf.j2
@@ -43,13 +62,6 @@
   when:
     - shared_storage and use_ldap_automount
 
-#- name : autofs-ldap packages
-#  yum:
-#    name: autofs-ldap
-#    state: present
-#  when:
-#    - shared_storage and use_ldap_automount
-
 - name: Copy autofs supporting file
   template:
     src: autofs.j2
@@ -64,3 +76,13 @@
   action: service name=rpcbind state=started enabled=yes
 
 - meta: flush_handlers
+
+- name: create user home directories
+  file:
+    state: directory
+    path: "/home/{{ item.key }}"
+    owner: "{{ item.value.uid }}"
+    group: "{{ item.value.gid }}"
+    mode: 0755
+  with_dict: "{{ ssh_users }}"
+  when: not shared_storage
