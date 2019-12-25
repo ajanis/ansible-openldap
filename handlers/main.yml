@@ -34,9 +34,13 @@
 - name: restart_sshd
   listen: restart_login_services
   service:
-    name: ssh
+    name: "{{ ssh_service }}"
     state: restarted
     enabled: yes
+
+- name: "enable_pam_ldap"
+  command: "authconfig --enableldap --enableldapauth --enablemkhomedir --update"
+  listen: restart_login_services
 
 - name: restart_systemd_logind
   listen: restart_login_services
