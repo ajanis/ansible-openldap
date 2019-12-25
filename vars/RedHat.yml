@@ -23,6 +23,8 @@ openldap_client_pkgs:
   - cyrus-sasl-devel
   - python-pip
   - python-ldap
+  - openssh-ldap
+  - rpcbind
 
 samba_pkgs:
   - smbldap-tools
