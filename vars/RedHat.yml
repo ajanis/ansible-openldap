@@ -32,3 +32,5 @@ openldap_server_app_path: "/etc/openldap"
 openldap_server_user: ldap
 
 openldap_nslcd_group: ldap
+
+ssh_service: sshd
