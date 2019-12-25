@@ -10,8 +10,9 @@ openldap_server_pkgs:
   - python-pip
   - python-dev
   - python-selinux
-#  - python3-dev
-#  - python3-pip
+  - python-pexpect
+  - python3-dev
+  - python3-pip
 
 openldap_client_pkgs:
   - libnss-ldapd
@@ -23,25 +24,21 @@ openldap_client_pkgs:
   - ldap-utils
   - python-pip
   - python-dev
-#  - python3-pip
-#  - python3-dev
+  - python3-pip
+  - python3-dev
 
 common_uninstall_pkgs:
   - python-setuptools
 
 common_python_pkgs:
   - setuptools
-  - pip
-  - ldap
+  - python-ldap
   - ldap3
-  - pexpect
 
-#common_python3_pkgs:
-#  - setuptools
-#  - pip
-#  - ldap
-#  - ldap3
-#  - pexpect
+common_python3_pkgs:
+  - setuptools
+  - python-ldap
+  - ldap3
 
 samba_pkgs:
   - smbldap-tools
