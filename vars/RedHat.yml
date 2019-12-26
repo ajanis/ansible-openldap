@@ -3,45 +3,34 @@ openldap_server_pkgs:
   - openldap-servers
   - openldap-clients
   - compat-openldap
+  - openldap-devel
   - libselinux-python
   - openssl
   - openssl-devel
   - python-pip
-  - python-devel
+  - python-ldap
   - python-pexpect
-  - python3-pip
-  - python3-devel
-  - python3-pexpect
+  - gcc
+  - rpcbind
+  - python2-ldap3
+  - python-devel
+
 
 openldap_client_pkgs:
   - nss-pam-ldapd
   - nscd
   - compat-openldap
+  - python-devel
   - gcc
   - openldap-devel
+  - gcc
   - cyrus-sasl
   - cyrus-sasl-ldap
   - cyrus-sasl-devel
+  - python-pip
+  - python-ldap
   - openssh-ldap
   - rpcbind
-  - python-pip
-  - python-devel
-  - python3-pip
-  - python3-devel
-
-
-common_uninstall_pkgs:
-  - python-ldap
-
-common_python_pkgs:
-  - setuptools
-  - python-ldap
-  - ldap3
-
-common_python3_pkgs:
-  - setuptools
-  - python-ldap
-  - ldap3
 
 samba_pkgs:
   - smbldap-tools
