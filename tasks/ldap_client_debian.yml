@@ -49,9 +49,9 @@
   template:
     src: ldap.conf.j2
     dest: "{{ openldap_server_app_path }}/ldap.conf"
-    notify:
-      - restart_login_services
-      - restart_ns_daemons
+  notify:
+    - restart_login_services
+    - restart_ns_daemons
 
 - name: Fix common-auth
   lineinfile:
