@@ -38,10 +38,20 @@
     - restart_login_services
 
 - name: Copy /etc/ldap.conf for client
-  template: src=client_ldap.conf.j2 dest=/etc/ldap.conf
+  template:
+    src: client_ldap.conf.j2
+    dest: /etc/ldap.conf
+  notify:
+    - restart_login_services
+    - restart_ns_daemons
 
 - name: Copy the ldap.conf configuration file
-  template: src=ldap.conf.j2 dest={{ openldap_server_app_path }}/ldap.conf
+  template:
+    src: ldap.conf.j2
+    dest: "{{ openldap_server_app_path }}/ldap.conf"
+    notify:
+      - restart_login_services
+      - restart_ns_daemons
 
 - name: Fix common-auth
   lineinfile:
@@ -50,6 +60,7 @@
     line: 'account required    pam_access.so'
   notify:
     - restart_ns_daemons
+    - restart_login_services
 
 - name: Fix common-session
   lineinfile:
@@ -58,6 +69,7 @@
     line: 'session required    pam_mkhomedir.so skel=/etc/skel umask=0022'
   notify:
     - restart_ns_daemons
+    - restart_login_services
 
 - name: Fix common-password
   replace:
@@ -67,6 +79,7 @@
     replace: 'password [success=1 user_unknown=ignore default=die] pam_ldap.so try_first_pass'
   notify:
     - restart_ns_daemons
+    - restart_login_services
 
 - name: Fix access.conf
   lineinfile:
@@ -75,6 +88,7 @@
     line: '-:ALL EXCEPT root (admin):ALL EXCEPT LOCAL'
   notify:
     - restart_ns_daemons
+    - restart_login_services
 
 - name: Copy nsswitch.conf
   template:
@@ -106,6 +120,18 @@
   when:
     - shared_storage and use_ldap_automount
 
+- name: Start AutoFS service
+  service:
+    name: autofs
+    state: started
+    enabled: yes
+
+- name: Start rpcbind service
+  service:
+    name: rpcbind
+    state: started
+    enabled: yes
+
 - name: Copy autofs supporting file
   template:
     src: autofs.j2
@@ -115,9 +141,6 @@
     - shared_storage and use_ldap_automount
   notify:
     - restart_autofs
-
-- name: Ensure rpcbind is running
-  action: service name=rpcbind state=started enabled=yes
 
 - meta: flush_handlers
 
