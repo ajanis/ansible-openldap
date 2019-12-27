@@ -4,6 +4,8 @@
     name: "{{ openldap_client_pkgs }}"
     state: present
     update_cache: yes
+  notify:
+    - restart_login_services
 
 - name: Install ssh-ldap-pubkey pip package
   pip:
@@ -11,6 +13,8 @@
     name: ssh-ldap-pubkey
     state: present
     version: 1.3.0
+  notify:
+    - restart_login_services
 
 - name: Enable Pam in SSHD config
   lineinfile:
@@ -36,15 +40,14 @@
     line: 'AuthorizedKeysCommandUser nobody'
   notify:
     - restart_login_services
+    - restart_ns_daemons
 
 - name: Copy /etc/ldap.conf for client
-  template: src=client_ldap.conf.j2 dest=/etc/ldap.conf
-
-- name: Copy nsswitch.conf
   template:
-    src: nsswitch.conf.j2
-    dest: /etc/nsswitch.conf
+    src: client_ldap.conf.j2
+    dest: /etc/ldap.conf
   notify:
+    - restart_login_services
     - restart_ns_daemons
 
 - name: Copy nslcd.conf
@@ -53,6 +56,7 @@
     dest: /etc/nslcd.conf
   notify:
     - restart_ns_daemons
+    - restart_login_services
 
 - name : autofs packages
   yum:
@@ -61,6 +65,18 @@
     update_cache: yes
   when:
     - shared_storage and use_ldap_automount
+
+- name: Start AutoFS service
+  service:
+    name: autofs
+    state: started
+    enabled: yes
+
+- name: Start rpcbind service
+  service:
+    name: rpcbind
+    state: started
+    enabled: yes
 
 - name: Copy autofs supporting file
   template:
@@ -72,10 +88,12 @@
   when:
     - shared_storage and use_ldap_automount
 
-- name: Ensure rpcbind is running
-  action: service name=rpcbind state=started enabled=yes
-
 - meta: flush_handlers
+
+- name: "Run 'authconfig --enableldap --enableldapauth --enablemkhomedir --update'"
+  command: "authconfig --enableldap --enableldapauth --enablemkhomedir --update"
+  when:
+    - run_authconfig | default(False)
 
 - name: create user home directories
   file:
