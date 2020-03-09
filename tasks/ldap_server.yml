@@ -13,3 +13,8 @@
     state: present
     update_cache: yes
   when: ansible_os_family == 'Debian'
+
+- name: Install ansible python dependencies for openldap configuration
+  pip:
+    name: "{{ openldap_python_pkgs }}"
+    state: present
