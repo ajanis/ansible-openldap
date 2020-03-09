@@ -1,44 +1,66 @@
 ---
 - name: Add the OS specific varibles
   include_vars: "{{ ansible_os_family }}.yml"
+  tags:
+    - always
 
 - name: Add /etc/hosts entry for ldap server
   lineinfile:
     dest: /etc/hosts
     state: present
     line: "{{ openldap_server_ip }} {{ openldap_server_domain_name }} {{ openldap_server_domain_name.split('.')[0] }}"
+  tags:
+    - always
 
 - import_tasks: ldap_server.yml
   when: "'ldapservers' in group_names"
+  tags:
+    - openldap-server
 
 - import_tasks: configure_ldap.yml
   when: "'ldapservers' in group_names"
+  tags:
+    - openldap-config
 
 - name: "Configure LDAP Client [Debian]"
   import_tasks: ldap_client_debian.yml
   when: ansible_os_family == "Debian"
+  tags:
+    - openldap-client
 
 - name: "Configure LDAP Client [RedHat]"
   import_tasks: ldap_client_redhat.yml
   when: ansible_os_family == "RedHat"
+  tags:
+    - openldap-client
 
 - import_tasks: ldap_automount.yml
   when:
     - "'ldapservers' in group_names"
     - shared_storage
+  tags:
+    - openldap-automount
 
 - import_tasks: ldap_users.yml
   when:
     - "'ldapservers' in group_names"
+  tags:
+    - openldap-users
 
 - import_tasks: smbd_server.yml
   when:
     - "'samba' in group_names"
+  tags:
+    - openldap-smbd
 
 - import_tasks: configure_smb.yml
   when:
     - "'samba' in group_names"
+  tags:
+    - openldap-samba
 
 - import_tasks: afpd.yml
   when:
     - "'afpd' in group_names"
+  tags:
+    - openldap-afpd
