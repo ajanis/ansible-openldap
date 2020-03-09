@@ -5,6 +5,11 @@
     state: present
     update_cache: yes
 
+- name: Install ansible python dependencies for ldap configuration
+  pip:
+    name: "{{ openldap_python_pkgs }}"
+    state: present
+
 - name: Install ssh-ldap-pubkey pip package
   pip:
     executable: pip
