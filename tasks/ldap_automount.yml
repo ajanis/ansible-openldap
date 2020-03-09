@@ -104,6 +104,18 @@
     - restart_ns_daemons
   when: storage_backend == "cephfs"
 
+- name: Update CephFS Data Directory CN if needed
+  ldap_attr:
+    dn: "cn={{ data_mount_root }},{{ auto_data_ou }}"
+    name: "automountInformation"
+    values: "-fstype=ceph {{ groups['mdss'] | join(':6789,') }}:6789:/"
+    state: exact
+    bind_dn: "{{ openldap_server_bind_dn }}"
+    bind_pw: "{{ openldap_server_rootpw }}"
+  notify:
+    - restart_ns_daemons
+  when: storage_backend == "cephfs"
+
 - name: NFS Data Directory CNs
   ldap_entry:
     bind_dn: "{{ openldap_server_bind_dn }}"
@@ -120,6 +132,20 @@
     - restart_ns_daemons
   with_dict: "{{ nfs_exports }}"
   when: storage_backend == "nfs"
+
+- name: Update NFS Data Directory CNs if needed
+  ldap_attr:
+    dn: "cn={{ item.key }},{{ auto_data_ou }}"
+    name: "automountInformation"
+    values: "-fstype=nfs,{{ item.value.mount_opts }} {{ nfs_server_ip }}:{{ item.value.nfs_export }}"
+    state: exact
+    bind_dn: "{{ openldap_server_bind_dn }}"
+    bind_pw: "{{ openldap_server_rootpw }}"
+  loop: "{{ nfs_exports|default({})|dict2items }}"
+  notify:
+    - restart_ns_daemons
+  when:
+    - storage_backend == "nfs"
 
 - name: Home automount CN
   ldap_entry:
@@ -167,6 +193,22 @@
   with_dict: "{{ ssh_users }}"
   when: storage_backend == "cephfs"
 
+- name: Update User home directory CNs if needed
+  ldap_attr:
+    dn: "cn={{ item.key }},{{ auto_home_ou }}"
+    name: "automountInformation"
+    values: "-fstype=ceph {{ groups['mdss'] | join(':6789,') }}:6789:/{{ ldap_user_home_directory }}/{{ item.key }}"
+    state: exact
+    bind_dn: "{{ openldap_server_bind_dn }}"
+    bind_pw: "{{ openldap_server_rootpw }}"
+  loop: "{{ ssh_users|default({})|dict2items }}"
+  notify:
+    - restart_ns_daemons
+  when:
+    - storage_backend == "cephfs"
+    - ssh_users is defined
+    - ssh_users != None
+
 - name: create user home directories
   file:
     state: directory
@@ -193,5 +235,19 @@
     - restart_ns_daemons
   with_dict: "{{ ssh_users }}"
   when: storage_backend == "nfs"
+
+- name: Update NFS user home directory exports if needed
+  ldap_attr:
+    dn: "cn={{ item.key }},{{ auto_home_ou }}"
+    name: "automountInformation"
+    values: "-fstype=nfs,{{ nfs_exports.homedirs.mount_opts }} {{ nfs_server_ip }}:{{ nfs_exports.homedirs.nfs_export }}/{{ item.key }}"
+    state: exact
+    bind_dn: "{{ openldap_server_bind_dn }}"
+    bind_pw: "{{ openldap_server_rootpw }}"
+  loop: "{{ ssh_users|default({})|dict2items }}"
+  notify:
+    - restart_ns_daemons
+  when:
+    - storage_backend == "nfs"
 
 - meta: flush_handlers
