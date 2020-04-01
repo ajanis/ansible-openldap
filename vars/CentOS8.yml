@@ -6,6 +6,7 @@ openldap_server_pkgs:
   - libselinux-python
   - openssl
   - openssl-devel
+  - authselect-compat
   - platform-python-pip
   - platform-python-pexpect
   - gcc
@@ -28,6 +29,7 @@ openldap_client_pkgs:
   - cyrus-sasl-devel
   - platform-python-pip
   - openssh-ldap
+  - authselect-compat
   - rpcbind
 
 samba_pkgs:
