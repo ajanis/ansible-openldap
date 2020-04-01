@@ -112,16 +112,16 @@
 
 - name: "Run 'authconfig --enableldap --enableldapauth --enablemkhomedir --update'"
   command: "authconfig --enableldap --enableldapauth --enablemkhomedir --update"
-  when:
-    - run_authconfig | default(False)
-    - ansible_distribution_major_version < "8"
+#  when:
+#    - run_authconfig | default(False)
+#    - ansible_distribution_major_version < "8"
 
 
-- name: "Run 'authselect select sssd with-mkhomedir with-pamaccess --force' [CentOS 8]"
-  command: "authselect select sssd with-mkhomedir with-pamaccess --force"
-  when:
-    - run_authconfig | default(False)
-    - ansible_distribution_major_version >= "8"
+#- name: "Run 'authselect select sssd with-mkhomedir with-pamaccess --force' [CentOS 8]"
+#  command: "authselect select sssd with-mkhomedir with-pamaccess --force"
+#  when:
+#    - run_authconfig | default(False)
+#    - ansible_distribution_major_version >= "8"
 
 - name: create user home directories
   file:

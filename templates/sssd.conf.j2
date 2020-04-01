@@ -1,7 +1,15 @@
 [sssd]
+{% if shared_storage is defined and shared_storage %}
+services = nss, pam, sudo, autofs
+{% else %}
 services = nss, pam, sudo
+{% endif %}
 config_file_version = 2
 domains = default
+
+{% if shared_storage is defined and shared_storage %}
+[autofs]
+{% endif %}
 
 [sudo]
 
@@ -9,6 +17,7 @@ domains = default
 
 [pam]
 offline_credentials_expiration = 60
+
 [domain/default]
 cache_credentials = True
 ldap_search_base = {{ openldap_server_dc }}
@@ -35,3 +44,12 @@ ldap_network_timeout = 60
 ldap_sudo_search_base = {{ admin_ou }}
 ldap_access_order = filter
 ldap_access_filter = (objectClass=posixAccount)
+{% if shared_storage is defined and shared_storage %}
+autofs_provider = ldap
+ldap_autofs_search_base = ou=automount,ou=admin,dc=ldap,dc=home,dc=prettybaked,dc=com
+ldap_autofs_map_object_class = automountMap
+ldap_autofs_entry_object_class = automount
+ldap_autofs_map_name = cn=/-
+ldap_autofs_entry_key = cn
+ldap_autofs_entry_value = automountInformation
+{% endif %}
