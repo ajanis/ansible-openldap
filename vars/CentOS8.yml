@@ -2,7 +2,6 @@
 openldap_server_pkgs:
   - openldap-servers
   - openldap-clients
-  - compat-openldap
   - openldap-devel
   - libselinux-python
   - openssl
@@ -21,7 +20,6 @@ openldap_python_pkgs:
 openldap_client_pkgs:
   - nss-pam-ldapd
   - nscd
-  - compat-openldap
   - platform-python-devel
   - gcc
   - openldap-devel
