@@ -110,6 +110,14 @@
   notify:
     - restart_ns_daemons
 
+- name: Ensure directory for nscd socket exists
+  file:
+    state: directory
+    path: /var/run/nscd
+    mode: 0755
+  notify:
+    - restart_ns_daemons
+
 - name : autofs packages
   apt:
     name: autofs
