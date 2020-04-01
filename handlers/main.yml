@@ -31,6 +31,16 @@
     state: restarted
     enabled: yes
 
+- name: restart_sssd
+  listen: restart_ns_daemons
+  service:
+    name: sssd
+    state: restarted
+    enabled: yes
+  when:
+    - ansible_os_family == "RedHat"
+    - ansible_distribution_major_version >= "8"
+
 - name: restart_sshd
   listen: restart_login_services
   service:
