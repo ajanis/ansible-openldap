@@ -33,7 +33,9 @@
     state: present
   notify:
     - restart_ns_daemons
-  with_dict: "{{ ssh_groups }}"
+  loop: "{{ ssh_groups|default({})|dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
 
 - name: Set Group Membership
   ldap_attr:
@@ -45,7 +47,9 @@
     state: exact
   notify:
     - restart_ns_daemons
-  with_dict: "{{ ssh_groups }}"
+  loop: "{{ ssh_groups|default({})|dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
 
 - name: "Set up SSH users"
   ldap_entry:
@@ -72,7 +76,9 @@
       cn: "{{ item.value.cn }}"
       sshPublicKey: "{{ item.value.pubkey }}"
     state: "{{ item.value.state }}"
-  loop: "{{ ssh_users|dict2items }}"
+  loop: "{{ ssh_users|default({})|dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
   register: ssh_users_added
   notify:
     - restart_ns_daemons
