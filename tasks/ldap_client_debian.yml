@@ -106,6 +106,7 @@
   template:
     src: nslcd.conf.j2
     dest: /etc/nslcd.conf
+    mode: 0600
   notify:
     - restart_ns_daemons
 
