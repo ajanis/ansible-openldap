@@ -55,10 +55,25 @@
     - restart_login_services
     - restart_ns_daemons
 
+- name: Copy /etc/sssd/sssd.conf for client
+  template:
+    src: sssd.conf.j2
+    dest: /etc/sssd/sssd.conf
+    owner: root
+    group: root
+    mode: 0600
+  notify:
+    - restart_login_services
+    - restart_ns_daemons
+    - restart_sssd
+  when:
+    - ansible_distribution_major_version >= "8"
+
 - name: Copy nslcd.conf
   template:
     src: nslcd.conf.j2
     dest: /etc/nslcd.conf
+    mode: 0600
   notify:
     - restart_ns_daemons
     - restart_login_services
@@ -99,6 +114,14 @@
   command: "authconfig --enableldap --enableldapauth --enablemkhomedir --update"
   when:
     - run_authconfig | default(False)
+    - ansible_distribution_major_version < "8"
+
+
+- name: "Run 'authselect select sssd with-mkhomedir with-pamaccess --force' [CentOS 8]"
+  command: "authselect select sssd with-mkhomedir with-pamaccess --force"
+  when:
+    - run_authconfig | default(False)
+    - ansible_distribution_major_version >= "8"
 
 - name: create user home directories
   file:
@@ -107,5 +130,7 @@
     owner: "{{ item.value.uid }}"
     group: "{{ item.value.gid }}"
     mode: 0755
-  with_dict: "{{ ssh_users }}"
+  loop: "{{ ssh_users|default({})|dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
   when: not shared_storage
