@@ -6,6 +6,7 @@ openldap_server_pkgs:
   - libselinux-python
   - openssl
   - openssl-devel
+  - redhat-rpm-config
   - authselect-compat
   - platform-python-pip
   - platform-python-pexpect
@@ -21,14 +22,19 @@ openldap_python_pkgs:
 openldap_client_pkgs:
   - nss-pam-ldapd
   - nscd
+  - sssd-ldap
+  - sssd-nfs-idmap
+  - libsss_autofs
   - platform-python-devel
   - gcc
   - openldap-devel
   - cyrus-sasl
   - cyrus-sasl-ldap
+  - redhat-rpm-config
   - cyrus-sasl-devel
   - platform-python-pip
   - openssh-ldap
+  - openldap-clients
   - authselect-compat
   - rpcbind
 
