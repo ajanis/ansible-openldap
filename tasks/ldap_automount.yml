@@ -1,5 +1,20 @@
 ---
-
+- name: Gather and delegate facts for all Ceph nodes
+  setup:
+  delegate_to: "{{ item }}"
+  delegate_facts: True
+  loop: "{{ groups['ceph'] }}"
+  run_once: true
+  when:
+    - storage_backend == "cephfs"
+- name: Gather and delegate facts for all NFS nodes
+  setup:
+  delegate_to: "{{ item }}"
+  delegate_facts: True
+  loop: "{{ groups['nfsservers'] }}"
+  run_once: true
+  when:
+    - storage_backend == "nfs"
 - name: Admin OU
   ldap_entry:
     bind_dn: "{{ openldap_server_bind_dn }}"
@@ -98,7 +113,7 @@
       - automount
     attributes:
       cn: "{{ data_mount_root }}"
-      automountInformation: "-fstype=ceph {{ groups['mdss'] | join(':6789,') }}:6789:/"
+      automountInformation: "-fstype=ceph {% for host in groups['mdss'] %}{{ hostvars[host]['ansible_default_ipv4']['address'] }}:6789{% if not loop.last %},{% endif %}{% endfor %}:/"
     state: present
   notify:
     - restart_ns_daemons
@@ -108,7 +123,7 @@
   ldap_attr:
     dn: "cn={{ data_mount_root }},{{ auto_data_ou }}"
     name: "automountInformation"
-    values: "-fstype=ceph {{ groups['mdss'] | join(':6789,') }}:6789:/"
+    values: "-fstype=ceph {% for host in groups['mdss'] %}{{ hostvars[host]['ansible_default_ipv4']['address'] }}:6789{% if not loop.last %},{% endif %}{% endfor %}:/"
     state: exact
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
@@ -130,9 +145,10 @@
     state: present
   notify:
     - restart_ns_daemons
-  with_dict: "{{ nfs_exports }}"
+  loop: "{{ nfs_exports|default({})|dict2items }}"
   when: storage_backend == "nfs"
-
+  loop_control:
+    label: "{{ item.key }}"
 - name: Update NFS Data Directory CNs if needed
   ldap_attr:
     dn: "cn={{ item.key }},{{ auto_data_ou }}"
@@ -146,6 +162,8 @@
     - restart_ns_daemons
   when:
     - storage_backend == "nfs"
+  loop_control:
+    label: "{{ item.key }}"
 
 - name: Home automount CN
   ldap_entry:
@@ -186,22 +204,26 @@
       - automount
     attributes:
       cn: "{{ item.key }}"
-      automountInformation: "-fstype=ceph {{ groups['mdss'] | join(':6789,') }}:6789:/{{ ldap_user_home_directory }}/{{ item.key }}"
+      automountInformation: "-fstype=ceph {% for host in groups['mdss'] %}{{ hostvars[host]['ansible_default_ipv4']['address'] }}:6789{% if not loop.last %},{% endif %}{% endfor %}:/{{ ldap_user_home_directory }}/{{ item.key }}"
     state: present
   notify:
     - restart_ns_daemons
-  with_dict: "{{ ssh_users }}"
+  loop: "{{ ssh_users|default({})|dict2items }}"
   when: storage_backend == "cephfs"
+  loop_control:
+    label: "{{ item.key }}"
 
 - name: Update User home directory CNs if needed
   ldap_attr:
     dn: "cn={{ item.key }},{{ auto_home_ou }}"
     name: "automountInformation"
-    values: "-fstype=ceph {{ groups['mdss'] | join(':6789,') }}:6789:/{{ ldap_user_home_directory }}/{{ item.key }}"
+    values: "-fstype=ceph {% for host in groups['mdss'] %}{{ hostvars[host]['ansible_default_ipv4']['address'] }}:6789{% if not loop.last %},{% endif %}{% endfor %}:/{{ ldap_user_home_directory }}/{{ item.key }}"
     state: exact
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
   loop: "{{ ssh_users|default({})|dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
   notify:
     - restart_ns_daemons
   when:
@@ -216,7 +238,9 @@
     owner: "{{ item.value.uid }}"
     group: "{{ item.value.gid }}"
     mode: 0755
-  with_dict: "{{ ssh_users }}"
+  loop: "{{ ssh_users|default({})|dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
   when: storage_backend == "nfs"
 
 - name: User Directory CNs
@@ -233,7 +257,9 @@
     state: present
   notify:
     - restart_ns_daemons
-  with_dict: "{{ ssh_users }}"
+  loop: "{{ ssh_users|default({})|dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
   when: storage_backend == "nfs"
 
 - name: Update NFS user home directory exports if needed
@@ -245,6 +271,8 @@
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
   loop: "{{ ssh_users|default({})|dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
   notify:
     - restart_ns_daemons
   when:
