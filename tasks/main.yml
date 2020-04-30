@@ -15,12 +15,12 @@
   tags:
     - always
 
-- import_tasks: ldap_server.yml
+- import_tasks: ldap_server_install.yml
   when: "'ldapservers' in group_names"
   tags:
     - openldap-server
 
-- import_tasks: configure_ldap.yml
+- import_tasks: ldap_server_configure.yml
   when: "'ldapservers' in group_names"
   tags:
     - openldap-config
@@ -37,33 +37,29 @@
   tags:
     - openldap-client
 
-- import_tasks: ldap_automount.yml
+- import_tasks: ldap_autofs_configure.yml
   when:
+    - openldap_server_enable_autofs
     - "'ldapservers' in group_names"
-    - shared_storage
-  tags:
+    tags:
     - openldap-automount
 
-- import_tasks: ldap_users.yml
+- import_tasks: ldap_account_configure.yml
   when:
     - "'ldapservers' in group_names"
   tags:
     - openldap-users
 
-- import_tasks: smbd_server.yml
+- import_tasks: samba_server.yml
   when:
-    - "'samba' in group_names"
-  tags:
-    - openldap-smbd
-
-- import_tasks: configure_smb.yml
-  when:
+    - openldap_server_enable_samba
     - "'samba' in group_names"
   tags:
     - openldap-samba
 
-- import_tasks: afpd.yml
+- import_tasks: afp_server.yml
   when:
+    - openldap_server_enable_afpd
     - "'afpd' in group_names"
   tags:
-    - openldap-afpd
+    - openldap-afp
