@@ -27,6 +27,11 @@ openldap_server_ip:
 openldap_server_rootpw: "{{ vault_openldap_server_rootpw }}"
 openldap_server_enable_ssl: false
 
+openldap_server_enable_sshkeys: false
+openldap_server_enable_samba: false
+openldap_server_enable_afpd: false
+openldap_server_enable_autofs: false
+
 ssl_certpath:
 ssl_keypath:
 ssl_privkey:
@@ -38,7 +43,7 @@ smb_shares: []
 nfs_shares: []
 
 ## The self signed ssl parameters
-#openldap_server_country: "US"
-#openldap_server_state: "colorado"
-#openldap_server_location: "denver"
-#openldap_server_organization: "Home"
+openldap_server_country: "US"
+openldap_server_state: "AnyState"
+openldap_server_location: "AnyCity"
+openldap_server_organization: "MyCompany"
