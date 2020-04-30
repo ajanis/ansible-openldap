@@ -1,0 +1,86 @@
+---
+- name: Users OU
+  ldap_entry:
+    bind_dn: "{{ openldap_server_bind_dn }}"
+    bind_pw: "{{ openldap_server_rootpw }}"
+    dn: "{{ users_ou }}"
+    objectClass: organizationalUnit
+    state: present
+  notify:
+    - restart_ns_daemons
+
+- name: Groups OU
+  ldap_entry:
+    bind_dn: "{{ openldap_server_bind_dn }}"
+    bind_pw: "{{ openldap_server_rootpw }}"
+    dn: "{{ groups_ou }}"
+    objectClass: organizationalUnit
+    state: present
+  notify:
+    - restart_ns_daemons
+
+- name: Create Groups
+  ldap_entry:
+    bind_dn: "{{ openldap_server_bind_dn }}"
+    bind_pw: "{{ openldap_server_rootpw }}"
+    dn: "cn={{ item.key }},{{ groups_ou }}"
+    objectClass:
+      - posixGroup
+      - top
+    attributes:
+      description: "{{ item.value.description }}"
+      gidNumber: "{{ item.value.gid }}"
+    state: present
+  notify:
+    - restart_ns_daemons
+  loop: "{{ ssh_groups|default({})|dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Set Group Membership
+  ldap_attr:
+    bind_dn: "{{ openldap_server_bind_dn }}"
+    bind_pw: "{{ openldap_server_rootpw }}"
+    dn: "cn={{ item.key }},{{ groups_ou }}"
+    name: memberUid
+    values: "{{ item.value.members }}"
+    state: exact
+  notify:
+    - restart_ns_daemons
+  loop: "{{ ssh_groups|default({})|dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: "Set up SSH users"
+  ldap_entry:
+    bind_dn: "{{ openldap_server_bind_dn }}"
+    bind_pw: "{{ openldap_server_rootpw }}"
+    dn: "uid={{ item.key }},{{ users_ou }}"
+    objectClass:
+      - top
+      - posixAccount
+      - person
+      - inetOrgPerson
+      - shadowAccount
+      - ldapPublicKey
+    attributes:
+      gidNumber: "{{ item.value.gid }}"
+      uidNumber: "{{ item.value.uid }}"
+      homeDirectory: "/home/{{ item.key }}"
+      loginShell: "{{ item.value.shell | default('/bin/bash') }}"
+      givenName: "{{ item.value.givenname }}"
+      sn: "{{ item.value.sn }}"
+      mail: "{{ item.value.mail }}"
+      gecos: "{{ item.value.gecos }}"
+      userPassword: "{{ item.value.password }}"
+      cn: "{{ item.value.cn }}"
+      sshPublicKey: "{{ item.value.pubkey }}"
+    state: "{{ item.value.state }}"
+  loop: "{{ ssh_users|default({})|dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  register: ssh_users_added
+  notify:
+    - restart_ns_daemons
+
+- meta: flush_handlers
