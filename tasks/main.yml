@@ -12,6 +12,8 @@
     dest: /etc/hosts
     state: present
     line: "{{ openldap_server_ip }} {{ openldap_server_domain_name }} {{ openldap_server_domain_name.split('.')[0] }}"
+  when:
+    - openldap_client_enable
   tags:
     - always
 
@@ -27,13 +29,17 @@
 
 - name: "Configure LDAP Client [Debian]"
   import_tasks: ldap_client_debian.yml
-  when: ansible_os_family == "Debian"
+  when:
+    - ansible_os_family == "Debian"
+    - openldap_client_enable
   tags:
     - openldap-client
 
 - name: "Configure LDAP Client [RedHat]"
   import_tasks: ldap_client_redhat.yml
-  when: ansible_os_family == "RedHat"
+  when:
+    - ansible_os_family == "RedHat"
+    - openldap_client_enable
   tags:
     - openldap-client
 
@@ -41,11 +47,12 @@
   when:
     - openldap_server_enable_autofs
     - "'ldapservers' in group_names"
-    tags:
+  tags:
     - openldap-automount
 
 - import_tasks: ldap_account_configure.yml
   when:
+    - openldap_server_enable_posixaccounts
     - "'ldapservers' in group_names"
   tags:
     - openldap-users

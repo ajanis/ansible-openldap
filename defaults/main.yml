@@ -27,10 +27,18 @@ openldap_server_ip:
 openldap_server_rootpw: "{{ vault_openldap_server_rootpw }}"
 openldap_server_enable_ssl: false
 
-openldap_server_enable_sshkeys: false
+# enable openldap server posix user/group configs
+openldap_server_enable_posixaccounts: true
+# enable ssh key storage schema to openldap server
+openldap_server_enable_sshkeys: true
+# add samba authentication schema to openldap server
 openldap_server_enable_samba: false
+# add apple file protocol auth schema to openldap server
 openldap_server_enable_afpd: false
+# add autofs schema to openldap server
 openldap_server_enable_autofs: false
+# enable openldap client configs
+openldap_client_enable: true
 
 ssl_certpath:
 ssl_keypath:
@@ -38,7 +46,7 @@ ssl_privkey:
 ssl_certchain:
 
 ssh_users: {}
-ssh_groups: []
+ssh_groups: {}
 smb_shares: []
 nfs_shares: []
 
