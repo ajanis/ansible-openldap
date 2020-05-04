@@ -7,7 +7,7 @@
     mode: 0644
   notify: slapd rebuild
   when:
-    - openldap_enable_sshkeys
+    - openldap_server_enable_sshkeys
 
 - name: copy samba ldap schema file
   copy:
@@ -16,7 +16,7 @@
     mode: 0644
   notify: slapd rebuild
   when:
-    - openldap_enable_samba
+    - openldap_server_enable_samba
 
 - name: copy autofs schema file
   copy:
@@ -25,7 +25,7 @@
     mode: 0644
   notify: slapd rebuild
   when:
-    - openldap_enable_autofs
+    - openldap_server_enable_autofs
 
 - name: Check for ldap root password change
   copy:
@@ -204,7 +204,7 @@
     dest: /tmp/
   register: smbindices
   when:
-    - openldap_enable_samba
+    - openldap_server_enable_samba
 
 - name: add the samba indices
   shell: >
@@ -213,4 +213,4 @@
   args:
     creates: "{{ openldap_server_app_path }}/smbindices_created"
   when:
-    - openldap_enable_samba
+    - openldap_server_enable_samba
