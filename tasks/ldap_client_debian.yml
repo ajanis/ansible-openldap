@@ -18,35 +18,35 @@
     version: 1.3.0
   when:
     - openldap_server_enable_sshkeys
-
-- name: Enable Pam in SSHD config
-  lineinfile:
-    dest: /etc/ssh/sshd_config
-    state: present
-    regexp: '^UsePAM.*'
-    line: 'UsePAM yes'
-  notify:
-    - restart_login_services
-
-- name: Append ssh-ldap-pubkey wrapper configs to sshd_config
-  lineinfile:
-    dest: /etc/ssh/sshd_config
-    state: present
-    line: 'AuthorizedKeysCommand /usr/local/bin/ssh-ldap-pubkey-wrapper'
-  notify:
-    - restart_login_services
-  when:
-    - openldap_server_enable_sshkeys
-
-- name: Append ssh-ldap-pubkey user configs to sshd_config
-  lineinfile:
-    dest: /etc/ssh/sshd_config
-    state: present
-    line: 'AuthorizedKeysCommandUser nobody'
-  notify:
-    - restart_login_services
-  when:
-    - openldap_server_enable_sshkeys
+#
+#- name: Enable Pam in SSHD config
+#  lineinfile:
+#    dest: /etc/ssh/sshd_config
+#    state: present
+#    regexp: '^UsePAM.*'
+#    line: 'UsePAM yes'
+#  notify:
+#    - restart_login_services
+#
+#- name: Append ssh-ldap-pubkey wrapper configs to sshd_config
+#  lineinfile:
+#    dest: /etc/ssh/sshd_config
+#    state: present
+#    line: 'AuthorizedKeysCommand /usr/local/bin/ssh-ldap-pubkey-wrapper'
+#  notify:
+#    - restart_login_services
+#  when:
+#    - openldap_server_enable_sshkeys
+#
+#- name: Append ssh-ldap-pubkey user configs to sshd_config
+#  lineinfile:
+#    dest: /etc/ssh/sshd_config
+#    state: present
+#    line: 'AuthorizedKeysCommandUser nobody'
+#  notify:
+#    - restart_login_services
+#  when:
+#    - openldap_server_enable_sshkeys
 
 - name: Copy /etc/ldap.conf for client
   template:

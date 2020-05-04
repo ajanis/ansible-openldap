@@ -85,7 +85,7 @@
     group: "{{ openldap_server_user }}"
   when: openldap_server_enable_ssl
 
-- name: "[OpenLDAP] :: Install SSL Key"
+- name: "Install SSL Key"
   copy:
     content: "{{ ssl_privkey }}"
     dest: "{{ ssl_keypath }}"
@@ -96,7 +96,7 @@
   notify:
     - restart slapd
 
-- name: "[OpenLDAP] :: Install SSL Certificate Chain"
+- name: "Install SSL Certificate Chain"
   copy:
     content: "{{ ssl_certchain }}"
     dest: "{{ ssl_certpath }}"
