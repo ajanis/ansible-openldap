@@ -46,15 +46,12 @@
   lineinfile:
     dest: /etc/ssh/sshd_config
     state: present
-    line: |
-      {% if ansible_system == 'OpenBSD' %}
-      {% else %}
-      UsePAM yes
-      {% endif %}
+    line: UsePam yes
     notify:
       - restart_login_services
     when:
       - openldap_server_enable_posixaccounts
+      - ansible_system != 'OpenBSD'
     tags:
       - always
 
