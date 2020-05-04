@@ -35,8 +35,26 @@
       #AuthorizedKeysCommand none
       #AuthorizedKeysCommandUser nobody
       {% endif %}
+    notify:
+      - restart_login_services
     when:
       - openldap_server_enable_sshkeys
+    tags:
+      - always
+
+- name: Enable pam authentication in ssh server configuration
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    state: present
+    line: |
+      {% if ansible_system == 'OpenBSD' %}
+      {% else %}
+      UsePAM yes
+      {% endif %}
+    notify:
+      - restart_login_services
+    when:
+      - openldap_server_enable_posixaccounts
     tags:
       - always
 
