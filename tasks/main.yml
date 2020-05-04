@@ -21,39 +21,48 @@
   lineinfile:
     dest: /etc/ssh/sshd_config
     state: present
-    line: |
-      {% if openldap_server_enable_sshkeys|default(false) %}
-      {% if ansible_os_family == 'Debian' %}
-      AuthorizedKeysCommand /usr/local/bin/ssh-ldap-pubkey-wrapper
-      {% elif ansible_os_family == 'RedHat' %}
-      AuthorizedKeysCommand /usr/bin/ssh-ldap-pubkey-wrapper
-      {% else %}
+    line: >-
+      {%- if openldap_server_enable_sshkeys|default(false) -%}
       AuthorizedKeysCommand ssh-ldap-pubkey-wrapper
-      {% endif %}
-      AuthorizedKeysCommandUser nobody
-      {% else %}
+      {%- else -%}
       #AuthorizedKeysCommand none
+      {%- endif -%}
+  notify:
+    - restart_login_services
+  when:
+    - openldap_server_enable_sshkeys
+  tags:
+    - always
+
+- name: Add ssh pubkey command user to ssh server configuration
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    state: present
+    line: >-
+      {%- if openldap_server_enable_sshkeys|default(false) -%}
+      AuthorizedKeysCommandUser nobody
+      {%- else -%}
       #AuthorizedKeysCommandUser nobody
-      {% endif %}
-    notify:
-      - restart_login_services
-    when:
-      - openldap_server_enable_sshkeys
-    tags:
-      - always
+      {%- endif -%}
+  notify:
+    - restart_login_services
+  when:
+    - openldap_server_enable_sshkeys
+  tags:
+    - always
 
 - name: Enable pam authentication in ssh server configuration
   lineinfile:
     dest: /etc/ssh/sshd_config
     state: present
-    line: UsePam yes
-    notify:
-      - restart_login_services
-    when:
-      - openldap_server_enable_posixaccounts
-      - ansible_system != 'OpenBSD'
-    tags:
-      - always
+    line: UsePAM yes
+  notify:
+    - restart_login_services
+  when:
+    - openldap_server_enable_posixaccounts
+    - ansible_system != 'OpenBSD'
+  tags:
+    - always
 
 - import_tasks: ldap_server_install.yml
   when: "'ldapservers' in group_names"
