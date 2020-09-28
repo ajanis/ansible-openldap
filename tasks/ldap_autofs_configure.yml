@@ -113,7 +113,7 @@
       - automount
     attributes:
       cn: "{{ data_mount_root }}"
-      automountInformation: "-fstype=ceph {% for host in groups['mdss'] %}{{ hostvars[host]['ansible_default_ipv4']['address'] }}:6789{% if not loop.last %},{% endif %}{% endfor %}:/"
+      automountInformation: "-fstype=ceph,name={{ cephfs_user }},secretfile={{ cephfs_secretfile }} {% for host in groups['mdss'] %}{{ hostvars[host]['ansible_default_ipv4']['address'] }}:6789{% if not loop.last %},{% endif %}{% endfor %}:/"
     state: present
   notify:
     - restart_ns_daemons
@@ -123,7 +123,7 @@
   ldap_attr:
     dn: "cn={{ data_mount_root }},{{ auto_data_ou }}"
     name: "automountInformation"
-    values: "-fstype=ceph {% for host in groups['mdss'] %}{{ hostvars[host]['ansible_default_ipv4']['address'] }}:6789{% if not loop.last %},{% endif %}{% endfor %}:/"
+    values: "-fstype=ceph,name={{ cephfs_user }},secretfile={{ cephfs_secretfile }} {% for host in groups['mdss'] %}{{ hostvars[host]['ansible_default_ipv4']['address'] }}:6789{% if not loop.last %},{% endif %}{% endfor %}:/"
     state: exact
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
@@ -204,7 +204,7 @@
       - automount
     attributes:
       cn: "{{ item.key }}"
-      automountInformation: "-fstype=ceph {% for host in groups['mdss'] %}{{ hostvars[host]['ansible_default_ipv4']['address'] }}:6789{% if not loop.last %},{% endif %}{% endfor %}:/{{ ldap_user_home_directory }}/{{ item.key }}"
+      automountInformation: "-fstype=ceph,name={{ cephfs_user }},secretfile={{ cephfs_secretfile }} {% for host in groups['mdss'] %}{{ hostvars[host]['ansible_default_ipv4']['address'] }}:6789{% if not loop.last %},{% endif %}{% endfor %}:/{{ ldap_user_home_directory }}/{{ item.key }}"
     state: present
   notify:
     - restart_ns_daemons
@@ -217,7 +217,7 @@
   ldap_attr:
     dn: "cn={{ item.key }},{{ auto_home_ou }}"
     name: "automountInformation"
-    values: "-fstype=ceph {% for host in groups['mdss'] %}{{ hostvars[host]['ansible_default_ipv4']['address'] }}:6789{% if not loop.last %},{% endif %}{% endfor %}:/{{ ldap_user_home_directory }}/{{ item.key }}"
+    values: "-fstype=ceph,name={{ cephfs_user }},secretfile={{ cephfs_secretfile }} {% for host in groups['mdss'] %}{{ hostvars[host]['ansible_default_ipv4']['address'] }}:6789{% if not loop.last %},{% endif %}{% endfor %}:/{{ ldap_user_home_directory }}/{{ item.key }}"
     state: exact
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
