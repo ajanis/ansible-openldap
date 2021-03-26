@@ -93,7 +93,7 @@
     - restart_ns_daemons
     - restart_login_services
 
-- name : autofs packages
+- name: autofs packages
   yum:
     name: autofs
     state: present
