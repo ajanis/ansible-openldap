@@ -108,22 +108,31 @@
     - restart slapd
 
 - name: copy the /etc/default/slapd for RedHat
-  copy: src=ldap dest=/etc/sysconfig/ldap mode=0755
+  copy:
+    src: ldap
+    dest: /etc/sysconfig/ldap
+    mode: 0755
   when: openldap_server_enable_ssl and ansible_os_family == 'RedHat'
   notify:
-   - restart slapd
+    - restart slapd
 
 - name: copy /etc/default/slapd for Fedora
-  copy: src=slapd_fedora dest=/etc/sysconfig/slapd mode=0755
+  copy:
+    src: slapd_fedora
+    dest: /etc/sysconfig/slapd
+    mode: 0755
   when: openldap_server_enable_ssl and ansible_distribution == "Fedora"
   notify:
-   - restart slapd
+    - restart slapd
 
 - name: copy /etc/default/slapd for Ubuntu
-  copy: src=slapd dest=/etc/default/slapd mode=0755
+  copy:
+    src: slapd
+    dest: /etc/default/slapd
+    mode: 0755
   when: openldap_server_enable_ssl and ansible_os_family == 'Debian'
   notify:
-   - restart slapd
+    - restart slapd
 
 - meta: flush_handlers
 
@@ -188,7 +197,9 @@
   when: slapd_rebuild | default(False)
 
 - name: Copy the template for creating base dn
-  template: src={{ openldap_server_ldif }} dest=/tmp/
+  template:
+    src: "{{ openldap_server_ldif }}"
+    dest: /tmp/
   register: rootdn
 
 - name: add the base domain
