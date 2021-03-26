@@ -212,7 +212,7 @@
   shell:
     cmd: >
       ldapadd -x -D "cn=Manager,{{ openldap_server_dc }}" -w {{ openldap_server_rootpw }}
-      -f {{ rootdn.dest|default(rootdn.path) }} && touch {{ openldap_server_app_path }}/rootdn_created
+      -f {{ rootdn.dest|default( '/tmp/' ~ openldap_server_ldif ) }} && touch {{ openldap_server_app_path }}/rootdn_created
     creates: "{{ openldap_server_app_path }}/rootdn_created"
 
 - name: Copy the template for creating samba indices
@@ -226,7 +226,7 @@
 - name: add the samba indices
   shell: >
     ldapmodify -x -D "cn=admin,cn=config" -w {{ openldap_server_rootpw }}
-    -f {{ smbindices.dest|default(smbindices.path) }} && touch {{ openldap_server_app_path }}/smbindices_created
+    -f {{ smbindices.dest|default( '/tmp/samba_indices.ldif' ) }} && touch {{ openldap_server_app_path }}/smbindices_created
   args:
     creates: "{{ openldap_server_app_path }}/smbindices_created"
   when:
