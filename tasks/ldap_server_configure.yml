@@ -202,6 +202,12 @@
     dest: /tmp/
   register: rootdn
 
+- name: Print rootdn variable info for debugging
+  debug:
+    var: rootdn
+    verbosity: 1
+  when: rootdn is defined
+
 - name: add the base domain
   shell:
     cmd: >
