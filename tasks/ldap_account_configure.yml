@@ -55,7 +55,7 @@
   ldap_entry:
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
-    dn: "uid={{ item.key }},{{ users_ou }}"
+    dn: "uid={{ item.value.uid }},{{ users_ou }}"
     objectClass:
       - top
       - posixAccount
@@ -83,4 +83,156 @@
   notify:
     - restart_ns_daemons
 
+- name: 'Update User accounts if needed'
+  ldap_attr:
+    dn: "uid={{ item.value.uid }},{{ users_ou }}"
+    bind_dn: "{{ openldap_server_bind_dn }}"
+    bind_pw: "{{ openldap_server_rootpw }}"
+    state: exact
+    name: gidNumber
+    values: "{{ item.value.gid }}"
+  loop: "{{ ssh_users|default({})|dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  notify:
+    - restart_ns_daemons
+
+- name: 'Update User accounts if needed'
+  ldap_attr:
+    dn: "uid={{ item.value.uid }},{{ users_ou }}"
+    bind_dn: "{{ openldap_server_bind_dn }}"
+    bind_pw: "{{ openldap_server_rootpw }}"
+    state: exact
+    name: uidNumber
+    values: "{{ item.value.uid }}"
+  loop: "{{ ssh_users|default({})|dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  notify:
+    - restart_ns_daemons
+
+- name: 'Update User accounts if needed'
+  ldap_attr:
+    dn: "uid={{ item.value.uid }},{{ users_ou }}"
+    bind_dn: "{{ openldap_server_bind_dn }}"
+    bind_pw: "{{ openldap_server_rootpw }}"
+    state: exact
+    name: homeDirectory
+    values: "/home/{{ item.key }}"
+  loop: "{{ ssh_users|default({})|dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  notify:
+    - restart_ns_daemons
+
+- name: 'Update User accounts if needed'
+  ldap_attr:
+    dn: "uid={{ item.value.uid }},{{ users_ou }}"
+    bind_dn: "{{ openldap_server_bind_dn }}"
+    bind_pw: "{{ openldap_server_rootpw }}"
+    state: exact
+    name: loginShell
+    values: "{{ item.value.shell | default('/bin/bash') }}"
+  loop: "{{ ssh_users|default({})|dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  notify:
+    - restart_ns_daemons
+
+- name: 'Update User accounts if needed'
+  ldap_attr:
+    dn: "uid={{ item.value.uid }},{{ users_ou }}"
+    bind_dn: "{{ openldap_server_bind_dn }}"
+    bind_pw: "{{ openldap_server_rootpw }}"
+    state: exact
+    name: givenName
+    values: "{{ item.value.givenname }}"
+  loop: "{{ ssh_users|default({})|dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  notify:
+    - restart_ns_daemons
+
+- name: 'Update User accounts if needed'
+  ldap_attr:
+    dn: "uid={{ item.value.uid }},{{ users_ou }}"
+    bind_dn: "{{ openldap_server_bind_dn }}"
+    bind_pw: "{{ openldap_server_rootpw }}"
+    state: exact
+    name: sn
+    values: "{{ item.value.sn }}"
+  loop: "{{ ssh_users|default({})|dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  notify:
+    - restart_ns_daemons
+
+- name: 'Update User accounts if needed'
+  ldap_attr:
+    dn: "uid={{ item.value.uid }},{{ users_ou }}"
+    bind_dn: "{{ openldap_server_bind_dn }}"
+    bind_pw: "{{ openldap_server_rootpw }}"
+    state: exact
+    name: mail
+    values: "{{ item.value.mail }}"
+  loop: "{{ ssh_users|default({})|dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  notify:
+    - restart_ns_daemons
+
+- name: 'Update User accounts if needed'
+  ldap_attr:
+    dn: "uid={{ item.value.uid }},{{ users_ou }}"
+    bind_dn: "{{ openldap_server_bind_dn }}"
+    bind_pw: "{{ openldap_server_rootpw }}"
+    state: exact
+    name: gecos
+    values: "{{ item.value.gecos }}"
+  loop: "{{ ssh_users|default({})|dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  notify:
+    - restart_ns_daemons
+
+- name: 'Update User accounts if needed'
+  ldap_attr:
+    dn: "uid={{ item.value.uid }},{{ users_ou }}"
+    bind_dn: "{{ openldap_server_bind_dn }}"
+    bind_pw: "{{ openldap_server_rootpw }}"
+    state: exact
+    name: userPassword
+    values: "{{ item.value.password }}"
+  loop: "{{ ssh_users|default({})|dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  notify:
+    - restart_ns_daemons
+- name: 'Update User accounts if needed'
+  ldap_attr:
+    dn: "uid={{ item.value.uid }},{{ users_ou }}"
+    bind_dn: "{{ openldap_server_bind_dn }}"
+    bind_pw: "{{ openldap_server_rootpw }}"
+    state: exact
+    name: cn
+    values: "{{ item.value.cn }}"
+  loop: "{{ ssh_users|default({})|dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  notify:
+    - restart_ns_daemons
+
+- name: 'Update User accounts if needed'
+  ldap_attr:
+    dn: "uid={{ item.value.uid }},{{ users_ou }}"
+    bind_dn: "{{ openldap_server_bind_dn }}"
+    bind_pw: "{{ openldap_server_rootpw }}"
+    state: exact
+    name: sshPublicKey
+    values: "{{ item.value.pubkey }}"
+  loop: "{{ ssh_users|default({})|dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  notify:
+    - restart_ns_daemons
 - meta: flush_handlers
