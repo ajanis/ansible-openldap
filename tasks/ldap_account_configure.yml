@@ -83,7 +83,7 @@
   notify:
     - restart_ns_daemons
 
-- name: 'Update User accounts if needed'
+- name: 'Update LDAP gidNumber"
   ldap_attr:
     dn: "uid={{ item.value.uid }},{{ users_ou }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
@@ -97,7 +97,7 @@
   notify:
     - restart_ns_daemons
 
-- name: 'Update User accounts if needed'
+- name: 'Update LDAP uidNumber"
   ldap_attr:
     dn: "uid={{ item.value.uid }},{{ users_ou }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
@@ -111,7 +111,7 @@
   notify:
     - restart_ns_daemons
 
-- name: 'Update User accounts if needed'
+- name: 'Update LDAP homeDirectory"
   ldap_attr:
     dn: "uid={{ item.value.uid }},{{ users_ou }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
@@ -125,7 +125,7 @@
   notify:
     - restart_ns_daemons
 
-- name: 'Update User accounts if needed'
+- name: 'Update LDAP loginShell'
   ldap_attr:
     dn: "uid={{ item.value.uid }},{{ users_ou }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
@@ -139,7 +139,7 @@
   notify:
     - restart_ns_daemons
 
-- name: 'Update User accounts if needed'
+- name: 'Update LDAP givenName'
   ldap_attr:
     dn: "uid={{ item.value.uid }},{{ users_ou }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
@@ -153,7 +153,7 @@
   notify:
     - restart_ns_daemons
 
-- name: 'Update User accounts if needed'
+- name: 'Update LDAP user sn'
   ldap_attr:
     dn: "uid={{ item.value.uid }},{{ users_ou }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
@@ -167,7 +167,7 @@
   notify:
     - restart_ns_daemons
 
-- name: 'Update User accounts if needed'
+- name: 'Update LDAP user mail'
   ldap_attr:
     dn: "uid={{ item.value.uid }},{{ users_ou }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
@@ -181,7 +181,7 @@
   notify:
     - restart_ns_daemons
 
-- name: 'Update User accounts if needed'
+- name: 'Update LDAP user gecos'
   ldap_attr:
     dn: "uid={{ item.value.uid }},{{ users_ou }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
@@ -195,7 +195,7 @@
   notify:
     - restart_ns_daemons
 
-- name: 'Update User accounts if needed'
+- name: 'Update LDAP userPassword'
   ldap_attr:
     dn: "uid={{ item.value.uid }},{{ users_ou }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
@@ -208,7 +208,8 @@
     label: "{{ item.key }}"
   notify:
     - restart_ns_daemons
-- name: 'Update User accounts if needed'
+
+- name: 'Update LDAP user cn'
   ldap_attr:
     dn: "uid={{ item.value.uid }},{{ users_ou }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
@@ -222,7 +223,7 @@
   notify:
     - restart_ns_daemons
 
-- name: 'Update User accounts if needed'
+- name: 'Update LDAP sshPublicKey'
   ldap_attr:
     dn: "uid={{ item.value.uid }},{{ users_ou }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
