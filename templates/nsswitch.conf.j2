@@ -4,7 +4,7 @@
 # If you have the `glibc-doc-reference' and `info' packages installed, try:
 # `info libc "Name Service Switch"' for information about this file.
 
-{% if ansible_os_distribution == "RedHat" and ansible_distribution_major_version is version('8', '>=') %}
+{% if ansible_os_family == "RedHat" and ansible_distribution_major_version is version('8', '>=') %}
 passwd:     sss files systemd compat ldap
 group:      sss files systemd compat ldap
 netgroup:   sss files
@@ -29,22 +29,7 @@ networks:   files
 protocols:  files
 rpc:        files
 
-{% elif ansible_os_distribution == "CentOS" and ansible_distribution_major_version is version('8', '>=') %}
-passwd:     files systemd compat ldap
-group:      files systemd compat ldap
-netgroup:   files
-{% if shared_storage is defined and shared_storage %}
-automount:      files ldap
-{% else %}
-automount:      files
-{% endif %}
-services:   files
-shadow:     files compat ldap
-{% if 'afpd' in group_names %}
-hosts: files sss mdns4_minimal dns mdns4 mdns myhostname
-{% else %}
-hosts:          files dns myhostname
-{% endif %}
+
 
 {% elif ansible_os_family == "Debian" %}
 

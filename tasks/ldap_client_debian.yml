@@ -23,7 +23,9 @@
   loop: "{{ openldap_python_pkgs }}"
   notify:
     - restart_login_services
-
+  when:
+    - openldap_python_pkgs is defined
+    - openldap_python_pkgs|length > 0
 #
 #- name: Enable Pam in SSHD config
 #  lineinfile:

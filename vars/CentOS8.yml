@@ -5,6 +5,7 @@ openldap_server_app_path: "/etc/openldap"
 
 openldap_authselect_nslcd_path: /etc/authselect/custom/nslcd
 openldap_authselect_sssd_path: /usr/share/authselect/default/sssd
+
 openldap_authselect_files:
   - "{{ openldap_authselect_nslcd_path }}/fingerprint-auth"
   - "{{ openldap_authselect_nslcd_path }}/password-auth"
@@ -36,7 +37,6 @@ openldap_client_pkgs:
   - epel-release
   - nss-pam-ldapd
   - nscd
-  - nslcd
   - python3-devel
   - gcc
   - openldap-devel

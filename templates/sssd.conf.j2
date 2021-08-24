@@ -32,7 +32,8 @@ ldap_uri = ldaps://{{ openldap_server_domain_name }}
 ldap_tls_reqcert = demand
 ldap_tls_cacert = {{ ssl_certpath }}
 ldap_tls_cacertdir = {{ ssl_certpath.split('/')[:-1] }}
-{% elif not openldap_server_enable_ssl %}
+{% endif %}
+{% if not openldap_server_enable_ssl %}
 ldap_id_use_start_tls = False
 ldap_uri = ldap://{{ openldap_server_domain_name }}
 {% endif %}

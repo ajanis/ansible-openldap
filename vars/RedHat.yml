@@ -17,7 +17,6 @@ openldap_client_pkgs:
   - epel-release
   - nss-pam-ldapd
   - nscd
-  - nslcd
   - python3-devel
   - gcc
   - openldap-devel
