@@ -59,7 +59,7 @@
       ldap_entry:
         bind_dn: "{{ openldap_server_bind_dn }}"
         bind_pw: "{{ openldap_server_rootpw }}"
-        dn: "uid={{ item.value.uid }},{{ users_ou }}"
+        dn: "uid={{ item.key }},{{ users_ou }}"
         objectClass:
           - top
           - posixAccount
@@ -91,7 +91,7 @@
   block:
     - name: 'Update LDAP user gidNumber'
       ldap_attr:
-        dn: "uid={{ item.value.uid }},{{ users_ou }}"
+        dn: "uid={{ item.key }},{{ users_ou }}"
         bind_dn: "{{ openldap_server_bind_dn }}"
         bind_pw: "{{ openldap_server_rootpw }}"
         state: exact
@@ -105,7 +105,7 @@
 
     - name: 'Update LDAP user uidNumber'
       ldap_attr:
-        dn: "uid={{ item.value.uid }},{{ users_ou }}"
+        dn: "uid={{ item.key }},{{ users_ou }}"
         bind_dn: "{{ openldap_server_bind_dn }}"
         bind_pw: "{{ openldap_server_rootpw }}"
         state: exact
@@ -119,7 +119,7 @@
 
     - name: 'Update LDAP user attribute homeDirectory'
       ldap_attr:
-        dn: "uid={{ item.value.uid }},{{ users_ou }}"
+        dn: "uid={{ item.key }},{{ users_ou }}"
         bind_dn: "{{ openldap_server_bind_dn }}"
         bind_pw: "{{ openldap_server_rootpw }}"
         state: exact
@@ -133,7 +133,7 @@
 
     - name: 'Update LDAP user attribute loginShell'
       ldap_attr:
-        dn: "uid={{ item.value.uid }},{{ users_ou }}"
+        dn: "uid={{ item.key }},{{ users_ou }}"
         bind_dn: "{{ openldap_server_bind_dn }}"
         bind_pw: "{{ openldap_server_rootpw }}"
         state: exact
@@ -147,7 +147,7 @@
 
     - name: 'Update LDAP user attribute givenName'
       ldap_attr:
-        dn: "uid={{ item.value.uid }},{{ users_ou }}"
+        dn: "uid={{ item.key }},{{ users_ou }}"
         bind_dn: "{{ openldap_server_bind_dn }}"
         bind_pw: "{{ openldap_server_rootpw }}"
         state: exact
@@ -161,7 +161,7 @@
 
     - name: 'Update LDAP user attribute sn'
       ldap_attr:
-        dn: "uid={{ item.value.uid }},{{ users_ou }}"
+        dn: "uid={{ item.key }},{{ users_ou }}"
         bind_dn: "{{ openldap_server_bind_dn }}"
         bind_pw: "{{ openldap_server_rootpw }}"
         state: exact
@@ -175,7 +175,7 @@
 
     - name: 'Update LDAP user attribute mail'
       ldap_attr:
-        dn: "uid={{ item.value.uid }},{{ users_ou }}"
+        dn: "uid={{ item.key }},{{ users_ou }}"
         bind_dn: "{{ openldap_server_bind_dn }}"
         bind_pw: "{{ openldap_server_rootpw }}"
         state: exact
@@ -189,7 +189,7 @@
 
     - name: 'Update LDAP user attribute gecos'
       ldap_attr:
-        dn: "uid={{ item.value.uid }},{{ users_ou }}"
+        dn: "uid={{ item.key }},{{ users_ou }}"
         bind_dn: "{{ openldap_server_bind_dn }}"
         bind_pw: "{{ openldap_server_rootpw }}"
         state: exact
@@ -203,7 +203,7 @@
 
     - name: 'Update LDAP user attribute userPassword'
       ldap_attr:
-        dn: "uid={{ item.value.uid }},{{ users_ou }}"
+        dn: "uid={{ item.key }},{{ users_ou }}"
         bind_dn: "{{ openldap_server_bind_dn }}"
         bind_pw: "{{ openldap_server_rootpw }}"
         state: exact
@@ -217,7 +217,7 @@
 
     - name: 'Update LDAP user attribute cn'
       ldap_attr:
-        dn: "uid={{ item.value.uid }},{{ users_ou }}"
+        dn: "uid={{ item.key }},{{ users_ou }}"
         bind_dn: "{{ openldap_server_bind_dn }}"
         bind_pw: "{{ openldap_server_rootpw }}"
         state: exact
@@ -231,7 +231,7 @@
 
     - name: 'Update LDAP user attribute sshPublicKey'
       ldap_attr:
-        dn: "uid={{ item.value.uid }},{{ users_ou }}"
+        dn: "uid={{ item.key }},{{ users_ou }}"
         bind_dn: "{{ openldap_server_bind_dn }}"
         bind_pw: "{{ openldap_server_rootpw }}"
         state: exact
