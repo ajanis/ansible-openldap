@@ -14,7 +14,21 @@
     update_cache: yes
   when: ansible_os_family == 'Debian'
 
-- name: Install ansible python dependencies for openldap configuration
+- name: Install ansible python dependencies for ldap configuration
   pip:
-    name: "{{ openldap_python_pkgs }}"
-    state: present
+    name: "{{ item.name }}"
+    version: |
+      {% if (item.version is defined) and (item.version|length > 0) %}
+        {{ item.version }}
+      {% else %}
+        (omit)
+      {% endif %}
+    state: |
+      {% if (item.state is defined) and (item.state|length > 0) %}"
+        {{ item.state }}
+      {% else %}
+        present
+      {% endif %}
+  loop: "{{ openldap_python_pkgs }}"
+  notify:
+    - restart_login_services

@@ -9,49 +9,22 @@
 
 - name: Install ansible python dependencies for ldap configuration
   pip:
-    name: "{{ openldap_python_pkgs }}"
-    state: present
-
-- name: Install ssh-ldap-pubkey pip package
-  pip:
-    #executable: pip2
-    name: ssh-ldap-pubkey
-    state: present
-    version: 1.3.0
+    name: "{{ item.name }}"
+    version: |
+      {% if (item.version is defined) and (item.version|length > 0) %}
+        {{ item.version }}
+      {% else %}
+        (omit)
+      {% endif %}
+    state: |
+      {% if (item.state is defined) and (item.state|length > 0) %}"
+        {{ item.state }}
+      {% else %}
+        present
+      {% endif %}
+  loop: "{{ openldap_python_pkgs }}"
   notify:
     - restart_login_services
-  when:
-    - openldap_server_enable_sshkeys
-#
-#- name: Enable Pam in SSHD config
-#  lineinfile:
-#    dest: /etc/ssh/sshd_config
-#    state: present
-#    regexp: '^UsePAM.*'
-#    line: 'UsePAM yes'
-#  notify:
-#    - restart_login_services
-#
-#- name: Append ssh-ldap-pubkey wrapper configs to sshd_config
-#  lineinfile:
-#    dest: /etc/ssh/sshd_config
-#    state: present
-#    line: 'AuthorizedKeysCommand /usr/bin/ssh-ldap-pubkey-wrapper'
-#  notify:
-#    - restart_login_services
-#  when:
-#    - openldap_server_enable_sshkeys
-#
-#- name: Append ssh-ldap-pubkey user configs to sshd_config
-#  lineinfile:
-#    dest: /etc/ssh/sshd_config
-#    state: present
-#    line: 'AuthorizedKeysCommandUser nobody'
-#  notify:
-#    - restart_login_services
-#    - restart_ns_daemons
-#  when:
-#    - openldap_server_enable_sshkeys
 
 - name: Copy /etc/ldap.conf for client
   template:
@@ -73,7 +46,8 @@
     - restart_ns_daemons
     - restart_sssd
   when:
-    - ansible_distribution_major_version >= "8"
+    - ansible_os_distribution == "RedHat"
+    - ansible_distribution_major_version is version('8', '>=')
 
 - name: Copy nsswitch.conf
   template:
@@ -82,7 +56,8 @@
   notify:
     - restart_ns_daemons
   when:
-    - ansible_distribution_major_version >= "8"
+    - ansible_os_family == "RedHat"
+    - ansible_distribution_major_version is version('8', '>=')
 
 - name: Copy nslcd.conf
   template:
@@ -131,14 +106,54 @@
   command: "authconfig --enableldap --enableldapauth --enablemkhomedir --update"
   when:
     - run_authconfig | default(False)
-    - ansible_distribution_major_version < "8"
+    - ansible_os_family == "RedHat"
+    - ansible_distribution_major_version is version('8', '<')
 
+- name: "Run 'authselect select sssd with-mkhomedir with-pamaccess --force' [RHEL 8]"
+  command: "authselect select sssd with-mkhomedir with-pamaccess --force"
+  when:
+    - run_authconfig | default(False)
+    - ansible_os_distribution == "RedHat"
+    - ansible_distribution_major_version >= "8"
 
-#- name: "Run 'authselect select sssd with-mkhomedir with-pamaccess --force' [CentOS 8]"
-#  command: "authselect select sssd with-mkhomedir with-pamaccess --force"
-#  when:
-#    - run_authconfig | default(False)
-#    - ansible_distribution_major_version >= "8"
+- name: Authentication workarounds for CentOS 8
+  block:
+    - name: Disable SSSD
+      service:
+        name: sssd
+        state: stopped
+        enabled: no
+    - name: Enable and start NSLCD
+      service:
+        name: nslcd
+        state: started
+        enabled: yes
+    - name: Create custom authselect path for nslcd
+      file:
+        path: "{{ openldap_authselect_nslcd_path }}"
+        state: directory
+    - name: Copy default authselect files for sssd
+      copy:
+        src: "{{ openldap_authselect_sssd_path }}/"
+        dest: "{{ openldap_authselect_nslcd_path }}/"
+        remote_src: yes
+    - name: Update authselect files for ldap
+      replace:
+        path: "{{ item }}"
+        regexp: 'sss'
+        replace: 'ldap'
+      loop: "{{ openldap_authselect_files }}"
+    - name: Update authselect REQUIREMENTS file
+      replace:
+        path: "{{ openldap_authselect_nslcd_path }}/REQUIREMENTS"
+        regexp: 'SSSD'
+        replace: 'NSLCD'
+    - name: "Run 'authselect select custom/nslcd --force' [CentOS 8]"
+      command: "authselect select custom/nslcd --force"
+  when:
+    - run_authconfig | default(False)
+    - ansible_os_distribution == "CentOS"
+    - ansible_distribution_major_version >= "8"
 
 - name: create user home directories
   file:
