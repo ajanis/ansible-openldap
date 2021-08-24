@@ -1,50 +1,58 @@
 ---
-openldap_server_pkgs:
-  - openldap-servers
-  - openldap-clients
-  - openldap-devel
-  - libselinux-python
-  - openssl
-  - openssl-devel
-  - redhat-rpm-config
-  - authselect-compat
-  - platform-python-pip
-  - platform-python-pexpect
-  - gcc
-  - rpcbind
-  - python-devel
-
-openldap_python_pkgs:
-  - python-ldap
-  - ldap3
-
-
-openldap_client_pkgs:
-  - nss-pam-ldapd
-  - nscd
-  - sssd-ldap
-  - sssd-nfs-idmap
-  - libsss_autofs
-  - platform-python-devel
-  - gcc
-  - openldap-devel
-  - cyrus-sasl
-  - cyrus-sasl-ldap
-  - redhat-rpm-config
-  - cyrus-sasl-devel
-  - platform-python-pip
-  - openssh-ldap
-  - openldap-clients
-  - authselect-compat
-  - rpcbind
-
-samba_pkgs:
-  - smbldap-tools
-  - samba
+ssh_service: sshd
 
 openldap_server_app_path: "/etc/openldap"
-openldap_server_user: ldap
 
+openldap_authselect_nslcd_path: /etc/authselect/custom/nslcd
+openldap_authselect_sssd_path: /usr/share/authselect/default/sssd
+openldap_authselect_files:
+  - "{{ openldap_authselect_nslcd_path }}/fingerprint-auth"
+  - "{{ openldap_authselect_nslcd_path }}/password-auth"
+  - "{{ openldap_authselect_nslcd_path }}/smartcard-auth"
+  - "{{ openldap_authselect_nslcd_path }}/system-auth"
+  - "{{ openldap_authselect_nslcd_path }}/nsswitch.conf"
+  - "{{ openldap_authselect_nslcd_path }}/fingerprint-auth"
+
+openldap_server_user: ldap
+openldap_server_group: ldap
+openldap_nslcd_user: nslcd
 openldap_nslcd_group: ldap
 
-ssh_service: sshd
+openldap_server_pkgs:
+  - epel-release
+  - openldap
+  - openldap-clients
+  - openldap-devel
+  - python3-libselinux
+  - openssl
+  - openssl-devel
+  - python3-pip
+  - python3-pexpect
+  - gcc
+  - rpcbind
+  - python3-devel
+
+openldap_client_pkgs:
+  - epel-release
+  - nss-pam-ldapd
+  - nscd
+  - nslcd
+  - python3-devel
+  - gcc
+  - openldap-devel
+  - gcc
+  - cyrus-sasl
+  - cyrus-sasl-devel
+  - python3-pip
+  - openssh-ldap
+  - openssh-ldap-authkeys
+  - rpcbind
+  - python3-ldap3
+  - python3-ldap
+
+
+
+
+
+
+

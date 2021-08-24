@@ -13,8 +13,10 @@ openldap_server_pkgs:
   - rpcbind
 
 openldap_python_pkgs:
-  - python-ldap
-  - ldap3
+  - name: python-ldap
+  - name: ldap3
+  - name: ssh-ldap-pubkey
+    state: latest
 
 openldap_client_pkgs:
   - libnss-ldapd
