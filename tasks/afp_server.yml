@@ -41,7 +41,7 @@
   notify:
     - restart avahi-daemon
     - restart netatalk
-  when: afp_ldap_auth
+  when: openldap_server_enable_afpd
 
 - name: add afpd service to local avahi daemon
   copy:
