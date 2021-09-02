@@ -1,25 +1,23 @@
 ---
-- name: Install the openldap client and required Packages for Ubuntu
+- name: Install the openldap client and required Packages [Debian/Ubuntu]
   apt:
     name: "{{ openldap_client_pkgs }}"
     state: present
     update_cache: yes
 
-- name: Install ansible python dependencies for ldap configuration
+- name: Install ansible python dependencies for ldap configuration [Debian/Ubuntu]
   pip:
-    name: "{{ item.name }}"
-    version: |
-      {% if (item.version is defined) and (item.version|length > 0) %}
-        {{ item.version }}
-      {% else %}
-        (omit)
-      {% endif %}
-    state: |
-      {% if (item.state is defined) and (item.state|length > 0) %}"
+    name: |-
+      {{ item.name }}
+      {%- if (item.version is defined) and (item.version|length > 0) -%}
+        =={{ item.version }}
+      {%- endif %}
+    state: |-
+      {%- if (item.state is defined) and (item.state|length > 0) -%}
         {{ item.state }}
-      {% else %}
+      {%- else -%}
         present
-      {% endif %}
+      {%- endif %}
   loop: "{{ openldap_python_pkgs }}"
   notify:
     - restart_login_services
@@ -56,7 +54,7 @@
 #  when:
 #    - openldap_server_enable_sshkeys
 
-- name: Copy /etc/ldap.conf for client
+- name: Copy /etc/ldap.conf for client [Debian/Ubuntu]
   template:
     src: client_ldap.conf.j2
     dest: /etc/ldap.conf
@@ -64,7 +62,7 @@
     - restart_login_services
     - restart_ns_daemons
 
-- name: Copy the ldap.conf configuration file
+- name: Copy the ldap.conf configuration file [Debian/Ubuntu]
   template:
     src: ldap.conf.j2
     dest: "{{ openldap_server_app_path }}/ldap.conf"
@@ -72,7 +70,7 @@
     - restart_login_services
     - restart_ns_daemons
 
-- name: Fix common-auth
+- name: Fix common-auth [Debian/Ubuntu]
   lineinfile:
     dest: /etc/pam.d/common-auth
     state: present
@@ -81,7 +79,7 @@
     - restart_ns_daemons
     - restart_login_services
 
-- name: Fix common-session
+- name: Fix common-session [Debian/Ubuntu]
   lineinfile:
     dest: /etc/pam.d/common-session
     state: present
@@ -90,7 +88,7 @@
     - restart_ns_daemons
     - restart_login_services
 
-- name: Fix common-password
+- name: Fix common-password [Debian/Ubuntu]
   replace:
     path: /etc/pam.d/common-password
     backup: yes
@@ -100,7 +98,7 @@
     - restart_ns_daemons
     - restart_login_services
 
-- name: Fix access.conf
+- name: Fix access.conf [Debian/Ubuntu]
   lineinfile:
     dest: /etc/security/access.conf
     state: absent
@@ -109,14 +107,14 @@
     - restart_ns_daemons
     - restart_login_services
 
-- name: Copy nsswitch.conf
+- name: Copy nsswitch.conf [Debian/Ubuntu]
   template:
     src: nsswitch.conf.j2
     dest: /etc/nsswitch.conf
   notify:
     - restart_ns_daemons
 
-- name: Copy nslcd.conf
+- name: Copy nslcd.conf [Debian/Ubuntu]
   template:
     src: nslcd.conf.j2
     dest: /etc/nslcd.conf
@@ -124,7 +122,7 @@
   notify:
     - restart_ns_daemons
 
-- name: Ensure directory for nscd socket exists
+- name: Ensure directory for nscd socket exists [Debian/Ubuntu]
   file:
     state: directory
     path: /var/run/nscd
@@ -132,7 +130,7 @@
   notify:
     - restart_ns_daemons
 
-- name: autofs packages
+- name: autofs packages [Debian/Ubuntu]
   apt:
     name: autofs
     state: present
@@ -140,7 +138,7 @@
   when:
     - openldap_server_enable_autofs
 
-- name: autofs-ldap packages
+- name: autofs-ldap packages [Debian/Ubuntu]
   apt:
     name: autofs-ldap
     state: present
@@ -148,7 +146,7 @@
   when:
     - openldap_server_enable_autofs
 
-- name: Start AutoFS service
+- name: Start AutoFS service [Debian/Ubuntu]
   service:
     name: autofs
     state: started
@@ -156,13 +154,13 @@
   when:
     - openldap_server_enable_autofs
 
-- name: Start rpcbind service
+- name: Start rpcbind service [Debian/Ubuntu]
   service:
     name: rpcbind
     state: started
     enabled: yes
 
-- name: Copy autofs supporting file
+- name: Copy autofs supporting file [Debian/Ubuntu]
   template:
     src: autofs.j2
     dest: /etc/default/autofs
@@ -174,7 +172,7 @@
 
 - meta: flush_handlers
 
-- name: create user home directories
+- name: create user home directories [Debian/Ubuntu]
   file:
     state: directory
     path: "/home/{{ item.key }}"

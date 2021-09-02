@@ -7,27 +7,25 @@
   notify:
     - restart_login_services
 
-- name: Install ansible python dependencies for ldap configuration
+- name: Install ansible python dependencies for ldap configuration [Debian/Ubuntu]
   pip:
-    name: "{{ item.name }}"
-    version: |
-      {% if (item.version is defined) and (item.version|length > 0) %}
-        {{ item.version }}
-      {% else %}
-        (omit)
-      {% endif %}
-    state: |
-      {% if (item.state is defined) and (item.state|length > 0) %}"
+    name: |-
+      {{ item.name }}
+      {%- if (item.version is defined) and (item.version|length > 0) -%}
+        =={{ item.version }}
+      {%- endif %}
+    state: |-
+      {%- if (item.state is defined) and (item.state|length > 0) -%}
         {{ item.state }}
-      {% else %}
+      {%- else -%}
         present
-      {% endif %}
+      {%- endif %}
   loop: "{{ openldap_python_pkgs }}"
   notify:
     - restart_login_services
   when:
     - openldap_python_pkgs is defined
-    - openldap_python_pkgs|length > "0"
+    - openldap_python_pkgs|length > 0
 
 - name: Copy /etc/ldap.conf for client
   template:
