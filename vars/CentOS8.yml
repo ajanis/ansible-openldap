@@ -38,6 +38,7 @@ openldap_client_pkgs:
   - nss-pam-ldapd
   - nscd
   - python3-devel
+  - gcc
   - openldap-devel
   - gcc
   - cyrus-sasl
@@ -48,7 +49,7 @@ openldap_client_pkgs:
   - rpcbind
   - python3-ldap3
   - python3-ldap
-  - sssd-ldap
+
 
 
 
