@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+
+<autofs_ldap_sasl_conf
+
+	usetls={% if openldap_server_enable_tls %}"yes"{% else %}"no"{% endif %}
+
+	tlsrequired={% if autofs_ldap_tlsrequired %}"yes"{% else %}"no"{% endif %}
+
+	authrequired={% if autofs_ldap_authrequired %}"yes"{% else %}"no"{% endif %}
+
+/>
