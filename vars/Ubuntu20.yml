@@ -1,8 +1,17 @@
 ---
+ssh_service: ssh
+openldap_server_app_path: "/etc/ldap"
+openldap_server_cert_path: "{{ openldap_server_app_path }}/certs"
+openldap_server_user: "openldap"
+openldap_server_group: "openldap"
+openldap_nslcd_user: "root"
+openldap_nslcd_group: "nslcd"
+openldap_ldap_pubkey_wrapper: /usr/local/bin/ssh-ldap-pubkey-wrapper
+openldap_ldap_pubkey_user: root
+
 openldap_server_pkgs:
   - slapd
   - ldap-utils
-  - python-selinux
   - openssl
   - python3-pip
   - libsasl2-dev
@@ -39,10 +48,7 @@ afpd_pkgs:
   - samba
   - libnss-mdns
 
-openldap_server_app_path: "/etc/ldap"
-openldap_server_user: "openldap"
-openldap_server_group: "openldap"
-openldap_nslcd_user: "root"
-openldap_nslcd_group: "nslcd"
-
-ssh_service: ssh
+openldap_autofs_defaults_file: /etc/default/autofs
+openldap_autofs_packages:
+  - autofs
+  - autofs-ldap
