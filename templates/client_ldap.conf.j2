@@ -1,10 +1,5 @@
 base {{ openldap_server_dc }}
-{% if openldap_server_enable_ssl %}
-uri ldaps://{{ openldap_server_domain_name }}
-{% endif %}
-{% if not openldap_server_enable_ssl %}
-uri ldap://{{ openldap_server_domain_name }}
-{% endif %}
+uri {% if openldap_server_enable_tls %}ldaps{% else %}ldap{% endif %}://{{ openldap_server_fqdn }}
 ldap_version 3
 binddn {{ openldap_server_bind_dn }}
 bindpw {{ openldap_server_rootpw }}

@@ -55,7 +55,7 @@ sambaDomain="WORKGROUP"
 # Slave LDAP server
 # Ex: slaveLDAP=127.0.0.1
 # If not defined, parameter is set to "127.0.0.1"
-slaveLDAP="ldap://{{ openldap_server_domain_name }}"
+slaveLDAP="{% if openldap_server_enable_tls %}ldaps{% else %}ldap{% endif %}://{{ openldap_server_fqdn }}"
 
 # Slave LDAP port
 # If not defined, parameter is set to "389"
@@ -64,7 +64,7 @@ slavePort="389"
 # Master LDAP server: needed for write operations
 # Ex: masterLDAP=127.0.0.1
 # If not defined, parameter is set to "127.0.0.1"
-masterLDAP="ldap://{{ openldap_server_domain_name }}"
+masterLDAP="{% if openldap_server_enable_tls %}ldaps{% else %}ldap{% endif %}://{{ openldap_server_fqdn }}"
 
 # Master LDAP port
 # If not defined, parameter is set to "389"
@@ -74,16 +74,12 @@ masterPort="389"
 # If set to 1, this option will use start_tls for connection
 # (you should also used the port 389)
 # If not defined, parameter is set to "1"
-{% if openldap_server_enable_ssl %}
+{% if openldap_server_enable_tls %}
 ldapTLS="1"
-{% else %}
-ldapTLS="0"
-{% endif %}
-
 
 # How to verify the server's certificate (none, optional or require)
 # see "man Net::LDAP" in start_tls section for more details
-verify=""
+verify="{{ openldap_server_tls_reqcert_samba | default('optional') }}"
 
 # CA certificate
 # see "man Net::LDAP" in start_tls section for more details
@@ -91,15 +87,20 @@ cafile=""
 
 # certificate to use to connect to the ldap server
 # see "man Net::LDAP" in start_tls section for more details
-clientcert=""
+clientcert="{{ ssl_certpath }}"
 
 # key certificate to use to connect to the ldap server
 # see "man Net::LDAP" in start_tls section for more details
-clientkey=""
+clientkey="{{ ssl_keypath }}"
+
+{% else %}
+ldapTLS="0"
+
+{% endif %}
 
 # LDAP Suffix
 # Ex: suffix=dc=IDEALX,dc=ORG
-suffix="dc={{ openldap_server_domain_name.split('.')[0] }},dc={{ openldap_server_domain_name.split('.')[1] }},dc={{ openldap_server_domain_name.split('.')[2] }},dc={{ openldap_server_domain_name.split('.')[3] }}"
+suffix="dc={{ openldap_server_fqdn.split('.')[0] }},dc={{ openldap_server_fqdn.split('.')[1] }},dc={{ openldap_server_fqdn.split('.')[2] }},dc={{ openldap_server_fqdn.split('.')[3] }}"
 
 # Where are stored Users
 # Ex: usersdn="ou=Users,dc=IDEALX,dc=ORG"

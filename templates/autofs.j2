@@ -13,7 +13,7 @@ USE_MISC_DEVICE="yes"
 #OPTIONS=""
 MASTER_MAP_NAME="{{ auto_master_ou }}"
 LOGGING="verbose"
-LDAP_URI="ldap://{{openldap_server_ip}}"
+LDAP_URI="{% if openldap_server_enable_tls %}ldaps{% else %}ldap{% endif %}://{{ openldap_server_fqdn }}"
 SEARCH_BASE="{{ automount_ou }}"
 # Define the LDAP schema to used for lookups
 #

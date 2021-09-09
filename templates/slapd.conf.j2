@@ -2,9 +2,9 @@ include         /etc/openldap/schema/core.schema
 include         /etc/openldap/schema/cosine.schema
 include         /etc/openldap/schema/inetorgperson.schema
 include         /etc/openldap/schema/nis.schema
-include         /etc/ldap/schema/openssh-lpk.schema
-include         /etc/ldap/schema/autofs.schema
-include			/etc/ldap/schema/samba.schema
+include         {{ openldap_server_app_path}}/schema/openssh-lpk.schema
+include         {{ openldap_server_app_path}}/schema/autofs.schema
+include			{{ openldap_server_app_path}}/schema/samba.schema
 pidfile         /var/run/openldap/slapd.pid
 argsfile        /var/run/openldap/slapd.args
 modulepath      /usr/lib64/openldap
@@ -31,14 +31,14 @@ suffix          "{{ openldap_server_dc }}"
 rootdn          "{{ openldap_server_dc }}"
 rootpw          {{ root_password.stdout }}
 #This directory has to be created and would contain the ldap database.
-directory       /var/lib/ldap/{{ openldap_server_domain_name }}/
+directory       /var/lib/ldap/{{ openldap_server_fqdn }}/
 index objectClass                       eq,pres
 index ou,cn,mail,surname,givenname      eq,pres,sub
 index uidNumber,gidNumber,loginShell    eq,pres
 index uid,memberUid                     eq,pres,sub
 index nisMapName,nisMapEntry            eq,pres,sub
 
-{% if openldap_server_enable_ssl %}
+{% if openldap_server_enable_tls %}
 TLSCertificateFile {{ ssl_certpath }}
 TLSCertificateKeyFile {{ ssl_keypath }}
 {% endif %}
