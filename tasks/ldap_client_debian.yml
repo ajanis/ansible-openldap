@@ -5,6 +5,12 @@
     state: present
     update_cache: yes
 
+- import_tasks: ldap_tls_configure.yml
+  when:
+    - openldap_server_enable_tls
+  tags:
+    - openldap-tls
+
 - name: Install ansible python dependencies for ldap configuration [Debian/Ubuntu]
   pip:
     name: |-
@@ -24,35 +30,7 @@
   when:
     - openldap_python_pkgs is defined
     - openldap_python_pkgs|length > 0
-#
-#- name: Enable Pam in SSHD config
-#  lineinfile:
-#    dest: /etc/ssh/sshd_config
-#    state: present
-#    regexp: '^UsePAM.*'
-#    line: 'UsePAM yes'
-#  notify:
-#    - restart_login_services
-#
-#- name: Append ssh-ldap-pubkey wrapper configs to sshd_config
-#  lineinfile:
-#    dest: /etc/ssh/sshd_config
-#    state: present
-#    line: 'AuthorizedKeysCommand /usr/local/bin/ssh-ldap-pubkey-wrapper'
-#  notify:
-#    - restart_login_services
-#  when:
-#    - openldap_server_enable_sshkeys
-#
-#- name: Append ssh-ldap-pubkey user configs to sshd_config
-#  lineinfile:
-#    dest: /etc/ssh/sshd_config
-#    state: present
-#    line: 'AuthorizedKeysCommandUser nobody'
-#  notify:
-#    - restart_login_services
-#  when:
-#    - openldap_server_enable_sshkeys
+
 
 - name: Copy /etc/ldap.conf for client [Debian/Ubuntu]
   template:
@@ -130,45 +108,11 @@
   notify:
     - restart_ns_daemons
 
-- name: autofs packages [Debian/Ubuntu]
-  apt:
-    name: autofs
-    state: present
-    update_cache: yes
+- import_tasks: ldap_autofs_install.yml
   when:
     - openldap_server_enable_autofs
-
-- name: autofs-ldap packages [Debian/Ubuntu]
-  apt:
-    name: autofs-ldap
-    state: present
-    update_cache: yes
-  when:
-    - openldap_server_enable_autofs
-
-- name: Start AutoFS service [Debian/Ubuntu]
-  service:
-    name: autofs
-    state: started
-    enabled: yes
-  when:
-    - openldap_server_enable_autofs
-
-- name: Start rpcbind service [Debian/Ubuntu]
-  service:
-    name: rpcbind
-    state: started
-    enabled: yes
-
-- name: Copy autofs supporting file [Debian/Ubuntu]
-  template:
-    src: autofs.j2
-    dest: /etc/default/autofs
-    mode: 0755
-  notify:
-    - restart_autofs
-  when:
-    - openldap_server_enable_autofs
+  tags:
+    - openldap-autofs
 
 - meta: flush_handlers
 

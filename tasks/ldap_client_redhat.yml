@@ -7,6 +7,12 @@
   notify:
     - restart_login_services
 
+- import_tasks: ldap_tls_configure.yml
+  when:
+    - openldap_server_enable_tls
+  tags:
+    - openldap-tls
+
 - name: Install ansible python dependencies for ldap configuration [Debian/Ubuntu]
   pip:
     name: |-
@@ -47,7 +53,6 @@
     - restart_ns_daemons
     - restart_sssd
   when:
-   #- ansible_distribution == "RedHat"
     - ansible_distribution_major_version is version('8', '>=')
 
 - name: Copy nsswitch.conf
@@ -69,37 +74,11 @@
     - restart_ns_daemons
     - restart_login_services
 
-- name: autofs packages
-  yum:
-    name: autofs
-    state: present
-    update_cache: yes
+- import_tasks: ldap_autofs_install.yml
   when:
     - openldap_server_enable_autofs
-
-- name: Start AutoFS service
-  service:
-    name: autofs
-    state: started
-    enabled: yes
-  when:
-    - openldap_server_enable_autofs
-
-- name: Start rpcbind service
-  service:
-    name: rpcbind
-    state: started
-    enabled: yes
-
-- name: Copy autofs supporting file
-  template:
-    src: autofs.j2
-    dest: /etc/sysconfig/autofs
-    mode: 0755
-  notify:
-    - restart_autofs
-  when:
-    - openldap_server_enable_autofs
+  tags:
+    - openldap-autofs
 
 - meta: flush_handlers
 
@@ -114,7 +93,6 @@
   command: "authselect select sssd with-mkhomedir with-pamaccess --force"
   when:
     - run_authconfig | default(False)
-    #- ansible_distribution == "RedHat"
     - ansible_distribution_major_version is version('8', '>=')
 
 #- name: Authentication workarounds for CentOS 8
