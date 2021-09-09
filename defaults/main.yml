@@ -7,7 +7,7 @@ ldap_user_home_directory: "homedirs"
 
 #The ldif file
 openldap_server_ldif: domain.ldif
-openldap_server_dc: "dc={{ ',dc='.join( openldap_server_domain_name.split('.') ) }}"
+openldap_server_dc: "dc={{ ',dc='.join( openldap_server_fqdn.split('.') ) }}"
 openldap_server_bind_dn: "cn=Manager,{{ openldap_server_dc }}"
 
 #### LDAP AUTOMOUNT CONFIG
@@ -19,11 +19,11 @@ auto_master_ou: "ou=auto.master,{{ automount_ou }}"
 auto_data_ou: "ou=auto.data,{{ automount_ou }}"
 auto_home_ou: "ou=auto.home,{{ automount_ou }}"
 
-openldap_server_domain_name: "ldap.home.example.com"
-openldap_server_ip:
-
-openldap_server_rootpw: "{{ vault_openldap_server_rootpw }}"
-openldap_server_enable_ssl: false
+openldap_server_fqdn: "ldap.home.example.com"
+openldap_server_ip: "{{ hostvars['openldap_server_fqdn'].ansible_default_ipv4.address }}"
+openldap_server_rootpw: changeme_ldap_root_password
+openldap_ldap_pubkey_wrapper: /usr/local/bin/ssh-ldap-pubkey-wrapper
+openldap_ldap_pubkey_user: root
 
 # enable openldap server posix user/group configs
 openldap_server_enable_posixaccounts: true
@@ -31,6 +31,7 @@ openldap_server_enable_posixaccounts: true
 openldap_server_enable_sshkeys: true
 # add samba authentication schema to openldap server
 openldap_server_enable_samba: false
+openldap_server_tls_reqcert_samba: optional
 # add apple file protocol auth schema to openldap server
 openldap_server_enable_afpd: false
 # add autofs schema to openldap server
@@ -38,10 +39,15 @@ openldap_server_enable_autofs: false
 # enable openldap client configs
 openldap_client_enable: true
 
-ssl_certpath:
-ssl_keypath:
+ssl_keypath: "{{ openldap_server_app_path|default('/etc/ldap') }}/certs/{{ openldap_server_fqdn }}.key"
+ssl_certpath: "{{ openldap_server_app_path|default('/etc/ldap') }}/certs/{{ openldap_server_fqdn }}.crt"
 ssl_privkey:
 ssl_certchain:
+openldap_tls_reqcert: allow
+
+autofs_ldap_authrequired: no
+autofs_ldap_tlsrequired: no
+
 
 ssh_users: {}
 ssh_groups: {}

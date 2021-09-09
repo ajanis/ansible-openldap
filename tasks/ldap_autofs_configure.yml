@@ -67,7 +67,7 @@
       - automount
     attributes:
       cn: "/-"
-      automountInformation: "ldap:ou=auto.data,ou=automount,ou=admin,{{ openldap_server_dc }} --ghost"
+      automountInformation: "{% if openldap_server_enable_tls %}ldaps{% else %}ldap{% endif %}:ou=auto.data,ou=automount,ou=admin,{{ openldap_server_dc }} --ghost"
     state: absent
   notify:
     - restart_ns_daemons
@@ -83,7 +83,7 @@
       - automount
     attributes:
       cn: "{{ data_mount_root }}"
-      automountInformation: "ldap:ou=auto.data,ou=automount,ou=admin,{{ openldap_server_dc }} --ghost"
+      automountInformation: "{% if openldap_server_enable_tls %}ldaps{% else %}ldap{% endif %}:ou=auto.data,ou=automount,ou=admin,{{ openldap_server_dc }} --ghost"
     state: absent
   notify:
     - restart_ns_daemons
@@ -118,19 +118,6 @@
   notify:
     - restart_ns_daemons
   when: storage_backend == "cephfs"
-
-#- name: Update CephFS Data Directory CN if needed
-#  ldap_attr:
-#    dn: "cn={{ data_mount_root }},{{ auto_data_ou }}"
-#    name: "automountInformation"
-#    values: "-fstype=ceph,name={{  cephfs_user }},secret={{ vault_cephfs_user_key }},noatime,_netdev {% for host in groups['mons'] %}{{ hostvars[host]['ansible_default_ipv4']['address'] }}:6789{% if not loop.last %},{% endif %}{% endfor %}:/"
-#    state: exact
-#    bind_dn: "{{ openldap_server_bind_dn }}"
-#    bind_pw: "{{ openldap_server_rootpw }}"
-#  notify:
-#    - restart_ns_daemons
-#  when:
-#    - storage_backend == "cephfs"
 
 - name: NFS Data Directory CNs
   ldap_entry:
@@ -177,7 +164,7 @@
       - automount
     attributes:
       cn: /home
-      automountInformation: "ldap:ou=auto.home,ou=automount,ou=admin,{{ openldap_server_dc }} --timeout=60 --ghost"
+      automountInformation: "{% if openldap_server_enable_tls %}ldaps{% else %}ldap{% endif %}:ou=auto.home,ou=automount,ou=admin,{{ openldap_server_dc }} --timeout=60 --ghost"
     state: present
   notify:
     - restart_ns_daemons
