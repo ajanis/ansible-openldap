@@ -11,58 +11,18 @@
   lineinfile:
     dest: /etc/hosts
     state: present
-    line: "{{ openldap_server_ip }} {{ openldap_server_domain_name }} {{ openldap_server_domain_name.split('.')[0] }}"
+    line: "{{ openldap_server_ip }} {{ openldap_server_fqdn }} {{ openldap_server_fqdn.split('.')[0] }}"
   when:
     - openldap_client_enable
   tags:
     - always
 
-- name: Add ssh pubkey command to ssh server configuration
-  lineinfile:
-    dest: /etc/ssh/sshd_config
-    state: present
-    line: >-
-      {%- if (ansible_os_family == 'Debian') or (ansible_os_family == 'RedHat' and ansible_distribution_major_version >= '8') -%}
-      AuthorizedKeysCommand /usr/local/bin/ssh-ldap-pubkey-wrapper
-      {%- else -%}
-      AuthorizedKeysCommand /usr/bin/ssh-ldap-pubkey-wrapper
-      {%- endif -%}
-  notify:
-    - restart_login_services
+- import_tasks: ldap_autofs_configure.yml
   when:
-    - openldap_server_enable_sshkeys
+    - openldap_server_enable_autofs
+    - "'ldapservers' in group_names"
   tags:
-    - always
-
-- name: Add ssh pubkey command user to ssh server configuration
-  lineinfile:
-    dest: /etc/ssh/sshd_config
-    state: present
-    line: >-
-      {%- if openldap_server_enable_sshkeys|default(false) -%}
-      AuthorizedKeysCommandUser nobody
-      {%- else -%}
-      #AuthorizedKeysCommandUser nobody
-      {%- endif -%}
-  notify:
-    - restart_login_services
-  when:
-    - openldap_server_enable_sshkeys
-  tags:
-    - always
-
-- name: Enable pam authentication in ssh server configuration
-  lineinfile:
-    dest: /etc/ssh/sshd_config
-    state: present
-    line: UsePAM yes
-  notify:
-    - restart_login_services
-  when:
-    - openldap_server_enable_posixaccounts
-    - ansible_system != 'OpenBSD'
-  tags:
-    - always
+    - openldap-automount
 
 - import_tasks: ldap_server_install.yml
   when: "'ldapservers' in group_names"
@@ -90,12 +50,6 @@
   tags:
     - openldap-client
 
-- import_tasks: ldap_autofs_configure.yml
-  when:
-    - openldap_server_enable_autofs
-    - "'ldapservers' in group_names"
-  tags:
-    - openldap-automount
 
 - import_tasks: ldap_account_configure.yml
   when:
