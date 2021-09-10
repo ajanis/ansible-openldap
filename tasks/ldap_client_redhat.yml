@@ -7,7 +7,7 @@
   notify:
     - restart_login_services
 
-- import_tasks: ldap_tls_configure.yml
+- import_tasks: ldap_tls_client_configure.yml
   when:
     - openldap_server_enable_tls
   tags:
@@ -94,45 +94,6 @@
   when:
     - run_authconfig | default(False)
     - ansible_distribution_major_version is version('8', '>=')
-
-#- name: Authentication workarounds for CentOS 8
-#  block:
-#    - name: Disable SSSD
-#      service:
-#        name: sssd
-#        state: stopped
-#        enabled: no
-#    - name: Enable and start NSLCD
-#      service:
-#        name: nslcd
-#        state: started
-#        enabled: yes
-#    - name: Create custom authselect path for nslcd
-#      file:
-#        path: "{{ openldap_authselect_nslcd_path }}"
-#        state: directory
-#    - name: Copy default authselect files for sssd
-#      copy:
-#        src: "{{ openldap_authselect_sssd_path }}/"
-#        dest: "{{ openldap_authselect_nslcd_path }}/"
-#        remote_src: yes
-#    - name: Update authselect files for ldap
-#      replace:
-#        path: "{{ item }}"
-#        regexp: 'sss'
-#        replace: 'ldap'
-#      loop: "{{ openldap_authselect_files }}"
-#    - name: Update authselect REQUIREMENTS file
-#      replace:
-#        path: "{{ openldap_authselect_nslcd_path }}/REQUIREMENTS"
-#        regexp: 'SSSD'
-#        replace: 'NSLCD'
-#    - name: "Run 'authselect select custom/nslcd --force' [CentOS 8]"
-#      command: "authselect select custom/nslcd --force"
-#  when:
-#    - run_authconfig | default(False)
-#    - ansible_distribution == "CentOS"
-#    - ansible_distribution_major_version is version('8', '>=')
 
 - name: create user home directories
   file:

@@ -17,12 +17,7 @@
   tags:
     - always
 
-- import_tasks: ldap_autofs_configure.yml
-  when:
-    - openldap_server_enable_autofs
-    - "'ldapservers' in group_names"
-  tags:
-    - openldap-automount
+
 
 - import_tasks: ldap_server_install.yml
   when: "'ldapservers' in group_names"
@@ -33,6 +28,13 @@
   when: "'ldapservers' in group_names"
   tags:
     - openldap-config
+
+- import_tasks: ldap_autofs_configure.yml
+  when:
+    - openldap_server_enable_autofs
+    - "'ldapservers' in group_names"
+  tags:
+    - openldap-automount
 
 - name: "Configure LDAP Client [Debian]"
   import_tasks: ldap_client_debian.yml

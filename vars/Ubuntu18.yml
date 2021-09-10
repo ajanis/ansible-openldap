@@ -2,10 +2,12 @@
 ssh_service: ssh
 openldap_server_app_path: "/etc/ldap"
 openldap_server_cert_path: "{{ openldap_server_app_path }}/certs"
-openldap_server_user: "root"
-openldap_server_group: "root"
-openldap_nslcd_user: "root"
-openldap_nslcd_group: "nslcd"
+openldap_server_user: openldap
+openldap_server_group: openldap
+openldap_client_user: root
+openldap_client_group: root
+openldap_nslcd_user: root
+openldap_nslcd_group: nslcd
 openldap_ldap_pubkey_wrapper: /usr/local/bin/ssh-ldap-pubkey-wrapper
 openldap_ldap_pubkey_user: root
 

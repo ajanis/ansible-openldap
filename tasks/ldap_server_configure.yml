@@ -1,10 +1,13 @@
 ---
+- name: ensure ldap schema directory exists
+  file:
+    state: directory
+    path: "{{ openldap_server_app_path }}/schema/"
 
 - name: copy openssh-lpk schema file
   copy:
     src: openssh-lpk
     dest: "{{ openldap_server_app_path }}/schema/openssh-lpk.schema"
-    mode: 0644
   notify: slapd rebuild
   when:
     - openldap_server_enable_sshkeys
@@ -13,7 +16,6 @@
   copy:
     src: samba.schema
     dest: "{{ openldap_server_app_path }}/schema/samba.schema"
-    mode: 0644
   notify: slapd rebuild
   when:
     - openldap_server_enable_samba
@@ -22,7 +24,6 @@
   copy:
     src: autofs.schema
     dest: "{{ openldap_server_app_path }}/schema/autofs.schema"
-    mode: 0644
   notify: slapd rebuild
   when:
     - openldap_server_enable_autofs
@@ -67,15 +68,9 @@
   file:
     path: "/var/lib/ldap/{{ openldap_server_fqdn }}"
     state: directory
-    owner: "{{ openldap_server_user }}"
-    group: "{{ openldap_server_user }}"
+#    owner: "{{ openldap_server_user }}"
+#    group: "{{ openldap_server_user }}"
 
-#- name: copy DB_CONFIG
-#  template:
-#    src: db_config.j2
-#    dest: "/var/lib/ldap/{{ openldap_server_fqdn }}/DB_CONFIG"
-#    mode: 0644
-#  notify: slapd rebuild
 
 - import_tasks: ldap_tls_configure.yml
   when:
@@ -83,85 +78,12 @@
   tags:
     - openldap-tls
 
-#- name: Slurp ssl data from remote host
-#  block:
-#    - name: slurp latest ssl key contents
-#      slurp:
-#        src: "{{ ssl_key_slurp_path }}"
-#      register: ssl_key_contents
-#      delegate_to: "{{ ssl_slurp_remote_host }}"
-#      delegate_facts: true
-#
-#    - name: set encoded ssl key contents as fact for later processing
-#      set_fact:
-#        encoded_ssl_key: "{{ ssl_key_contents['content'] }}"
-#
-#    - name: slurp latest ssl certificate chain contents
-#      slurp:
-#        src: "{{ ssl_cert_slurp_path }}"
-#      register: ssl_cert_contents
-#      delegate_to: "{{ ssl_slurp_remote_host }}"
-#      delegate_facts: true
-#
-#    - name: set encoded ssl cert contents as fact for later processing
-#      set_fact:
-#        encoded_ssl_cert: "{{ ssl_cert_contents['content'] }}"
-#
-#    - name: set decoded ssl key and cert chain as fact for future tasks
-#      set_fact:
-#        ssl_privkey: "{{ encoded_ssl_key | b64decode }}"
-#        ssl_certchain: "{{ encoded_ssl_cert | b64decode }}"
-#
-#    - name: print decoded ssl key and certificate chain for debugging
-#      debug:
-#        msg: |
-#          SSL private key: {{ ssl_privkey }}
-#          SSL certificate chain: {{ ssl_certchain }}
-#        verbosity: 1
-#
-#    - name: Create the directory for ldap certificates
-#      file:
-#        path: "{{ openldap_server_app_path }}/certs"
-#        state: directory
-#        owner: "{{ openldap_server_user }}"
-#        group: "{{ openldap_server_user }}"
-#      notify:
-#        - restart slapd
-#
-#    - name: "Install SSL Key"
-#      copy:
-#        content: "{{ ssl_privkey }}"
-#        dest: "{{ ssl_keypath }}"
-#        owner: "{{ openldap_server_user }}"
-#        group: "{{ openldap_server_group }}"
-#        mode: 0600
-#      notify:
-#        - restart slapd
-#
-#    - name: "Install SSL Certificate Chain"
-#      copy:
-#        content: "{{ ssl_certchain }}"
-#        dest: "{{ ssl_certpath }}"
-#        owner: "{{ openldap_server_user }}"
-#        group: "{{ openldap_server_group }}"
-#        mode: 0640
-#      notify:
-#        - restart slapd
-#  when:
-#    - openldap_server_enable_ssl
-#    - slurp_ssl_keys_from_remote|default(False)
-#    - ssl_slurp_remote_host|length > 0
-#    - ssl_cert_slurp_path|length > 0
-#    - ssl_key_slurp_path|length > 0
-#  tags:
-#    - openldap-ssl
-
 - name: copy the /etc/default/slapd for RedHat
   copy:
     src: ldap
     dest: /etc/sysconfig/ldap
     mode: 0755
-  when: openldap_server_enable_ssl and ansible_os_family == 'RedHat'
+  when: openldap_server_enable_tls and ansible_os_family == 'RedHat'
   notify:
     - restart slapd
 
@@ -170,7 +92,7 @@
     src: slapd_fedora
     dest: /etc/sysconfig/slapd
     mode: 0755
-  when: openldap_server_enable_ssl and ansible_distribution == "Fedora"
+  when: openldap_server_enable_tls and ansible_distribution == "Fedora"
   notify:
     - restart slapd
 
@@ -179,7 +101,7 @@
     src: slapd
     dest: /etc/default/slapd
     mode: 0755
-  when: openldap_server_enable_ssl and ansible_os_family == 'Debian'
+  when: openldap_server_enable_tls and ansible_os_family == 'Debian'
   notify:
     - restart slapd
 
@@ -221,8 +143,8 @@
   file:
     path: "{{ openldap_server_app_path }}/slapd.d"
     state: directory
-    owner: openldap
-    group: openldap
+    owner: "{{ openldap_server_user }}"
+    group: "{{ openldap_server_group }}"
   when: slapd_rebuild | default(False)
 
 - name: Rebuild slapd OLC Directory
@@ -234,8 +156,8 @@
     path: "{{ openldap_server_app_path }}/slapd.d"
     state: directory
     recurse: yes
-    owner: openldap
-    group: openldap
+    owner: "{{ openldap_server_user }}"
+    group: "{{ openldap_server_group }}"
   when: slapd_rebuild | default(False)
 
 - name: restart slapd

@@ -77,7 +77,7 @@ ldap_user_home_directory: "homedirs"
 
 
 openldap_server_rootpw: "{{ vault_openldap_server_rootpw }}"
-openldap_server_enable_ssl: false
+openldap_server_enable_tls: false
 
 ssl_certpath:
 ssl_keypath:
@@ -214,7 +214,7 @@ shared_storage: False
 openldap_server_fqdn: "ldap.home.example.com"
 openldap_server_ip: "10.0.10.15"
 openldap_server_rootpw: "{{ vault_openldap_server_rootpw }}"
-openldap_server_enable_ssl: false
+openldap_server_enable_tls: false
 
 ssl_privkey: "{{ vault_example_com_ssl_private_key }}"
 ssl_keypath: "/etc/ssl/private/example.com.key"
