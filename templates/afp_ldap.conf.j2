@@ -1,6 +1,6 @@
 # Netatalk 2.x LDAP configuration
 
-ldap_server      = {{ openldap_server_fqdn }}
+ldap_server      = {{ openldap_server_domain_name }}
 ldap_auth_method = simple
 ldap_auth_dn     = {{ openldap_server_bind_dn }}
 ldap_auth_pw     = {{ openldap_server_rootpw }}

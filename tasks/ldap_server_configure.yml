@@ -1,13 +1,10 @@
 ---
-- name: ensure ldap schema directory exists
-  file:
-    state: directory
-    path: "{{ openldap_server_app_path }}/schema/"
 
 - name: copy openssh-lpk schema file
   copy:
     src: openssh-lpk
     dest: "{{ openldap_server_app_path }}/schema/openssh-lpk.schema"
+    mode: 0644
   notify: slapd rebuild
   when:
     - openldap_server_enable_sshkeys
@@ -16,6 +13,7 @@
   copy:
     src: samba.schema
     dest: "{{ openldap_server_app_path }}/schema/samba.schema"
+    mode: 0644
   notify: slapd rebuild
   when:
     - openldap_server_enable_samba
@@ -24,6 +22,7 @@
   copy:
     src: autofs.schema
     dest: "{{ openldap_server_app_path }}/schema/autofs.schema"
+    mode: 0644
   notify: slapd rebuild
   when:
     - openldap_server_enable_autofs
@@ -66,33 +65,63 @@
 
 - name: Create the directory for ldap database
   file:
-    path: "/var/lib/ldap/{{ openldap_server_fqdn }}"
+    path: "/var/lib/ldap/{{ openldap_server_domain_name }}"
     state: directory
-#    owner: "{{ openldap_server_user }}"
-#    group: "{{ openldap_server_user }}"
+    owner: "{{ openldap_server_user }}"
+    group: "{{ openldap_server_user }}"
 
+#- name: copy DB_CONFIG
+#  template:
+#    src: db_config.j2
+#    dest: "/var/lib/ldap/{{ openldap_server_domain_name }}/DB_CONFIG"
+#    mode: 0644
+#  notify: slapd rebuild
 
-- import_tasks: ldap_tls_configure.yml
-  when:
-    - openldap_server_enable_tls
-  tags:
-    - openldap-tls
+- name: Create the directory for ldap certificates
+  file:
+    path: "{{ openldap_server_app_path }}/certs"
+    state: directory
+    owner: "{{ openldap_server_user }}"
+    group: "{{ openldap_server_user }}"
+  when: openldap_server_enable_ssl
+
+- name: "Install SSL Key"
+  copy:
+    content: "{{ ssl_privkey }}"
+    dest: "{{ ssl_keypath }}"
+    owner: root
+    group: root
+    mode: 0640
+  when: openldap_server_enable_ssl
+  notify:
+    - restart slapd
+
+- name: "Install SSL Certificate Chain"
+  copy:
+    content: "{{ ssl_certchain }}"
+    dest: "{{ ssl_certpath }}"
+    owner: root
+    group: root
+    mode: 0640
+  when: openldap_server_enable_ssl
+  notify:
+    - restart slapd
 
 - name: copy the /etc/default/slapd for RedHat
   copy:
     src: ldap
     dest: /etc/sysconfig/ldap
     mode: 0755
-  when: openldap_server_enable_tls and ansible_os_family == 'RedHat'
+  when: openldap_server_enable_ssl and ansible_os_family == 'RedHat'
   notify:
     - restart slapd
 
-- name: copy /etc/sysconfig/slapd for Fedora
+- name: copy /etc/default/slapd for Fedora
   copy:
     src: slapd_fedora
     dest: /etc/sysconfig/slapd
     mode: 0755
-  when: openldap_server_enable_tls and ansible_distribution == "Fedora"
+  when: openldap_server_enable_ssl and ansible_distribution == "Fedora"
   notify:
     - restart slapd
 
@@ -101,7 +130,7 @@
     src: slapd
     dest: /etc/default/slapd
     mode: 0755
-  when: openldap_server_enable_tls and ansible_os_family == 'Debian'
+  when: openldap_server_enable_ssl and ansible_os_family == 'Debian'
   notify:
     - restart slapd
 
@@ -115,13 +144,13 @@
 
 - name: Delete the ldap database
   file:
-    path: /var/lib/ldap/{{ openldap_server_fqdn }}"
+    path: /var/lib/ldap/{{ openldap_server_domain_name }}"
     state: absent
   when: slapd_rebuild | default(False)
 
 - name: Recreate the ldap database directory
   file:
-    path: "/var/lib/ldap/{{ openldap_server_fqdn }}"
+    path: "/var/lib/ldap/{{ openldap_server_domain_name }}"
     state: directory
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_user }}"
@@ -143,8 +172,8 @@
   file:
     path: "{{ openldap_server_app_path }}/slapd.d"
     state: directory
-    owner: "{{ openldap_server_user }}"
-    group: "{{ openldap_server_group }}"
+    owner: openldap
+    group: openldap
   when: slapd_rebuild | default(False)
 
 - name: Rebuild slapd OLC Directory
@@ -156,8 +185,8 @@
     path: "{{ openldap_server_app_path }}/slapd.d"
     state: directory
     recurse: yes
-    owner: "{{ openldap_server_user }}"
-    group: "{{ openldap_server_group }}"
+    owner: openldap
+    group: openldap
   when: slapd_rebuild | default(False)
 
 - name: restart slapd

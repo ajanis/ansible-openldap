@@ -61,8 +61,10 @@
     enabled: yes
 
 - name: restart_autofs
-  set_fact:
-    autofs_needs_restart: True
+  service:
+    name: autofs
+    state: restarted
+    enabled: yes
 
 - name: reload exports
   command: exportfs -ra

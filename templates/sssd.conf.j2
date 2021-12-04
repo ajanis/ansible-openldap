@@ -26,15 +26,16 @@ auth_provider = ldap
 chpass_provider = ldap
 access_provider = ldap
 sudo_provider = ldap
-{% if openldap_server_enable_tls %}
+{% if openldap_server_enable_ssl %}
 ldap_id_use_start_tls = True
-ldap_uri = ldaps://{{ openldap_server_fqdn }}
-ldap_tls_reqcert = {{ openldap_server_tls_reqcert|default('allow') }}
+ldap_uri = ldaps://{{ openldap_server_domain_name }}
+ldap_tls_reqcert = demand
 ldap_tls_cacert = {{ ssl_certpath }}
-ldap_tls_cacertdir = {{ openldap_server_app_path }}/certs
-{% else %}
+ldap_tls_cacertdir = {{ ssl_certpath.split('/')[:-1] }}
+{% endif %}
+{% if not openldap_server_enable_ssl %}
 ldap_id_use_start_tls = False
-ldap_uri = ldap://{{ openldap_server_fqdn }}
+ldap_uri = ldap://{{ openldap_server_domain_name }}
 {% endif %}
 ldap_default_bind_dn = {{ openldap_server_bind_dn }}
 ldap_default_authtok = {{ openldap_server_rootpw }}

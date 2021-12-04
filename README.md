@@ -47,7 +47,7 @@ them are as follows:
 
 ### defaults/main.yml
 ```
-openldap_server_fqdn: "ldap.home.example.com"
+openldap_server_domain_name: "ldap.home.example.com"
 openldap_server_ip:
 
 # shared storage flag
@@ -56,7 +56,7 @@ shared_storage: False
 
 # These normally do not need to be changed
 openldap_server_ldif: domain.ldif
-openldap_server_dc: "dc={{ openldap_server_fqdn.split('.')[0] }},dc={{ openldap_server_fqdn.split('.')[1] }},dc={{ openldap_server_fqdn.split('.')[2] }},dc={{ openldap_server_fqdn.split('.')[3] }}"
+openldap_server_dc: "dc={{ openldap_server_domain_name.split('.')[0] }},dc={{ openldap_server_domain_name.split('.')[1] }},dc={{ openldap_server_domain_name.split('.')[2] }},dc={{ openldap_server_domain_name.split('.')[3] }}"
 
 # Bind DN
 openldap_server_bind_dn: "cn=Manager,{{ openldap_server_dc }}"
@@ -77,7 +77,7 @@ ldap_user_home_directory: "homedirs"
 
 
 openldap_server_rootpw: "{{ vault_openldap_server_rootpw }}"
-openldap_server_enable_tls: false
+openldap_server_enable_ssl: false
 
 ssl_certpath:
 ssl_keypath:
@@ -211,10 +211,10 @@ openldap_nslcd_group: ldap
 ```
 shared_storage: False
 
-openldap_server_fqdn: "ldap.home.example.com"
+openldap_server_domain_name: "ldap.home.example.com"
 openldap_server_ip: "10.0.10.15"
 openldap_server_rootpw: "{{ vault_openldap_server_rootpw }}"
-openldap_server_enable_tls: false
+openldap_server_enable_ssl: false
 
 ssl_privkey: "{{ vault_example_com_ssl_private_key }}"
 ssl_keypath: "/etc/ssl/private/example.com.key"

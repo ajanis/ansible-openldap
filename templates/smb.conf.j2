@@ -3,7 +3,7 @@
 # # Global parameters
 [global]
 workgroup = WORKGROUP
-passdb backend = ldapsam:"{% if openldap_server_enable_tls %}ldaps{% else %}ldap{% endif %}://{{ openldap_server_fqdn }}"
+passdb backend = ldapsam:"ldap://{{ openldap_server_domain_name }}"
 log level = 1
 log file = /var/log/samba/%m
 max log size = 0
@@ -15,14 +15,14 @@ add user to group script = /usr/sbin/smbldap-groupmod -m '%g' '%u'
 delete user from group script = /usr/sbin/smbldap-groupmod -x '%g' '%u'
 set primary group script = /usr/sbin/smbldap-usermod -g '%g' '%u'
 add machine script = /usr/sbin/smbldap-useradd -w '%u'
-ldap suffix = dc={{ openldap_server_fqdn.split('.')[0] }},dc={{ openldap_server_fqdn.split('.')[1] }},dc={{ openldap_server_fqdn.split('.')[2] }},dc={{ openldap_server_fqdn.split('.')[3] }}
+ldap suffix = dc={{ openldap_server_domain_name.split('.')[0] }},dc={{ openldap_server_domain_name.split('.')[1] }},dc={{ openldap_server_domain_name.split('.')[2] }},dc={{ openldap_server_domain_name.split('.')[3] }}
 ldap machine suffix = ou=computers
 ldap user suffix = ou=users
 ldap group suffix = ou=groups
 ldap idmap suffix = ou=Idmap
 ldap admin dn = cn=Manager,{{ openldap_server_dc }}
 
-{% if openldap_server_enable_tls %}
+{% if openldap_server_enable_ssl %}
 ldap ssl = on
 {% else %}
 ldap ssl = off

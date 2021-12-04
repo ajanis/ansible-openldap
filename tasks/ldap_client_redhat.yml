@@ -7,31 +7,51 @@
   notify:
     - restart_login_services
 
-- import_tasks: ldap_tls_client_configure.yml
-  when:
-    - openldap_server_enable_tls
-  tags:
-    - openldap-tls
-
-- name: Install ansible python dependencies for ldap configuration [Debian/Ubuntu]
+- name: Install ansible python dependencies for ldap configuration
   pip:
-    name: |-
-      {{ item.name }}
-      {%- if (item.version is defined) and (item.version|length > 0) -%}
-        =={{ item.version }}
-      {%- endif %}
-    state: |-
-      {%- if (item.state is defined) and (item.state|length > 0) -%}
-        {{ item.state }}
-      {%- else -%}
-        present
-      {%- endif %}
-  loop: "{{ openldap_python_pkgs }}"
+    name: "{{ openldap_python_pkgs }}"
+    state: present
+
+- name: Install ssh-ldap-pubkey pip package
+  pip:
+    #executable: pip2
+    name: ssh-ldap-pubkey
+    state: present
+    version: 1.3.0
   notify:
     - restart_login_services
   when:
-    - openldap_python_pkgs is defined
-    - openldap_python_pkgs|length > 0
+    - openldap_server_enable_sshkeys
+#
+#- name: Enable Pam in SSHD config
+#  lineinfile:
+#    dest: /etc/ssh/sshd_config
+#    state: present
+#    regexp: '^UsePAM.*'
+#    line: 'UsePAM yes'
+#  notify:
+#    - restart_login_services
+#
+#- name: Append ssh-ldap-pubkey wrapper configs to sshd_config
+#  lineinfile:
+#    dest: /etc/ssh/sshd_config
+#    state: present
+#    line: 'AuthorizedKeysCommand /usr/bin/ssh-ldap-pubkey-wrapper'
+#  notify:
+#    - restart_login_services
+#  when:
+#    - openldap_server_enable_sshkeys
+#
+#- name: Append ssh-ldap-pubkey user configs to sshd_config
+#  lineinfile:
+#    dest: /etc/ssh/sshd_config
+#    state: present
+#    line: 'AuthorizedKeysCommandUser nobody'
+#  notify:
+#    - restart_login_services
+#    - restart_ns_daemons
+#  when:
+#    - openldap_server_enable_sshkeys
 
 - name: Copy /etc/ldap.conf for client
   template:
@@ -53,7 +73,7 @@
     - restart_ns_daemons
     - restart_sssd
   when:
-    - ansible_distribution_major_version is version('8', '>=')
+    - ansible_distribution_major_version >= "8"
 
 - name: Copy nsswitch.conf
   template:
@@ -62,8 +82,7 @@
   notify:
     - restart_ns_daemons
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version is version('8', '>=')
+    - ansible_distribution_major_version >= "8"
 
 - name: Copy nslcd.conf
   template:
@@ -74,11 +93,37 @@
     - restart_ns_daemons
     - restart_login_services
 
-- import_tasks: ldap_autofs_install.yml
+- name: autofs packages
+  yum:
+    name: autofs
+    state: present
+    update_cache: yes
   when:
     - openldap_server_enable_autofs
-  tags:
-    - openldap-autofs
+
+- name: Start AutoFS service
+  service:
+    name: autofs
+    state: started
+    enabled: yes
+  when:
+    - openldap_server_enable_autofs
+
+- name: Start rpcbind service
+  service:
+    name: rpcbind
+    state: started
+    enabled: yes
+
+- name: Copy autofs supporting file
+  template:
+    src: autofs.j2
+    dest: /etc/sysconfig/autofs
+    mode: 0755
+  notify:
+    - restart_autofs
+  when:
+    - openldap_server_enable_autofs
 
 - meta: flush_handlers
 
@@ -86,14 +131,14 @@
   command: "authconfig --enableldap --enableldapauth --enablemkhomedir --update"
   when:
     - run_authconfig | default(False)
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version is version('8', '<')
+    - ansible_distribution_major_version < "8"
 
-- name: "Run 'authselect select sssd with-mkhomedir with-pamaccess --force' [RHEL 8]"
-  command: "authselect select sssd with-mkhomedir with-pamaccess --force"
-  when:
-    - run_authconfig | default(False)
-    - ansible_distribution_major_version is version('8', '>=')
+
+#- name: "Run 'authselect select sssd with-mkhomedir with-pamaccess --force' [CentOS 8]"
+#  command: "authselect select sssd with-mkhomedir with-pamaccess --force"
+#  when:
+#    - run_authconfig | default(False)
+#    - ansible_distribution_major_version >= "8"
 
 - name: create user home directories
   file:
