@@ -120,7 +120,7 @@
   when: storage_backend == "cephfs"
 
 #- name: Update CephFS Data Directory CN if needed
-#  ldap_attr:
+#  ldap_attrs:
 #    dn: "cn={{ data_mount_root }},{{ auto_data_ou }}"
 #    name: "automountInformation"
 #    values: "-fstype=ceph,name={{  cephfs_user }},secret={{ vault_cephfs_user_key }},noatime,_netdev {% for host in groups['mons'] %}{{ hostvars[host]['ansible_default_ipv4']['address'] }}:6789{% if not loop.last %},{% endif %}{% endfor %}:/"
@@ -152,7 +152,7 @@
     label: "{{ item.key }}"
 
 - name: Update NFS Data Directory CNs if needed
-  ldap_attr:
+  ldap_attrs:
     dn: "cn={{ item.key }},{{ auto_data_ou }}"
     name: "automountInformation"
     values: "-fstype=nfs,{{ item.value.mount_opts }} {{ nfs_server_ip }}:{{ item.value.nfs_export }}"
@@ -216,7 +216,7 @@
     label: "{{ item.key }}"
 
 - name: Update User home directory CNs if needed
-  ldap_attr:
+  ldap_attrs:
     dn: "cn={{ item.key }},{{ auto_home_ou }}"
     name: "automountInformation"
     values: "-fstype=ceph,{{ cephfs_mount_options }} {% for host in groups['mons'] %}{{ hostvars[host]['ansible_default_ipv4']['address'] }}:6789{% if not loop.last %},{% endif %}{% endfor %}:/{{ ldap_user_home_directory }}/{{ item.key }}"
@@ -265,7 +265,7 @@
   when: storage_backend == "nfs"
 
 - name: Update NFS user home directory exports if needed
-  ldap_attr:
+  ldap_attrs:
     dn: "cn={{ item.key }},{{ auto_home_ou }}"
     name: "automountInformation"
     values: "-fstype=nfs,{{ nfs_exports.homedirs.mount_opts }} {{ nfs_server_ip }}:{{ nfs_exports.homedirs.nfs_export }}/{{ item.key }}"
