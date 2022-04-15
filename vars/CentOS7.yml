@@ -45,10 +45,9 @@ openldap_client_pkgs:
   - python3-ldap
 
 openldap_python_pkgs:
-  - name: python-ldap
-  - name: ldap3
-  - name: ssh-ldap-pubkey
-    state: latest
+  - python-ldap
+  - ldap3
+  - ssh-ldap-pubkey
 
 
 openldap_autofs_defaults_file: /etc/sysconfig/autofs
