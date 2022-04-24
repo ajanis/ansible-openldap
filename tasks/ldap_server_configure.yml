@@ -65,17 +65,11 @@
 
 - name: Create the directory for ldap database
   file:
-    path: "/var/lib/ldap/{{ openldap_server_domain_name }}"
+    path: "{{ openldap_server_db_path }}"
     state: directory
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_user }}"
 
-#- name: copy DB_CONFIG
-#  template:
-#    src: db_config.j2
-#    dest: "/var/lib/ldap/{{ openldap_server_domain_name }}/DB_CONFIG"
-#    mode: 0644
-#  notify: slapd rebuild
 
 - name: Create the directory for ldap certificates
   file:
@@ -144,17 +138,42 @@
 
 - name: Delete the ldap database
   file:
-    path: /var/lib/ldap/{{ openldap_server_domain_name }}"
+    path: "{{ openldap_server_db_path }}"
     state: absent
   when: slapd_rebuild | default(False)
 
 - name: Recreate the ldap database directory
   file:
-    path: "/var/lib/ldap/{{ openldap_server_domain_name }}"
+    path: "{{ openldap_server_db_path }}"
     state: directory
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_user }}"
   when: slapd_rebuild | default(False)
+
+- name: check for DB_CONFIG
+  stat:
+    path: "{{ openldap_server_db_path }}/DB_CONFIG"
+  register: db_config_file
+
+- name: stop slapd
+  service:
+    name: slapd
+    state: stopped
+  when: not db_config_file.stat.exists | default(False)
+
+- name: copy DB_CONFIG
+  template:
+    src: DB_CONFIG.j2
+    dest: "{{ openldap_server_db_path }}/DB_CONFIG"
+    mode: 0644
+    owner: "{{ openldap_server_user }}"
+    group: "{{ openldap_server_group }}"
+
+- name: restart slapd
+  service:
+    name: slapd
+    state: restarted
+  when: not slapd_rebuild | default(False)
 
 - name: Delete the ldap configuration directory
   file:
@@ -166,14 +185,15 @@
   service:
     name: slapd
     state: restarted
-  when: slapd_rebuild | default(False)
+  when:
+    - slapd_rebuild|default(False)
 
 - name: Recreate the ldap configuration directory
   file:
     path: "{{ openldap_server_app_path }}/slapd.d"
     state: directory
-    owner: openldap
-    group: openldap
+    owner: "{{ openldap_server_user }}"
+    group: "{{ openldap_server_group }}"
   when: slapd_rebuild | default(False)
 
 - name: Rebuild slapd OLC Directory
@@ -185,15 +205,8 @@
     path: "{{ openldap_server_app_path }}/slapd.d"
     state: directory
     recurse: yes
-    owner: openldap
-    group: openldap
-  when: slapd_rebuild | default(False)
-
-- name: restart slapd
-  service:
-    name: slapd
-    state: restarted
-    enabled: yes
+    owner: "{{ openldap_server_user }}"
+    group: "{{ openldap_server_group }}"
   when: slapd_rebuild | default(False)
 
 - name: Copy the template for creating base dn
