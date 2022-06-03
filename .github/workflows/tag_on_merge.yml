@@ -5,7 +5,9 @@ name: Tag on Merge
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+      - master
 
 env:
   CI: true
