@@ -38,7 +38,7 @@
     label: "{{ item.key }}"
 
 - name: Set Group Membership
-  ldap_attrs:
+  ldap_attr:
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
     dn: "cn={{ item.key }},{{ groups_ou }}"
