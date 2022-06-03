@@ -42,8 +42,8 @@
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
     dn: "cn={{ item.key }},{{ groups_ou }}"
-    name: memberUid
-    values: "{{ item.value.members }}"
+    attributes:
+      memberUid: "{{ item.value.members }}"
     state: exact
   notify:
     - restart_ns_daemons
