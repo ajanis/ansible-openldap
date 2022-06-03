@@ -154,8 +154,8 @@
 - name: Update NFS Data Directory CNs if needed
   community.general.ldap_attrs:
     dn: "cn={{ item.key }},{{ auto_data_ou }}"
-    name: "automountInformation"
-    values: "-fstype=nfs,{{ item.value.mount_opts }} {{ nfs_server_ip }}:{{ item.value.nfs_export }}"
+    attributes:
+      automountInformation: "-fstype=nfs,{{ item.value.mount_opts }} {{ nfs_server_ip }}:{{ item.value.nfs_export }}"
     state: exact
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
@@ -218,8 +218,8 @@
 - name: Update User home directory CNs if needed
   community.general.ldap_attrs:
     dn: "cn={{ item.key }},{{ auto_home_ou }}"
-    name: "automountInformation"
-    values: "-fstype=ceph,{{ cephfs_mount_options }} {% for host in groups['mons'] %}{{ hostvars[host]['ansible_default_ipv4']['address'] }}:6789{% if not loop.last %},{% endif %}{% endfor %}:/{{ ldap_user_home_directory }}/{{ item.key }}"
+    attributes:
+      automountInformation: "-fstype=ceph,{{ cephfs_mount_options }} {% for host in groups['mons'] %}{{ hostvars[host]['ansible_default_ipv4']['address'] }}:6789{% if not loop.last %},{% endif %}{% endfor %}:/{{ ldap_user_home_directory }}/{{ item.key }}"
     state: exact
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
@@ -267,8 +267,8 @@
 - name: Update NFS user home directory exports if needed
   community.general.ldap_attrs:
     dn: "cn={{ item.key }},{{ auto_home_ou }}"
-    name: "automountInformation"
-    values: "-fstype=nfs,{{ nfs_exports.homedirs.mount_opts }} {{ nfs_server_ip }}:{{ nfs_exports.homedirs.nfs_export }}/{{ item.key }}"
+    attributes:
+      automountInformation: "-fstype=nfs,{{ nfs_exports.homedirs.mount_opts }} {{ nfs_server_ip }}:{{ nfs_exports.homedirs.nfs_export }}/{{ item.key }}"
     state: exact
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
