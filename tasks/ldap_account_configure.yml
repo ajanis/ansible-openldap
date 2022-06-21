@@ -74,7 +74,10 @@
       gecos: "{{ item.value.gecos }}"
       userPassword: "{{ item.value.password }}"
       cn: "{{ item.value.cn }}"
-      sshPublicKey: "{{ item.value.pubkey }}"
+      sshPublicKey: |
+        {% for key in item.value.pubkey %}
+        {{ key }}
+        {% endfor %}
     state: "{{ item.value.state }}"
   loop: "{{ ssh_users|default({})|dict2items }}"
   loop_control:
