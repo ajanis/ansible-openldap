@@ -3,7 +3,7 @@
   setup:
   delegate_to: "{{ item }}"
   delegate_facts: True
-  loop: "{{ groups['ceph'] }}"
+  loop: "{{ groups['mons'] }}"
   run_once: true
   when:
     - storage_backend == "cephfs"
@@ -113,24 +113,24 @@
       - automount
     attributes:
       cn: "{{ data_mount_root }}"
-      automountInformation: "-fstype=ceph,{{ cephfs_mount_options }} {% for host in groups['mons'] %}{{ hostvars[host]['ansible_default_ipv4']['address'] }}:6789{% if not loop.last %},{% endif %}{% endfor %}:/"
+      automountInformation: "-fstype=ceph,{{ cephfs_mount_options }} {% for host in groups['mons'] %}{{ hostvars[host]['ansible_ssh_host'] }}:6789{% if not loop.last %},{% endif %}{% endfor %}:/"
     state: absent
   notify:
     - restart_ns_daemons
   when: storage_backend == "cephfs"
 
-#- name: Update CephFS Data Directory CN if needed
-#  community.general.ldap_attrs:
-#    dn: "cn={{ data_mount_root }},{{ auto_data_ou }}"
-#    name: "automountInformation"
-#    values: "-fstype=ceph,name={{  cephfs_user }},secret={{ vault_cephfs_user_key }},noatime,_netdev {% for host in groups['mons'] %}{{ hostvars[host]['ansible_default_ipv4']['address'] }}:6789{% if not loop.last %},{% endif %}{% endfor %}:/"
-#    state: exact
-#    bind_dn: "{{ openldap_server_bind_dn }}"
-#    bind_pw: "{{ openldap_server_rootpw }}"
-#  notify:
-#    - restart_ns_daemons
-#  when:
-#    - storage_backend == "cephfs"
+- name: Update CephFS Data Directory CN if needed
+  community.general.ldap_attrs:
+    dn: "cn={{ data_mount_root }},{{ auto_data_ou }}"
+    name: "automountInformation"
+    values: "-fstype=ceph,name={{ cephfs_user }},secret={{ vault_cephfs_user_key }},noatime,_netdev {% for host in groups['mons'] %}{{ hostvars[host]['ansible_ssh_host'] }}:6789{% if not loop.last %},{% endif %}{% endfor %}:/"
+    state: exact
+    bind_dn: "{{ openldap_server_bind_dn }}"
+    bind_pw: "{{ openldap_server_rootpw }}"
+  notify:
+    - restart_ns_daemons
+  when:
+    - storage_backend == "cephfs"
 
 - name: NFS Data Directory CNs
   ldap_entry:
@@ -206,7 +206,7 @@
       - automount
     attributes:
       cn: "{{ item.key }}"
-      automountInformation: "-fstype=ceph,{{ cephfs_mount_options }} {% for host in groups['mons'] %}{{ hostvars[host]['ansible_default_ipv4']['address'] }}:6789{% if not loop.last %},{% endif %}{% endfor %}:/{{ ldap_user_home_directory }}/{{ item.key }}"
+      automountInformation: "-fstype=ceph,{{ cephfs_mount_options }} {% for host in groups['mons'] %}{{ hostvars[host]['ansible_ssh_host'] }}:6789{% if not loop.last %},{% endif %}{% endfor %}:/{{ ldap_user_home_directory }}/{{ item.key }}"
     state: present
   notify:
     - restart_ns_daemons
@@ -219,7 +219,7 @@
   community.general.ldap_attrs:
     dn: "cn={{ item.key }},{{ auto_home_ou }}"
     attributes:
-      automountInformation: "-fstype=ceph,{{ cephfs_mount_options }} {% for host in groups['mons'] %}{{ hostvars[host]['ansible_default_ipv4']['address'] }}:6789{% if not loop.last %},{% endif %}{% endfor %}:/{{ ldap_user_home_directory }}/{{ item.key }}"
+      automountInformation: "-fstype=ceph,{{ cephfs_mount_options }} {% for host in groups['mons'] %}{{ hostvars[host]['ansible_ssh_host'] }}:6789{% if not loop.last %},{% endif %}{% endfor %}:/{{ ldap_user_home_directory }}/{{ item.key }}"
     state: exact
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
