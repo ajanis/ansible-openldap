@@ -64,20 +64,21 @@
       - shadowAccount
       - ldapPublicKey
     attributes:
-      gidNumber: "{{ item.value.gid }}"
-      uidNumber: "{{ item.value.uid }}"
+      gidNumber: "{{ item.value.gid | default(omit) }}"
+      uidNumber: "{{ item.value.uid | default(omit) }}"
       homeDirectory: "/home/{{ item.key }}"
       loginShell: "{{ item.value.shell | default('/bin/bash') }}"
-      givenName: "{{ item.value.givenname }}"
-      sn: "{{ item.value.sn }}"
-      mail: "{{ item.value.mail }}"
-      gecos: "{{ item.value.gecos }}"
-      userPassword: "{{ item.value.password }}"
-      cn: "{{ item.value.cn }}"
+      givenName: "{{ item.value.givenname |default(omit) }}"
+      sn: "{{ item.value.sn | default(omit) }}"
+      mail: "{{ item.value.mail | default(omit) }}"
+      gecos: "{{ item.value.gecos | default(item.key) }}"
+      userPassword: "{{ item.value.password | default('please_change_password') }}"
+      cn: "{{ item.value.cn | default(item.key) }}"
       sshPublicKey: |
-        {% for key in item.value.pubkey %}
+        {% if (user.value.pubkey | default([])) | length >= 1 %}{% for key in user.value.pubkey %}
         {{ key }}
         {% endfor %}
+        {% endif %}
     state: "{{ item.value.state }}"
   loop: "{{ ssh_users|default({})|dict2items }}"
   loop_control:
@@ -85,5 +86,7 @@
   register: ssh_users_added
   notify:
     - restart_ns_daemons
+
+#
 
 - meta: flush_handlers
