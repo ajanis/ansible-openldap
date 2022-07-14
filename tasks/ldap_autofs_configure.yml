@@ -119,18 +119,19 @@
     - restart_ns_daemons
   when: storage_backend == "cephfs"
 
-- name: Update CephFS Data Directory CN if needed
-  community.general.ldap_attrs:
-    dn: "cn={{ data_mount_root }},{{ auto_data_ou }}"
-    name: "automountInformation"
-    values: "-fstype=ceph,name={{ cephfs_user }},secret={{ vault_cephfs_user_key }},noatime,_netdev {% for host in groups['mons'] %}{{ hostvars[host]['ansible_ssh_host'] }}:6789{% if not loop.last %},{% endif %}{% endfor %}:/"
-    state: exact
-    bind_dn: "{{ openldap_server_bind_dn }}"
-    bind_pw: "{{ openldap_server_rootpw }}"
-  notify:
-    - restart_ns_daemons
-  when:
-    - storage_backend == "cephfs"
+# - name: Update CephFS Data Directory CN if needed
+#   community.general.ldap_attrs:
+#     dn: "cn={{ data_mount_root }},{{ auto_data_ou }}"
+#     attributes:
+#       cn: "{{ data_mount_root }}"
+#       automountInformation: "-fstype=ceph,{{ cephfs_mount_options }} {% for host in groups['mons'] %}{{ hostvars[host]['ansible_ssh_host'] }}:6789{% if not loop.last %},{% endif %}{% endfor %}:/"
+#     state: exact
+#     bind_dn: "{{ openldap_server_bind_dn }}"
+#     bind_pw: "{{ openldap_server_rootpw }}"
+#   notify:
+#     - restart_ns_daemons
+#   when:
+#     - storage_backend == "cephfs"
 
 - name: NFS Data Directory CNs
   ldap_entry:
