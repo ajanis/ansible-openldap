@@ -104,16 +104,16 @@
   tags:
     - openldap-users
 
-- import_tasks: samba_server.yml
-  when:
-    - openldap_server_enable_samba
-    - "'samba' in group_names"
-  tags:
-    - openldap-samba
+# - import_tasks: samba_server.yml
+#   when:
+#     - openldap_server_enable_samba
+#     - "'samba' in group_names"
+#   tags:
+#     - openldap-samba
 
-- import_tasks: afp_server.yml
-  when:
-    - openldap_server_enable_afpd
-    - "'afpd' in group_names"
-  tags:
-    - openldap-afp
+# - import_tasks: afp_server.yml
+#   when:
+#     - openldap_server_enable_afpd
+#     - "'afpd' in group_names"
+#   tags:
+#     - openldap-afp
