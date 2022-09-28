@@ -39,8 +39,8 @@ openldap_client_pkgs:
   - rpcbind
 
 samba_pkgs:
-  - smbldap-tools
-  - samba
+  # - smbldap-tools
+  # - samba
 
 openldap_server_app_path: "/etc/openldap"
 openldap_server_db_path: "/var/lib/ldap/{{ openldap_server_domain_name }}"
