@@ -4,7 +4,9 @@ include         /etc/openldap/schema/inetorgperson.schema
 include         /etc/openldap/schema/nis.schema
 include         /etc/ldap/schema/openssh-lpk.schema
 include         /etc/ldap/schema/autofs.schema
-include			/etc/ldap/schema/samba.schema
+{% if openldap_server_enable_samba|default('False') and 'samba' in group_names %}
+include         /etc/ldap/schema/samba.schema
+{% endif %}
 pidfile         /var/run/openldap/slapd.pid
 argsfile        /var/run/openldap/slapd.args
 modulepath      /usr/lib64/openldap
@@ -26,7 +28,7 @@ database config
 rootdn "cn=admin,cn=config"
 rootpw {{ root_password.stdout }}
 
-database        bdb
+database        mdb
 suffix          "{{ openldap_server_dc }}"
 rootdn          "{{ openldap_server_dc }}"
 rootpw          {{ root_password.stdout }}

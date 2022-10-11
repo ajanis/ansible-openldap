@@ -3,7 +3,9 @@ include         /etc/ldap/schema/cosine.schema
 include         /etc/ldap/schema/inetorgperson.schema
 include         /etc/ldap/schema/nis.schema
 include         /etc/ldap/schema/openssh-lpk.schema
+{% if openldap_server_enable_samba|default('False') and 'samba' in group_names %}
 include         /etc/ldap/schema/samba.schema
+{% endif %}
 include         /etc/ldap/schema/autofs.schema
 pidfile         /var/run/slapd/slapd.pid
 
@@ -12,7 +14,7 @@ argsfile        /var/run/slapd/slapd.args
 loglevel        none
 
 modulepath      /usr/lib/ldap
-moduleload      back_bdb.la
+moduleload      back_mdb.la
 
 
 access to *
@@ -32,7 +34,7 @@ database config
 rootdn "cn=admin,cn=config"
 rootpw {{ root_password.stdout }}
 
-database        bdb
+database        mdb
 suffix          "{{ openldap_server_dc }}"
 rootdn          "cn=Manager,{{ openldap_server_dc }}"
 rootpw          {{ root_password.stdout }}
