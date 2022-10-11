@@ -2,7 +2,6 @@
 openldap_server_pkgs:
   - slapd
   - ldap-utils
-  - python-selinux
   - openssl
   - python3-pip
   - libsasl2-dev
@@ -40,7 +39,9 @@ afpd_pkgs:
 openldap_server_app_path: "/etc/ldap"
 openldap_server_db_path: "/var/lib/ldap/{{ openldap_server_domain_name }}"
 
-openldap_server_user: "openldap"
+openldap_server_user: openldap
+openldap_server_group: openldap
 openldap_nslcd_group: "nslcd"
 
 ssh_service: ssh
+openldap_ssh_ldap_pubkey_version: 1.3.0

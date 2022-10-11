@@ -27,7 +27,6 @@ openldap_server_pkgs:
 openldap_python_pkgs:
   - python3-ldap
   - ldap3
-  - ssh-ldap-pubkey
 
 openldap_client_pkgs:
   - libnss-ldapd
@@ -53,3 +52,4 @@ openldap_autofs_defaults_file: /etc/default/autofs
 openldap_autofs_packages:
   - autofs
   - autofs-ldap
+openldap_ssh_ldap_pubkey_version: 1.3.0
