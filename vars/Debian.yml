@@ -3,9 +3,7 @@ openldap_server_pkgs:
   - slapd
   - ldap-utils
   - openssl
-  - python-pip
   - libsasl2-dev
-  - python-dev
   - libldap2-dev
   - libssl-dev
   - python-pexpect
@@ -18,13 +16,11 @@ openldap_python_pkgs:
 openldap_client_pkgs:
   - libnss-ldapd
   - libsasl2-dev
-  - python-dev
   - libldap2-dev
   - libssl-dev
   - libpam-ldap
   - nscd
   - ldap-utils
-  - python-pip
 
 samba_pkgs:
   - smbldap-tools

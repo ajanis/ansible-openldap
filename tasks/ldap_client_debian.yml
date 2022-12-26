@@ -1,12 +1,12 @@
 ---
 - name: Install the openldap client and required Packages for Ubuntu
-  apt:
+  ansible.builtin.apt:
     name: "{{ openldap_client_pkgs }}"
     state: present
     update_cache: yes
 
 - name: Install ansible python dependencies for ldap configuration
-  pip:
+  ansible.builtin.pip:
     name: "{{ openldap_python_pkgs }}"
     state: present
 
@@ -17,54 +17,33 @@
     version: "{{ openldap_ssh_ldap_pubkey_version|default(omit) }}"
   when:
     - openldap_server_enable_sshkeys
-#
-#- name: Enable Pam in SSHD config
-#  lineinfile:
-#    dest: /etc/ssh/sshd_config
-#    state: present
-#    regexp: '^UsePAM.*'
-#    line: 'UsePAM yes'
-#  notify:
-#    - restart_login_services
-#
-#- name: Append ssh-ldap-pubkey wrapper configs to sshd_config
-#  lineinfile:
-#    dest: /etc/ssh/sshd_config
-#    state: present
-#    line: 'AuthorizedKeysCommand /usr/local/bin/ssh-ldap-pubkey-wrapper'
-#  notify:
-#    - restart_login_services
-#  when:
-#    - openldap_server_enable_sshkeys
-#
-#- name: Append ssh-ldap-pubkey user configs to sshd_config
-#  lineinfile:
-#    dest: /etc/ssh/sshd_config
-#    state: present
-#    line: 'AuthorizedKeysCommandUser nobody'
-#  notify:
-#    - restart_login_services
-#  when:
-#    - openldap_server_enable_sshkeys
 
-- name: Copy /etc/ldap.conf for client
-  template:
-    src: client_ldap.conf.j2
-    dest: /etc/ldap.conf
-  notify:
-    - restart_login_services
-    - restart_ns_daemons
+- name: Create openldap app path
+  ansible.builtin.file:
+    state: directory
+    dest: "{{ openldap_server_app_path }}"
+    mode: 0644
 
-- name: Copy the ldap.conf configuration file
-  template:
+- name: Copy the ldap.conf app configuration file
+  ansible.builtin.template:
     src: ldap.conf.j2
+    mode: 0644
     dest: "{{ openldap_server_app_path }}/ldap.conf"
   notify:
     - restart_login_services
     - restart_ns_daemons
 
+- name: Copy openldap client config
+  ansible.builtin.template:
+    src: client_ldap.conf.j2
+    dest: "{{ openldap_clientconfig }}"
+    mode: 0644
+  notify:
+    - restart_login_services
+    - restart_ns_daemons
+
 - name: Fix common-auth
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/pam.d/common-auth
     state: present
     line: 'account required    pam_access.so'
@@ -73,7 +52,7 @@
     - restart_login_services
 
 - name: Fix common-session
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/pam.d/common-session
     state: present
     line: 'session required    pam_mkhomedir.so skel=/etc/skel umask=0022'
@@ -82,7 +61,7 @@
     - restart_login_services
 
 - name: Fix common-password
-  replace:
+  ansible.builtin.replace:
     path: /etc/pam.d/common-password
     backup: yes
     regexp: '^.*use_authtok.*$'
@@ -92,7 +71,7 @@
     - restart_login_services
 
 - name: Fix access.conf
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/security/access.conf
     state: absent
     line: '-:ALL EXCEPT root (admin):ALL EXCEPT LOCAL'
@@ -101,14 +80,15 @@
     - restart_login_services
 
 - name: Copy nsswitch.conf
-  template:
+  ansible.builtin.template:
     src: nsswitch.conf.j2
+    mode: 0644
     dest: /etc/nsswitch.conf
   notify:
     - restart_ns_daemons
 
 - name: Copy nslcd.conf
-  template:
+  ansible.builtin.template:
     src: nslcd.conf.j2
     dest: /etc/nslcd.conf
     mode: 0600
@@ -116,23 +96,23 @@
     - restart_ns_daemons
 
 - name: Ensure directory for nscd socket exists
-  file:
+  ansible.builtin.file:
     state: directory
     path: /var/run/nscd
     mode: 0755
   notify:
     - restart_ns_daemons
 
-- name: autofs packages
-  apt:
+- name: Autofs packages
+  ansible.builtin.apt:
     name: autofs
     state: present
     update_cache: yes
   when:
     - openldap_server_enable_autofs
 
-- name: autofs-ldap packages
-  apt:
+- name: Autofs-ldap packages
+  ansible.builtin.apt:
     name: autofs-ldap
     state: present
     update_cache: yes
@@ -140,7 +120,7 @@
     - openldap_server_enable_autofs
 
 - name: Start AutoFS service
-  service:
+  ansible.builtin.service:
     name: autofs
     state: started
     enabled: yes
@@ -148,13 +128,13 @@
     - openldap_server_enable_autofs
 
 - name: Start rpcbind service
-  service:
+  ansible.builtin.service:
     name: rpcbind
     state: started
     enabled: yes
 
 - name: Copy autofs supporting file
-  template:
+  ansible.builtin.template:
     src: autofs.j2
     dest: /etc/default/autofs
     mode: 0755
@@ -163,10 +143,11 @@
   when:
     - openldap_server_enable_autofs
 
-- meta: flush_handlers
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers
 
-- name: create user home directories
-  file:
+- name: Create user home directories
+  ansible.builtin.file:
     state: directory
     path: "/home/{{ item.key }}"
     owner: "{{ item.value.uid }}"

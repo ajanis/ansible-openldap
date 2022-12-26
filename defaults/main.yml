@@ -4,7 +4,7 @@
 shared_storage: False
 data_mount_root: "/data"
 ldap_user_home_directory: "homedirs"
-
+openldap_clientconfig: "/etc/ldap.conf"
 #The ldif file
 openldap_server_ldif: domain.ldif
 
