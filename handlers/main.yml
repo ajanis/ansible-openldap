@@ -5,11 +5,22 @@
     state: restarted
     enabled: yes
 
+- name: fix ldap perms
+  listen: restart slapd
+  file:
+    path: "{{ openldap_server_app_path }}"
+    state: directory
+    recurse: yes
+    owner: "{{ openldap_server_user }}"
+    group: "{{ openldap_server_group }}"
+    mode: 0755
 - name: restart slapd
+  listen: restart slapd
   service:
     name: slapd
     state: restarted
     enabled: yes
+
 
 - name: restart httpd
   service:
@@ -53,6 +64,15 @@
     run_authconfig: True
   listen: restart_login_services
 
+- name: fix ldap perms
+  listen: restart_login_services
+  file:
+    path: "{{ openldap_server_app_path }}"
+    state: directory
+    recurse: yes
+    owner: "{{ openldap_server_user }}"
+    group: "{{ openldap_server_group }}"
+    mode: 0755
 - name: restart_systemd_logind
   listen: restart_login_services
   service:

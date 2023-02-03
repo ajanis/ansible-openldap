@@ -4,7 +4,7 @@
   copy:
     src: openssh-lpk
     dest: "{{ openldap_server_app_path }}/schema/openssh-lpk.schema"
-    mode: 0600
+    mode: 0755
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
   notify: slapd rebuild
@@ -15,7 +15,7 @@
   copy:
     src: samba.schema
     dest: "{{ openldap_server_app_path }}/schema/samba.schema"
-    mode: 0600
+    mode: 0755
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
   notify: slapd rebuild
@@ -26,7 +26,7 @@
   copy:
     src: autofs.schema
     dest: "{{ openldap_server_app_path }}/schema/autofs.schema"
-    mode: 0600
+    mode: 0755
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
   notify: slapd rebuild
@@ -39,13 +39,14 @@
     content: "{{ openldap_server_rootpw | checksum }}"
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
-    mode: 0600
+    mode: 0755
   register: rootpw_updated
 
 - name: Generate the root password for ldap
   shell: "slappasswd -s {{ openldap_server_rootpw }}"
   register: root_password
   when: rootpw_updated is changed
+  become_user: "{{ openldap_server_user }}"
   no_log: True
 
 - name: Copy the slapd.conf configuration file for Redhat
@@ -64,7 +65,7 @@
   template:
     src: slapd.conf_ubuntu.j2
     dest: "{{ openldap_server_app_path }}/slapd.conf"
-    mode: 0700
+    mode: 0755
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
   when:
@@ -78,7 +79,7 @@
     dest: "{{ openldap_server_app_path }}/ldap.conf"
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
-    mode: 0644
+    mode: 0755
   notify: restart slapd
 
 - name: Create the directory for ldap database
@@ -87,7 +88,8 @@
     state: directory
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
-    mode: 0744
+    mode: 0755
+    recurse: yes
 
 
 - name: Create the directory for ldap certificates
@@ -96,7 +98,7 @@
     state: directory
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
-    mode: 0644
+    mode: 0755
   when: openldap_server_enable_ssl
 
 - name: "Install SSL Key"
@@ -105,7 +107,7 @@
     dest: "{{ ssl_keypath }}"
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
-    mode: 0600
+    mode: 0755
   when: openldap_server_enable_ssl
   notify:
     - restart slapd
@@ -116,7 +118,7 @@
     dest: "{{ ssl_certpath }}"
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
-    mode: 0644
+    mode: 0755
   when: openldap_server_enable_ssl
   notify:
     - restart slapd
@@ -125,7 +127,7 @@
   copy:
     src: ldap
     dest: /etc/sysconfig/ldap
-    mode: 0744
+    mode: 0755
   when: openldap_server_enable_ssl and ansible_os_family == 'RedHat'
   notify:
     - restart slapd
@@ -134,7 +136,7 @@
   copy:
     src: slapd_fedora
     dest: /etc/sysconfig/slapd
-    mode: 0744
+    mode: 0755
   when: openldap_server_enable_ssl and ansible_distribution == "Fedora"
   notify:
     - restart slapd
@@ -143,7 +145,7 @@
   copy:
     src: slapd
     dest: /etc/default/slapd
-    mode: 0744
+    mode: 0755
   when: openldap_server_enable_ssl and ansible_os_family == 'Debian'
   notify:
     - restart slapd
@@ -168,7 +170,8 @@
     state: directory
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
-    mode: 0744
+    mode: 0755
+    recurse: yes
   when: slapd_rebuild | default(False)
 
 - name: check for DB_CONFIG
@@ -186,15 +189,16 @@
   template:
     src: DB_CONFIG.j2
     dest: "{{ openldap_server_db_path }}/DB_CONFIG"
-    mode: 0644
+    mode: 0755
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
+  notify: restart slapd
 
-- name: restart slapd
-  service:
-    name: slapd
-    state: restarted
-  when: not slapd_rebuild | default(False)
+# - name: restart slapd
+#   service:
+#     name: slapd
+#     state: restarted
+#   when: not slapd_rebuild | default(False)
 
 - name: Delete the ldap configuration directory
   file:
@@ -202,12 +206,12 @@
     state: absent
   when: slapd_rebuild | default(False)
 
-- name: restart slapd
-  service:
-    name: slapd
-    state: restarted
-  when:
-    - slapd_rebuild|default(False)
+# - name: restart slapd
+#   service:
+#     name: slapd
+#     state: restarted
+#   when:
+#     - slapd_rebuild|default(False)
 
 - name: Recreate the ldap configuration directory
   file:
@@ -215,27 +219,30 @@
     state: directory
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
-    mode: 0744
+    mode: 0755
+    recurse: yes
   when: slapd_rebuild | default(False)
 
 - name: Rebuild slapd OLC Directory
   shell: "slaptest -f {{ openldap_server_app_path }}/slapd.conf -F {{ openldap_server_app_path }}/slapd.d"
+  become_user: "{{ openldap_server_user }}"
   when: slapd_rebuild | default(False)
 
 - name: fix slapd.d permissions
   file:
-    path: "{{ openldap_server_app_path }}/slapd.d"
+    path: "{{ openldap_server_app_path }}"
     state: directory
     recurse: yes
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
-    mode: 0644
+    mode: 0755
   when: slapd_rebuild | default(False)
 
 - name: Copy the template for creating base dn
   template:
     src: "{{ openldap_server_ldif }}"
     dest: /tmp/
+    mode: 0755
   register: rootdn
 
 - name: Print rootdn variable info for debugging
@@ -255,6 +262,7 @@
   copy:
     src: samba_indices.ldif
     dest: /tmp/
+    mode: 0755
   register: smbindices
   when:
     - openldap_server_enable_samba
@@ -265,5 +273,6 @@
     -f {{ smbindices.dest|default( '/tmp/samba_indices.ldif' ) }} && touch {{ openldap_server_app_path }}/smbindices_created
   args:
     creates: "{{ openldap_server_app_path }}/smbindices_created"
+  become_user: "{{ openldap_server_user }}"
   when:
     - openldap_server_enable_samba
