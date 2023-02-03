@@ -11,7 +11,7 @@
   lineinfile:
     dest: /etc/hosts
     state: present
-    line: "{{ openldap_server_ip }} {{ openldap_server_domain_name }} {{ openldap_server_domain_name.split('.')[0] }}"
+    line: "{{ openldap_server_hosts_entry }}"
   when:
     - openldap_client_enable
   tags:

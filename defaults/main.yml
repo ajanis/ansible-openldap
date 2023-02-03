@@ -27,6 +27,7 @@ openldap_server_ip:
 openldap_server_rootpw: "{{ vault_openldap_server_rootpw }}"
 openldap_server_enable_ssl: false
 
+openldap_server_hosts_entry: "{{ openldap_server_ip }} {{ openldap_server_domain_name }} {{ openldap_server_domain_name.split('.')[0] }}"
 # enable openldap server posix user/group configs
 openldap_server_enable_posixaccounts: true
 # enable ssh key storage schema to openldap server
