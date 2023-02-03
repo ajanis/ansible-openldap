@@ -79,6 +79,7 @@
   template:
     src: nsswitch.conf.j2
     dest: /etc/nsswitch.conf
+    mode: 0644
   notify:
     - restart_ns_daemons
   when:
@@ -88,7 +89,7 @@
   template:
     src: nslcd.conf.j2
     dest: /etc/nslcd.conf
-    mode: 0600
+    mode: 0644
   notify:
     - restart_ns_daemons
     - restart_login_services
@@ -119,7 +120,7 @@
   template:
     src: autofs.j2
     dest: /etc/sysconfig/autofs
-    mode: 0755
+    mode: 0644
   notify:
     - restart_autofs
   when:
