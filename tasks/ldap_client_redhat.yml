@@ -89,7 +89,7 @@
   template:
     src: nslcd.conf.j2
     dest: /etc/nslcd.conf
-    mode: 0644
+    mode: 0640
   notify:
     - restart_ns_daemons
     - restart_login_services
