@@ -23,13 +23,13 @@ openldap_client_pkgs:
   - nss-pam-ldapd
   - nscd
   - sssd-ldap
+  - sssd-ad
   - sssd-nfs-idmap
   - libsss_autofs
   - platform-python-devel
   - gcc
   - openldap-devel
   - cyrus-sasl
-  - cyrus-sasl-ldap
   - redhat-rpm-config
   - cyrus-sasl-devel
   - platform-python-pip
