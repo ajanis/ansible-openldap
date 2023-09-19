@@ -1,6 +1,7 @@
 ---
 - name: Users OU
-  ldap_entry:
+  community.general.ldap_entry:
+    server_uri: '{{ openldap_server_uri }}'
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
     dn: "{{ users_ou }}"
@@ -10,7 +11,8 @@
     - restart_ns_daemons
 
 - name: Groups OU
-  ldap_entry:
+  community.general.ldap_entry:
+    server_uri: '{{ openldap_server_uri }}'
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
     dn: "{{ groups_ou }}"
@@ -20,7 +22,8 @@
     - restart_ns_daemons
 
 - name: Create Groups
-  ldap_entry:
+  community.general.ldap_entry:
+    server_uri: '{{ openldap_server_uri }}'
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
     dn: "cn={{ item.key }},{{ groups_ou }}"
@@ -33,7 +36,7 @@
     state: present
   notify:
     - restart_ns_daemons
-  loop: "{{ ssh_groups|default({})|dict2items }}"
+  loop: "{{ ssh_groups | default({}) | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
 
@@ -47,12 +50,13 @@
     state: exact
   notify:
     - restart_ns_daemons
-  loop: "{{ ssh_groups|default({})|dict2items }}"
+  loop: "{{ ssh_groups | default({}) | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
 
 - name: "Set up SSH users"
-  ldap_entry:
+  community.general.ldap_entry:
+    server_uri: '{{ openldap_server_uri }}'
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
     dn: "uid={{ item.key }},{{ users_ou }}"
@@ -68,7 +72,7 @@
       uidNumber: "{{ item.value.uid | default(omit) }}"
       homeDirectory: "/home/{{ item.key }}"
       loginShell: "{{ item.value.shell | default('/bin/bash') }}"
-      givenName: "{{ item.value.givenname |default(omit) }}"
+      givenName: "{{ item.value.givenname | default(omit) }}"
       sn: "{{ item.value.sn | default(omit) }}"
       mail: "{{ item.value.mail | default(omit) }}"
       gecos: "{{ item.value.gecos | default(item.key) }}"
@@ -80,7 +84,7 @@
         {% endfor %}
         {% endif %}
     state: "{{ item.value.state }}"
-  loop: "{{ ssh_users|default({})|dict2items }}"
+  loop: "{{ ssh_users | default({}) | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
   register: ssh_users_added
