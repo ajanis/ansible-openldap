@@ -2,7 +2,7 @@
 
 - name: Admin OU
   community.general.ldap_entry:
-    server_uri: '{{ openldap_server_uri }}'
+    server_uri: "{{ openldap_server_uri }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
     dn: "{{ admin_ou }}"
@@ -18,7 +18,7 @@
 
 - name: Automount OU
   community.general.ldap_entry:
-    server_uri: '{{ openldap_server_uri }}'
+    server_uri: "{{ openldap_server_uri }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
     dn: "{{ automount_ou }}"
@@ -34,7 +34,7 @@
 
 - name: Create auto.master OU
   community.general.ldap_entry:
-    server_uri: '{{ openldap_server_uri }}'
+    server_uri: "{{ openldap_server_uri }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
     dn: "{{ auto_master_ou }}"
@@ -50,7 +50,7 @@
 
 - name: Home automount CN
   community.general.ldap_entry:
-    server_uri: '{{ openldap_server_uri }}'
+    server_uri: "{{ openldap_server_uri }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
     dn: "cn=/home,{{ auto_master_ou }}"
@@ -66,7 +66,7 @@
 
 - name: Create auto.home OU
   community.general.ldap_entry:
-    server_uri: '{{ openldap_server_uri }}'
+    server_uri: "{{ openldap_server_uri }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
     dn: "{{ auto_home_ou }}"
@@ -81,7 +81,7 @@
 
 - name: User Directory CNs
   community.general.ldap_entry:
-    server_uri: '{{ openldap_server_uri }}'
+    server_uri: "{{ openldap_server_uri }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
     dn: "cn={{ item.key }},{{ auto_home_ou }}"

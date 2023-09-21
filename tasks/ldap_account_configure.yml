@@ -1,7 +1,7 @@
 ---
 - name: Users OU
   community.general.ldap_entry:
-    server_uri: '{{ openldap_server_uri }}'
+    server_uri: "{{ openldap_server_uri }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
     dn: "{{ users_ou }}"
@@ -12,7 +12,7 @@
 
 - name: Groups OU
   community.general.ldap_entry:
-    server_uri: '{{ openldap_server_uri }}'
+    server_uri: "{{ openldap_server_uri }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
     dn: "{{ groups_ou }}"
@@ -23,7 +23,7 @@
 
 - name: Create Groups
   community.general.ldap_entry:
-    server_uri: '{{ openldap_server_uri }}'
+    server_uri: "{{ openldap_server_uri }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
     dn: "cn={{ item.key }},{{ groups_ou }}"
@@ -56,7 +56,7 @@
 
 - name: "Set up SSH users"
   community.general.ldap_entry:
-    server_uri: '{{ openldap_server_uri }}'
+    server_uri: "{{ openldap_server_uri }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
     dn: "uid={{ item.key }},{{ users_ou }}"
