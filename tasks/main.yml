@@ -13,9 +13,11 @@
   lineinfile:
     dest: /etc/hosts
     state: present
-    line: "{{ openldap_server_hosts_entry }}"
+    line: "{{ hostvars[item].ansible_default_ipv4.address }} {{ openldap_server_domain_name }} {{ openldap_server_domain_name.split('.')[0] }}"
+  loop: "{{ groups['ldap'] | default([]) | unique }}"
   when:
-    - openldap_client_enable
+    - groups['ldap'] is defined
+    - groups['ldap'] | length > 0
   tags:
     - always
 
