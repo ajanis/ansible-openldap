@@ -1,6 +1,6 @@
 ---
-- name: include os specific vars
-  include_vars: "{{ item }}"
+- name: Include os specific vars
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - "{{ ansible_distribution }}{{ ansible_distribution_major_version }}.yml"
     - "{{ ansible_os_family }}{{ ansible_distribution_major_version }}.yml"
@@ -9,8 +9,12 @@
   tags:
     - always
 
+- name: Set up
+  ansible.builtin.setup: {}
+  delegate_facts: true
+
 - name: Add /etc/hosts entry for ldap server
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/hosts
     state: present
     line: "{{ hostvars[item].ansible_default_ipv4.address }} {{ openldap_server_domain_name }} {{ openldap_server_domain_name.split('.')[0] }}"
@@ -21,94 +25,115 @@
   tags:
     - always
 
-- name: Add ssh pubkey command to ssh server configuration
-  lineinfile:
-    dest: /etc/ssh/sshd_config
-    state: present
-    line: >-
-      {%- if (ansible_os_family == 'Debian') or (ansible_os_family == 'RedHat' and ansible_distribution_major_version >= '8') -%}
+- name: Add block configs to sshd_config
+  ansible.builtin.blockinfile:
+    path: /etc/ssh/sshd_config
+    block: |
       AuthorizedKeysCommand /usr/local/bin/ssh-ldap-pubkey-wrapper
-      {%- else -%}
-      AuthorizedKeysCommand /usr/bin/ssh-ldap-pubkey-wrapper
-      {%- endif -%}
-  notify:
-    - restart_login_services
+      AuthorizedKeysCommandUser {{ openldap_ldap_pubkey_user }}
+      {% if groups['kvm'] is defined and inventory_hostname in groups['kvm'] %}
+      Match user virsh
+          X11Forwarding no
+          AllowTcpForwarding no
+          PermitTTY no
+          ForceCommand nc -q 0 -U /var/run/libvirt/libvirt-sock
+      {% endif %}
+  notify: "restart_login_services"
   when:
     - openldap_server_enable_sshkeys
-  tags:
-    - always
 
-- name: Add ssh pubkey command user to ssh server configuration
-  lineinfile:
-    dest: /etc/ssh/sshd_config
-    state: present
-    line: >-
-      {%- if openldap_server_enable_sshkeys|default(false) -%}
-      AuthorizedKeysCommandUser nobody
-      {%- else -%}
-      #AuthorizedKeysCommandUser nobody
-      {%- endif -%}
-  notify:
-    - restart_login_services
-  when:
-    - openldap_server_enable_sshkeys
-  tags:
-    - always
+# - name: Add ssh pubkey command to ssh server configuration
+#   lineinfile:
+#     dest: /etc/ssh/sshd_config
+#     state: present
+#     line: >-
+#       {%- if (ansible_os_family == 'Debian') or (ansible_os_family == 'RedHat' and ansible_distribution_major_version >= '8') -%}
+#       AuthorizedKeysCommand /usr/local/bin/ssh-ldap-pubkey-wrapper
+#       {%- else -%}
+#       AuthorizedKeysCommand /usr/bin/ssh-ldap-pubkey-wrapper
+#       {%- endif -%}
+#   notify:
+#     - restart_login_services
+#   when:
+#     - openldap_server_enable_sshkeys
+#   tags:
+#     - always
 
-- name: Enable pam authentication in ssh server configuration
-  lineinfile:
-    dest: /etc/ssh/sshd_config
-    state: present
-    line: UsePAM yes
-  notify:
-    - restart_login_services
-  when:
-    - openldap_server_enable_posixaccounts
-    - ansible_system != 'OpenBSD'
-  tags:
-    - always
+# - name: Add ssh pubkey command user to ssh server configuration
+#   lineinfile:
+#     dest: /etc/ssh/sshd_config
+#     state: present
+#     line: >-
+#       {%- if openldap_server_enable_sshkeys|default(false) -%}
+#       AuthorizedKeysCommandUser nobody
+#       {%- else -%}
+#       #AuthorizedKeysCommandUser nobody
+#       {%- endif -%}
+#   notify:
+#     - restart_login_services
+#   when:
+#     - openldap_server_enable_sshkeys
+#   tags:
+#     - always
 
-- import_tasks: ldap_server_install.yml
+# - name: Enable pam authentication in ssh server configuration
+#   lineinfile:
+#     dest: /etc/ssh/sshd_config
+#     state: present
+#     line: UsePAM yes
+#   notify:
+#     - restart_login_services
+#   when:
+#     - openldap_server_enable_posixaccounts
+#     - ansible_system != 'OpenBSD'
+#   tags:
+#     - always
+- name: Import ldap server install tasks
+  ansible.builtin.import_tasks: ldap_server_install.yml
   when: "'ldapservers' in group_names"
   tags:
     - openldap-server
 
-- import_tasks: ldap_server_configure.yml
+- name: Import ldap server configuration tasks
+  ansible.builtin.import_tasks: ldap_server_configure.yml
   when: "'ldapservers' in group_names"
   tags:
     - openldap-config
 
-- name: "Configure LDAP Client [Debian]"
-  import_tasks: ldap_client_debian.yml
+- name: Configure LDAP Client [Debian]
+  ansible.builtin.import_tasks: ldap_client_debian.yml
   when:
     - ansible_os_family == "Debian"
     - openldap_client_enable
   tags:
     - openldap-client
 
-- name: "Configure LDAP Client [RedHat]"
-  import_tasks: ldap_client_redhat.yml
+- name: Configure LDAP Client [RedHat]
+  ansible.builtin.import_tasks: ldap_client_redhat.yml
   when:
     - ansible_os_family == "RedHat"
     - openldap_client_enable
   tags:
     - openldap-client
 
-- import_tasks: ldap_autofs_configure.yml
+- name: Import autofs tasks
+  ansible.builtin.import_tasks: ldap_autofs_configure.yml
   when:
     - openldap_server_enable_autofs
     - "'ldapservers' in group_names"
   tags:
     - openldap-automount
 
-- import_tasks: ldap_account_configure.yml
+- name: Import ldap account configuration tasks
+  ansible.builtin.import_tasks: ldap_account_configure.yml
   when:
     - openldap_server_enable_posixaccounts
     - "'ldapservers' in group_names"
   tags:
     - openldap-users
 
-- import_tasks: samba_server.yml
+- name: Import samba tasks
+  ansible.builtin.import_tasks: samba_server.yml
   when:
     - openldap_server_enable_samba
     - "'samba' in group_names"
