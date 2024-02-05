@@ -92,5 +92,5 @@
     - restart_ns_daemons
 
 #
-
-- meta: flush_handlers
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers
