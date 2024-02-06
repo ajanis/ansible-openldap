@@ -17,7 +17,7 @@
   ansible.builtin.lineinfile:
     dest: /etc/hosts
     state: present
-    line: "{{ hostvars[item].ansible_default_ipv4.address }} {{ openldap_server_domain_name }} {{ openldap_server_domain_name.split('.')[0] }}"
+    line: "{{ hostvars[item].ansible_host }} {{ openldap_server_domain_name }} {{ openldap_server_domain_name.split('.')[0] }}"
   loop: "{{ groups['ldap'] | default([]) | unique }}"
   when:
     - groups['ldap'] is defined
