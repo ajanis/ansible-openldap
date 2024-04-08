@@ -1,32 +1,31 @@
 ---
-
-- name: copy openssh-lpk schema file
-  copy:
+- name: Copy openssh-lpk schema file
+  ansible.builtin.copy:
     src: openssh-lpk
     dest: "{{ openldap_server_app_path }}/schema/openssh-lpk.schema"
-    mode: 0755
+    mode: "0755"
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
   notify: slapd rebuild
   when:
     - openldap_server_enable_sshkeys
 
-- name: copy samba ldap schema file
-  copy:
+- name: Copy samba ldap schema file
+  ansible.builtin.copy:
     src: samba.schema
     dest: "{{ openldap_server_app_path }}/schema/samba.schema"
-    mode: 0755
+    mode: "0755"
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
   notify: slapd rebuild
   when:
     - openldap_server_enable_samba
 
-- name: copy autofs schema file
-  copy:
+- name: Copy autofs schema file
+  ansible.builtin.copy:
     src: autofs.schema
     dest: "{{ openldap_server_app_path }}/schema/autofs.schema"
-    mode: 0755
+    mode: "0755"
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
   notify: slapd rebuild
@@ -34,38 +33,38 @@
     - openldap_server_enable_autofs
 
 - name: Check for ldap root password change
-  copy:
+  ansible.builtin.copy:
     dest: "{{ openldap_server_app_path }}/rootpw_configured"
     content: "{{ openldap_server_rootpw | checksum }}"
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
-    mode: 0755
+    mode: "0755"
   register: rootpw_updated
 
 - name: Generate the root password for ldap
-  shell: "slappasswd -s {{ openldap_server_rootpw }}"
+  ansible.builtin.shell: slappasswd -s {{ openldap_server_rootpw }}
   register: root_password
   when: rootpw_updated is changed
   become_user: "{{ openldap_server_user }}"
-  no_log: True
+  no_log: true
 
 - name: Copy the slapd.conf configuration file for Redhat
-  template:
+  ansible.builtin.template:
     src: slapd.conf.j2
     dest: "{{ openldap_server_app_path }}/slapd.conf"
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
-    mode: 0755
+    mode: "0755"
   when:
     - ansible_os_family == "RedHat"
     - rootpw_updated is changed
   notify: slapd rebuild
 
 - name: Copy the slapd.conf configuration file for Ubuntu
-  template:
+  ansible.builtin.template:
     src: slapd.conf_ubuntu.j2
     dest: "{{ openldap_server_app_path }}/slapd.conf"
-    mode: 0755
+    mode: "0755"
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
   when:
@@ -74,122 +73,120 @@
   notify: slapd rebuild
 
 - name: Copy the ldap.conf configuration file
-  template:
+  ansible.builtin.template:
     src: ldap.conf.j2
     dest: "{{ openldap_server_app_path }}/ldap.conf"
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
-    mode: 0755
+    mode: "0755"
   notify: restart slapd
 
 - name: Create the directory for ldap database
-  file:
+  ansible.builtin.file:
     path: "{{ openldap_server_db_path }}"
     state: directory
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
-    mode: 0755
-    recurse: yes
-
+    mode: "0755"
+    recurse: true
 
 - name: Create the directory for ldap certificates
-  file:
+  ansible.builtin.file:
     path: "{{ openldap_server_app_path }}/certs"
     state: directory
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
-    mode: 0755
+    mode: "0755"
   when: openldap_server_enable_ssl
 
-- name: "Install SSL Key"
-  copy:
+- name: Install SSL Key
+  ansible.builtin.copy:
     content: "{{ ssl_privkey }}"
     dest: "{{ ssl_keypath }}"
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
-    mode: 0755
+    mode: "0755"
   when: openldap_server_enable_ssl
   notify:
     - restart slapd
 
-- name: "Install SSL Certificate Chain"
-  copy:
+- name: Install SSL Certificate Chain
+  ansible.builtin.copy:
     content: "{{ ssl_certchain }}"
     dest: "{{ ssl_certpath }}"
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
-    mode: 0755
+    mode: "0755"
   when: openldap_server_enable_ssl
   notify:
     - restart slapd
 
-- name: copy the /etc/default/slapd for RedHat
-  copy:
+- name: Copy the /etc/default/slapd for RedHat
+  ansible.builtin.copy:
     src: ldap
     dest: /etc/sysconfig/ldap
-    mode: 0755
+    mode: "0755"
   when: openldap_server_enable_ssl and ansible_os_family == 'RedHat'
   notify:
     - restart slapd
 
-- name: copy /etc/default/slapd for Fedora
-  copy:
+- name: Copy /etc/default/slapd for Fedora
+  ansible.builtin.copy:
     src: slapd_fedora
     dest: /etc/sysconfig/slapd
-    mode: 0755
+    mode: "0755"
   when: openldap_server_enable_ssl and ansible_distribution == "Fedora"
   notify:
     - restart slapd
 
-- name: copy /etc/default/slapd for Ubuntu
-  copy:
+- name: Copy /etc/default/slapd for Ubuntu
+  ansible.builtin.copy:
     src: slapd
     dest: /etc/default/slapd
-    mode: 0755
+    mode: "0755"
   when: openldap_server_enable_ssl and ansible_os_family == 'Debian'
   notify:
     - restart slapd
 
-- meta: flush_handlers
-
-- name: stop slapd
-  service:
+- ansible.builtin.meta: flush_handlers
+- name: Stop slapd
+  ansible.builtin.service:
     name: slapd
     state: stopped
   when: slapd_rebuild | default(False)
 
 - name: Delete the ldap database
-  file:
+  ansible.builtin.file:
     path: "{{ openldap_server_db_path }}"
     state: absent
   when: slapd_rebuild | default(False)
 
 - name: Recreate the ldap database directory
-  file:
+  ansible.builtin.file:
     path: "{{ openldap_server_db_path }}"
     state: directory
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
-    mode: 0755
-    recurse: yes
+    mode: "0755"
+    recurse: true
   when: slapd_rebuild | default(False)
 
-- name: check for DB_CONFIG
-  stat:
+- name: Check for DB_CONFIG
+  ansible.builtin.stat:
     path: "{{ openldap_server_db_path }}/DB_CONFIG"
   register: db_config_file
 
-- name: stop slapd
-  service:
+- name: Stop slapd
+  ansible.builtin.service:
     name: slapd
     state: stopped
   when: not db_config_file.stat.exists | default(False)
 
-- name: copy DB_CONFIG
-  template:
+- name: Copy DB_CONFIG
+  ansible.builtin.template:
     src: DB_CONFIG.j2
     dest: "{{ openldap_server_db_path }}/DB_CONFIG"
-    mode: 0755
+    mode: "0755"
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
   notify: restart slapd
@@ -201,7 +198,7 @@
 #   when: not slapd_rebuild | default(False)
 
 - name: Delete the ldap configuration directory
-  file:
+  ansible.builtin.file:
     path: "{{ openldap_server_app_path }}/slapd.d"
     state: absent
   when: slapd_rebuild | default(False)
@@ -214,61 +211,61 @@
 #     - slapd_rebuild|default(False)
 
 - name: Recreate the ldap configuration directory
-  file:
+  ansible.builtin.file:
     path: "{{ openldap_server_app_path }}/slapd.d"
     state: directory
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
-    mode: 0755
-    recurse: yes
+    mode: "0755"
+    recurse: true
   when: slapd_rebuild | default(False)
 
 - name: Rebuild slapd OLC Directory
-  shell: "slaptest -f {{ openldap_server_app_path }}/slapd.conf -F {{ openldap_server_app_path }}/slapd.d"
+  ansible.builtin.shell: slaptest -f {{ openldap_server_app_path }}/slapd.conf -F {{ openldap_server_app_path }}/slapd.d
   become_user: "{{ openldap_server_user }}"
   when: slapd_rebuild | default(False)
 
-- name: fix slapd.d permissions
-  file:
+- name: Fix slapd.d permissions
+  ansible.builtin.file:
     path: "{{ openldap_server_app_path }}"
     state: directory
-    recurse: yes
+    recurse: true
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
-    mode: 0755
+    mode: "0755"
   when: slapd_rebuild | default(False)
 
 - name: Copy the template for creating base dn
-  template:
+  ansible.builtin.template:
     src: "{{ openldap_server_ldif }}"
     dest: /tmp/
-    mode: 0755
+    mode: "0755"
   register: rootdn
 
 - name: Print rootdn variable info for debugging
-  debug:
+  ansible.builtin.debug:
     var: rootdn
     verbosity: 1
   when: rootdn is defined
 
-- name: add the base domain
-  shell:
+- name: Add the base domain
+  ansible.builtin.shell:
     cmd: >
       ldapadd -x -D "cn=Manager,{{ openldap_server_dc }}" -w {{ openldap_server_rootpw }}
       -f {{ rootdn.dest|default( '/tmp/' ~ openldap_server_ldif ) }} && touch {{ openldap_server_app_path }}/rootdn_created
     creates: "{{ openldap_server_app_path }}/rootdn_created"
 
 - name: Copy the template for creating samba indices
-  copy:
+  ansible.builtin.copy:
     src: samba_indices.ldif
     dest: /tmp/
-    mode: 0755
+    mode: "0755"
   register: smbindices
   when:
     - openldap_server_enable_samba
 
-- name: add the samba indices
-  shell: >
+- name: Add the samba indices
+  ansible.builtin.shell: >
     ldapmodify -x -D "cn=admin,cn=config" -w {{ openldap_server_rootpw }}
     -f {{ smbindices.dest|default( '/tmp/samba_indices.ldif' ) }} && touch {{ openldap_server_app_path }}/smbindices_created
   args:

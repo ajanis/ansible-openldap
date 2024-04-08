@@ -26,7 +26,7 @@
     server_uri: "{{ openldap_server_uri }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
-    dn: "cn={{ item.key }},{{ groups_ou }}"
+    dn: cn={{ item.key }},{{ groups_ou }}
     objectClass:
       - posixGroup
       - top
@@ -44,7 +44,7 @@
   community.general.ldap_attrs:
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
-    dn: "cn={{ item.key }},{{ groups_ou }}"
+    dn: cn={{ item.key }},{{ groups_ou }}
     attributes:
       memberUid: "{{ item.value.members }}"
     state: exact
@@ -54,12 +54,12 @@
   loop_control:
     label: "{{ item.key }}"
 
-- name: "Set up SSH users"
+- name: Set up SSH users
   community.general.ldap_entry:
     server_uri: "{{ openldap_server_uri }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
-    dn: "uid={{ item.key }},{{ users_ou }}"
+    dn: uid={{ item.key }},{{ users_ou }}
     objectClass:
       - top
       - posixAccount
@@ -70,7 +70,7 @@
     attributes:
       gidNumber: "{{ item.value.gid | default(omit) }}"
       uidNumber: "{{ item.value.uid | default(omit) }}"
-      homeDirectory: "/home/{{ item.key }}"
+      homeDirectory: /home/{{ item.key }}
       loginShell: "{{ item.value.shell | default('/bin/bash') }}"
       givenName: "{{ item.value.givenname | default(omit) }}"
       sn: "{{ item.value.sn | default(omit) }}"

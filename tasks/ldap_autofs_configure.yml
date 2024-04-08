@@ -1,5 +1,4 @@
 ---
-
 - name: Admin OU
   community.general.ldap_entry:
     server_uri: "{{ openldap_server_uri }}"
@@ -14,7 +13,6 @@
     state: present
   notify:
     - restart_ns_daemons
-
 
 - name: Automount OU
   community.general.ldap_entry:
@@ -47,19 +45,18 @@
   notify:
     - restart_ns_daemons
 
-
 - name: Home automount CN
   community.general.ldap_entry:
     server_uri: "{{ openldap_server_uri }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
-    dn: "cn=/home,{{ auto_master_ou }}"
+    dn: cn=/home,{{ auto_master_ou }}
     objectClass:
       - top
       - automount
     attributes:
       cn: /home
-      automountInformation: "ldap:ou=auto.home,ou=automount,ou=admin,{{ openldap_server_dc }} --timeout=60 --ghost"
+      automountInformation: ldap:ou=auto.home,ou=automount,ou=admin,{{ openldap_server_dc }} --timeout=60 --ghost
     state: present
   notify:
     - restart_ns_daemons
@@ -84,7 +81,7 @@
     server_uri: "{{ openldap_server_uri }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
-    dn: "cn={{ item.key }},{{ auto_home_ou }}"
+    dn: cn={{ item.key }},{{ auto_home_ou }}
     objectClass:
       - top
       - automount
@@ -103,7 +100,7 @@
 
 - name: Update User home directory CNs if needed
   community.general.ldap_attrs:
-    dn: "cn={{ item.key }},{{ auto_home_ou }}"
+    dn: cn={{ item.key }},{{ auto_home_ou }}
     attributes:
       automountInformation: >-
         -fstype=ceph,{{ cephfs_mount_options }}

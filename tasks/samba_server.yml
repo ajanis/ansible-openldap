@@ -1,47 +1,46 @@
 ---
 - name: Install samba and required Packages for RedHat
-  package:
+  ansible.builtin.package:
     name: "{{ samba_pkgs }}"
     state: present
 
 - name: Create samba config directory
-  file:
+  ansible.builtin.file:
     path: /etc/samba
     state: directory
     mode: 755
 
 - name: Create smbldap config directory
-  file:
+  ansible.builtin.file:
     path: /etc/smbldap-tools
     state: directory
     mode: 755
 
 - name: Copy Samba configuration
-  template:
+  ansible.builtin.template:
     src: smb.conf.j2
     dest: /etc/samba/smb.conf
   notify: smbldap populate
 
 - name: Copy smbldap.conf
-  template:
+  ansible.builtin.template:
     src: smbldap.conf.j2
     dest: /etc/smbldap-tools/smbldap.conf
   notify: smbldap populate
 
 - name: Copy smbldap_bind.conf
-  template:
+  ansible.builtin.template:
     src: smbldap_bind.conf.j2
     dest: /etc/smbldap-tools/smbldap_bind.conf
   notify: smbldap populate
 
-- meta: flush_handlers
-
+- ansible.builtin.meta: flush_handlers
 - name: Generate password db
-  command: "smbpasswd -w {{ openldap_server_rootpw }}"
+  ansible.builtin.command: smbpasswd -w {{ openldap_server_rootpw }}
   when: smbldap_populate | default(False)
 
 - name: Populate smbldap database
-  shell: |
+  ansible.builtin.shell: |
     smbldap-populate -g 10000 -u 10000 -r 10000 <<EOF
     {{ openldap_server_rootpw }}
     {{ openldap_server_rootpw }}
@@ -50,8 +49,8 @@
     executable: /bin/bash
   when: smbldap_populate | default(False)
 
-- name: "Add users to Samba"
-  shell: |
+- name: Add users to Samba
+  ansible.builtin.shell: |
     smbpasswd -s -a {{ item.key }} <<EOF
     {{ item.value.password }}
     {{ item.value.password }}
@@ -62,14 +61,14 @@
   when: smbldap_populate | default(False)
 
 - name: Inform Samba about RootDN password
-  shell: "smbpasswd -w {{ openldap_server_rootpw }}"
+  ansible.builtin.shell: smbpasswd -w {{ openldap_server_rootpw }}
   when: smbldap_populate | default(False)
 
-- name: restart samba services
-  service:
+- name: Restart samba services
+  ansible.builtin.service:
     name: "{{ item }}"
     state: restarted
-    enabled: yes
+    enabled: true
   loop:
     - nmbd
     - smbd

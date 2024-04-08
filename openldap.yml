@@ -2,18 +2,18 @@
 - name: Deploy OpenLDAP Server with users, ssh keys, autoFS configurations
   hosts: all
   remote_user: root
-  gather_facts: yes
+  gather_facts: true
   tasks:
-    - import_role:
+    - ansible.builtin.include_role:
         name: common
-    - import_role:
+    - ansible.builtin.include_role:
         name: openldap
-      when:  openldap_server_ip is defined and openldap_server_ip != None
-    - import_role:
+      when: openldap_server_ip is defined and openldap_server_ip != None
+    - ansible.builtin.include_role:
         name: ceph-fs
       when:
         - shared_storage
         - storage_backend == "cephfs"
-    - import_role:
+    - ansible.builtin.include_role:
         name: telegraf
       when: "'telegraf' in group_names"

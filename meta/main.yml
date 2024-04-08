@@ -1,3 +1,4 @@
+---
 galaxy_info:
   author: Alan Janis
   description: Set up an OpenLDAP webserver with configurable posix users, posix groups, samba authz/authn, samba shares, AutoFS mount configurations.
