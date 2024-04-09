@@ -1,19 +1,19 @@
 ---
-- name: install afpd required packages
-  apt:
+- name: Install afpd required packages
+  ansible.builtin.apt:
     name: "{{ afpd_pkgs }}"
-    update_cache: yes
+    update_cache: true
     state: present
 
-- name: copy afpd defaults file
-  copy:
+- name: Copy afpd defaults file
+  ansible.builtin.copy:
     src: netatalk
     dest: /etc/default/netatalk
   notify:
     - restart netatalk
 
-- name: copy afpd shares configuration
-  template:
+- name: Copy afpd shares configuration
+  ansible.builtin.template:
     src: AppleVolumes.default
     dest: /etc/netatalk/AppleVolumes.default
   notify:
@@ -27,15 +27,15 @@
 #  notify:
 #    - restart netatalk
 
-- name: set system model for afpd
-  lineinfile:
+- name: Set system model for afpd
+  ansible.builtin.lineinfile:
     dest: /etc/netatalk/afpd.conf
-    line: '-mimicmodel Xserve'
+    line: -mimicmodel Xserve
   notify:
     - restart netatalk
 
-- name: template afpd config for ldap authentication
-  template:
+- name: Template afpd config for ldap authentication
+  ansible.builtin.template:
     src: afp_ldap.conf.j2
     dest: /etc/netatalk/afp_ldap.conf
   notify:
@@ -43,19 +43,19 @@
     - restart netatalk
   when: afp_ldap_auth
 
-- name: add afpd service to local avahi daemon
-  copy:
+- name: Add afpd service to local avahi daemon
+  ansible.builtin.copy:
     src: afpd.service
     dest: /etc/avahi/services/afpd.service
   notify:
     - restart avahi-daemon
 
-- name: enable afpd service
-  service:
+- name: Enable afpd service
+  ansible.builtin.service:
     name: netatalk
     state: started
 
-- name: enable avahi service
-  service:
+- name: Enable avahi service
+  ansible.builtin.service:
     name: avahi-daemon
     state: started

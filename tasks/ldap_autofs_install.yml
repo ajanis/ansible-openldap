@@ -1,37 +1,37 @@
+---
 - name: Install autofs packages and supporting ldap packages
-  package:
+  ansible.builtin.package:
     name: "{{ openldap_autofs_packages }}"
     state: present
-    update_cache: yes
+    update_cache: true
   when:
     - openldap_server_enable_autofs
 
 - name: Copy autofs defaults file
-  template:
+  ansible.builtin.template:
     src: autofs.j2
     dest: "{{ openldap_autofs_defaults_file }}"
-    mode: 0755
+    mode: "0755"
   notify:
     - restart_autofs
   when:
     - openldap_server_enable_autofs
 
-
 - name: Update /etc/autofs_ldap_auth.conf
-  template:
+  ansible.builtin.template:
     src: autofs_ldap_auth.conf.j2
     dest: /etc/autofs_ldap_auth.conf
-    mode: 0600
+    mode: "0600"
   notify:
     - restart_autofs
   when:
     - openldap_server_enable_autofs
 
 - name: Enable pam authentication in ssh server configuration
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/ssh/sshd_config
     state: present
-    regexp: '^.*UsePam.*$'
+    regexp: ^.*UsePam.*$
     line: UsePAM yes
   notify:
     - restart_login_services
@@ -42,46 +42,41 @@
     - always
 
 - name: Append ssh-ldap-pubkey wrapper configs to sshd_config
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/ssh/sshd_config
     state: present
-    line: 'AuthorizedKeysCommand {{ openldap_ldap_pubkey_wrapper }}'
+    line: AuthorizedKeysCommand {{ openldap_ldap_pubkey_wrapper }}
   notify:
     - restart_login_services
   when:
     - openldap_server_enable_sshkeys
 
 - name: Append ssh-ldap-pubkey user configs to sshd_config
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/ssh/sshd_config
     state: present
-    line: 'AuthorizedKeysCommandUser {{ openldap_ldap_pubkey_user }}'
+    line: AuthorizedKeysCommandUser {{ openldap_ldap_pubkey_user }}
   notify:
     - restart_login_services
   when:
 
 - name: Start rpcbind service
-  service:
+  ansible.builtin.service:
     name: rpcbind
     state: started
-    enabled: yes
+    enabled: true
   when:
     - openldap_server_enable_autofs
 
-- meta: flush_handlers
-
+- ansible.builtin.meta: flush_handlers
 - name: Start AutoFS service
-  service:
+  ansible.builtin.service:
     name: autofs
     state: |-
-      {%- if autofs_needs_restart|default('false') -%}
+      {%- if autofs_needs_restart | default('false') -%}
         restarted
       {%- else %}
-        started
-      {%- endif %}
-    enabled: yes
+        started{%- endif %}
+    enabled: true
   when:
     - openldap_server_enable_autofs
-
-
-

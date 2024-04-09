@@ -1,53 +1,5 @@
+---
 - name: Slurp ssl data from remote host
-  block:
-    - name: slurp latest ssl key contents
-      slurp:
-        src: "{{ ssl_key_slurp_path }}"
-      register: ssl_key_contents
-      delegate_to: "{{ ssl_slurp_remote_host }}"
-      delegate_facts: true
-
-    - name: set encoded ssl key contents as fact for later processing
-      set_fact:
-        encoded_ssl_key: "{{ ssl_key_contents['content'] }}"
-
-    - name: slurp latest ssl certificate chain contents
-      slurp:
-        src: "{{ ssl_cert_slurp_path }}"
-      register: ssl_cert_contents
-      delegate_to: "{{ ssl_slurp_remote_host }}"
-      delegate_facts: true
-
-    - name: set encoded ssl cert contents as fact for later processing
-      set_fact:
-        encoded_ssl_cert: "{{ ssl_cert_contents['content'] }}"
-
-    - name: set decoded ssl key and cert chain as fact for future tasks
-      set_fact:
-        ssl_privkey: "{{ encoded_ssl_key | b64decode }}"
-        ssl_certchain: "{{ encoded_ssl_cert | b64decode }}"
-
-    - name: print decoded ssl key and certificate chain for debugging
-      debug:
-        msg: |
-          SSL private key: {{ ssl_privkey }}
-          SSL certificate chain: {{ ssl_certchain }}
-        verbosity: 1
-
-    - name: Create the directory for ldap certificates
-      file:
-        path: "{{ openldap_server_app_path }}/certs"
-        state: directory
-        owner: "{{ openldap_client_user|default('root')  }}"
-        group: "{{ openldap_client_group|default('root')  }}"
-
-    - name: "Install SSL Certificate Chain"
-      copy:
-        content: "{{ ssl_certchain }}"
-        dest: "{{ ssl_certpath }}"
-        owner: "{{ openldap_client_user|default('root')  }}"
-        group: "{{ openldap_client_group|default('root')  }}"
-        mode: 0640
   when:
     - openldap_server_enable_tls
     - slurp_ssl_keys_from_remote|default(False)
@@ -56,3 +8,52 @@
     - ssl_key_slurp_path|length > 0
   tags:
     - openldap-ssl
+  block:
+    - name: Slurp latest ssl key contents
+      ansible.builtin.slurp:
+        src: "{{ ssl_key_slurp_path }}"
+      register: ssl_key_contents
+      delegate_to: "{{ ssl_slurp_remote_host }}"
+      delegate_facts: true
+
+    - name: Set encoded ssl key contents as fact for later processing
+      ansible.builtin.set_fact:
+        encoded_ssl_key: "{{ ssl_key_contents['content'] }}"
+
+    - name: Slurp latest ssl certificate chain contents
+      ansible.builtin.slurp:
+        src: "{{ ssl_cert_slurp_path }}"
+      register: ssl_cert_contents
+      delegate_to: "{{ ssl_slurp_remote_host }}"
+      delegate_facts: true
+
+    - name: Set encoded ssl cert contents as fact for later processing
+      ansible.builtin.set_fact:
+        encoded_ssl_cert: "{{ ssl_cert_contents['content'] }}"
+
+    - name: Set decoded ssl key and cert chain as fact for future tasks
+      ansible.builtin.set_fact:
+        ssl_privkey: "{{ encoded_ssl_key | b64decode }}"
+        ssl_certchain: "{{ encoded_ssl_cert | b64decode }}"
+
+    - name: Print decoded ssl key and certificate chain for debugging
+      ansible.builtin.debug:
+        msg: |
+          SSL private key: {{ ssl_privkey }}
+          SSL certificate chain: {{ ssl_certchain }}
+        verbosity: 1
+
+    - name: Create the directory for ldap certificates
+      ansible.builtin.file:
+        path: "{{ openldap_server_app_path }}/certs"
+        state: directory
+        owner: "{{ openldap_client_user | default('root') }}"
+        group: "{{ openldap_client_group | default('root') }}"
+
+    - name: Install SSL Certificate Chain
+      ansible.builtin.copy:
+        content: "{{ ssl_certchain }}"
+        dest: "{{ ssl_certpath }}"
+        owner: "{{ openldap_client_user | default('root') }}"
+        group: "{{ openldap_client_group | default('root') }}"
+        mode: "0640"

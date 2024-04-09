@@ -57,6 +57,7 @@
   ansible.builtin.template:
     src: client_ldap.conf.j2
     dest: /etc/ldap.conf
+    mode: "0644"
   notify:
     - restart_login_services
     - restart_ns_daemons

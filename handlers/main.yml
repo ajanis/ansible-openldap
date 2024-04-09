@@ -1,67 +1,66 @@
 ---
-- name: Restart iptables
-  service:
+- name: restart iptables
+  ansible.builtin.service:
     name: iptables
     state: restarted
     enabled: true
 
 - name: fix ldap perms
   listen: restart slapd
-  file:
+  ansible.builtin.file:
     path: "{{ openldap_server_app_path }}"
     state: directory
     recurse: true
     owner: "{{ openldap_server_user }}"
     group: "{{ openldap_server_group }}"
-    mode: 0755
+    mode: "0755"
 - name: restart slapd
   listen: restart slapd
-  service:
+  ansible.builtin.service:
     name: slapd
     state: restarted
-    enabled: yes
-
+    enabled: true
 
 - name: restart httpd
-  service:
+  ansible.builtin.service:
     name: httpd
     state: restarted
-    enabled: yes
+    enabled: true
 
 - name: restart nscd
   listen: restart_ns_daemons
-  service:
+  ansible.builtin.service:
     name: nscd
     state: restarted
-    enabled: yes
+    enabled: true
 
 - name: restart_nslcd
   listen: restart_ns_daemons
-  service:
+  ansible.builtin.service:
     name: nslcd
     state: restarted
-    enabled: yes
+    enabled: true
 
 - name: restart_sssd
   listen: restart_ns_daemons
-  service:
+  ansible.builtin.service:
     name: sssd
     state: restarted
-    enabled: yes
+    enabled: true
   when:
     - ansible_os_family == "RedHat"
     - ansible_distribution_major_version >= "8"
 
 - name: restart_sshd
   listen: restart_login_services
-  service:
+  ansible.builtin.service:
     name: "{{ ssh_service }}"
     state: restarted
-    enabled: yes
+    enabled: true
 
-- name: "require authconfig update"
-  set_fact:
-    run_authconfig: True
+- name: require authconfig update
+  ansible.builtin.set_fact:
+    run_authconfig: true
   listen: restart_login_services
 
 # - name: fix ldap perms
@@ -75,46 +74,45 @@
 #     mode: 0755
 - name: restart_systemd_logind
   listen: restart_login_services
-  service:
+  ansible.builtin.service:
     name: systemd-logind
     state: restarted
-    enabled: yes
+    enabled: true
 
 - name: restart_autofs
-  service:
+  ansible.builtin.service:
     name: autofs
     state: restarted
-    enabled: yes
+    enabled: true
 
 - name: reload exports
-  command: exportfs -ra
-
-- name: restart samba
-  service:
+  ansible.builtin.command: exportfs -ra
+- name: Restart samba
+  ansible.builtin.service:
     name: smbd
     state: restarted
-    enabled: yes
+    enabled: true
 
 - name: restart nmbd
-  service:
+  ansible.builtin.service:
     name: nmbd
     state: restarted
-    enabled: yes
+    enabled: true
 
-- name: smbldap populate
-  set_fact:
-    smbldap_populate: True
+- name: rmbldap populate
+  ansible.builtin.set_fact:
+    smbldap_populate: true
 
-- name: slapd rebuild
-  set_fact:
-    slapd_rebuild: True
+- name: rlapd rebuild
+  ansible.builtin.set_fact:
+    slapd_rebuild: true
 
 - name: restart avahi-daemon
-  service:
+  ansible.builtin.service:
     name: avahi-daemon
     state: restarted
 
 - name: restart netatalk
-  service:
+  ansible.builtin.service:
     name: netatalk
     state: restarted
