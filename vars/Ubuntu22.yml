@@ -10,11 +10,9 @@ openldap_server_pkgs:
   - libssl-dev
   - python3-pexpect
   - rpcbind
-
+  - python3-ldap
+  - python3-ldap3
 openldap_python_pkgs:
-  - python-ldap
-  - ldap3
-
 openldap_client_pkgs:
   - libnss-ldapd
   - libsasl2-dev
@@ -25,7 +23,8 @@ openldap_client_pkgs:
   - nscd
   - ldap-utils
   - python3-pip
-
+  - python3-ldap
+  - python3-ldap3
 samba_pkgs:
   - smbldap-tools
   - samba
@@ -36,12 +35,12 @@ afpd_pkgs:
   - samba
   - libnss-mdns
 
-openldap_server_app_path: "/etc/ldap"
-openldap_server_db_path: "/var/lib/ldap/{{ openldap_server_domain_name }}"
+openldap_server_app_path: /etc/ldap
+openldap_server_db_path: /var/lib/ldap/{{ openldap_server_domain_name }}
 
 openldap_server_user: openldap
 openldap_server_group: openldap
-openldap_nslcd_group: "nslcd"
+openldap_nslcd_group: nslcd
 
 ssh_service: ssh
 openldap_ssh_ldap_pubkey_version: 1.4.0
