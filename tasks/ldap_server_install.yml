@@ -1,6 +1,6 @@
 ---
 - name: Install the openldap and required Packages for RedHat
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: "{{ openldap_server_pkgs }}"
     state: present
   when: ansible_os_family == 'RedHat'

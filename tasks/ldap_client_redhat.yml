@@ -1,6 +1,6 @@
 ---
 - name: Install the openldap client and required Packages for RedHat
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: "{{ openldap_client_pkgs }}"
     state: present
     update_cache: true
@@ -96,7 +96,7 @@
     - restart_login_services
 
 - name: Autofs packages
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: autofs
     state: present
     update_cache: true
