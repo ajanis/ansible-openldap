@@ -44,40 +44,6 @@
   when:
     - openldap_server_enable_sshkeys
 
-# - name: Add ssh pubkey command to ssh server configuration
-#   lineinfile:
-#     dest: /etc/ssh/sshd_config
-#     state: present
-#     line: >-
-#       {%- if (ansible_os_family == 'Debian') or (ansible_os_family == 'RedHat' and ansible_distribution_major_version >= '8') -%}
-#       AuthorizedKeysCommand /usr/local/bin/ssh-ldap-pubkey-wrapper
-#       {%- else -%}
-#       AuthorizedKeysCommand /usr/bin/ssh-ldap-pubkey-wrapper
-#       {%- endif -%}
-#   notify:
-#     - restart_login_services
-#   when:
-#     - openldap_server_enable_sshkeys
-#   tags:
-#     - always
-
-# - name: Add ssh pubkey command user to ssh server configuration
-#   lineinfile:
-#     dest: /etc/ssh/sshd_config
-#     state: present
-#     line: >-
-#       {%- if openldap_server_enable_sshkeys|default(false) -%}
-#       AuthorizedKeysCommandUser nobody
-#       {%- else -%}
-#       #AuthorizedKeysCommandUser nobody
-#       {%- endif -%}
-#   notify:
-#     - restart_login_services
-#   when:
-#     - openldap_server_enable_sshkeys
-#   tags:
-#     - always
-
 - name: Enable pam authentication in ssh server configuration
   ansible.builtin.lineinfile:
     dest: /etc/ssh/sshd_config
