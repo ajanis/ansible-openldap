@@ -5,18 +5,11 @@
     state: present
     update_cache: true
 
-- name: Install ansible python dependencies for ldap configuration
-  ansible.builtin.pip:
-    name: "{{ openldap_python_pkgs }}"
-    state: present
-
 - name: Install ssh-ldap-pubkey pip package
-  ansible.builtin.pip:
-    name: ssh-ldap-pubkey
-    state: present
-    version: "{{ openldap_ssh_ldap_pubkey_version | default(omit) }}"
+  ansible.builtin.include_tasks:
+    file: ssh-ldap-pubkey.yml
   when:
-    - openldap_server_enable_sshkeys
+    - openldap_server_enable_sshkeys | default(true)
 
 - name: Create openldap app path
   ansible.builtin.file:

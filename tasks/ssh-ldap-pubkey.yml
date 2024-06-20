@@ -1,0 +1,8 @@
+---
+- name: Install ssh-ldap-pubkey and wrapper script via pipx
+  community.general.pipx:
+    name: ssh-ldap-pubkey
+    state: latest
+  environment:
+    PIPX_HOME: /usr/local/share/pipx
+    PIPX_BIN_DIR: /usr/local/bin
