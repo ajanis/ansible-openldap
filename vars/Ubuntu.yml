@@ -23,8 +23,7 @@ openldap_client_pkgs:
   - libsasl2-dev
   - python3-dev
   - libldap-dev
-  - libldap2
-  - libssl-dev
+  - libldap2-dev  - libssl-dev
   - libpam-ldap
   - nscd
   - ldap-utils
