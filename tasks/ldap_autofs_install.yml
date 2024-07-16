@@ -13,7 +13,7 @@
     dest: "{{ openldap_autofs_defaults_file }}"
     mode: "0755"
   notify:
-    - restart_autofs
+    - Restart AutoFS
   when:
     - openldap_server_enable_autofs
 
@@ -23,7 +23,7 @@
     dest: /etc/autofs_ldap_auth.conf
     mode: "0600"
   notify:
-    - restart_autofs
+    - Restart AutoFS
   when:
     - openldap_server_enable_autofs
 
@@ -68,7 +68,9 @@
   when:
     - openldap_server_enable_autofs
 
-- ansible.builtin.meta: flush_handlers
+- name: Flush Handlers
+  ansible.builtin.meta: flush_handlers
+
 - name: Start AutoFS service
   ansible.builtin.service:
     name: autofs

@@ -10,14 +10,14 @@
     src: netatalk
     dest: /etc/default/netatalk
   notify:
-    - restart netatalk
+    - Restart Netatalk
 
 - name: Copy afpd shares configuration
   ansible.builtin.template:
     src: AppleVolumes.default
     dest: /etc/netatalk/AppleVolumes.default
   notify:
-    - restart netatalk
+    - Restart Netatalk
 
 #- name: update hosts entry in nsswitch config
 #  lineinfile:
@@ -25,22 +25,22 @@
 #    regexp: '^hosts:.*'
 #    line: 'hosts: files mdns4_minimal dns mdns4 mdns'
 #  notify:
-#    - restart netatalk
+#    - Restart Netatalk
 
 - name: Set system model for afpd
   ansible.builtin.lineinfile:
     dest: /etc/netatalk/afpd.conf
     line: -mimicmodel Xserve
   notify:
-    - restart netatalk
+    - Restart Netatalk
 
 - name: Template afpd config for ldap authentication
   ansible.builtin.template:
     src: afp_ldap.conf.j2
     dest: /etc/netatalk/afp_ldap.conf
   notify:
-    - restart avahi-daemon
-    - restart netatalk
+    - Restart Avahi Daemon
+    - Restart Netatalk
   when: afp_ldap_auth
 
 - name: Add afpd service to local avahi daemon
@@ -48,7 +48,7 @@
     src: afpd.service
     dest: /etc/avahi/services/afpd.service
   notify:
-    - restart avahi-daemon
+    - Restart Avahi Daemon
 
 - name: Enable afpd service
   ansible.builtin.service:

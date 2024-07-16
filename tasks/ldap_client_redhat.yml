@@ -83,7 +83,7 @@
     dest: /etc/sysconfig/autofs
     mode: "0644"
   notify:
-    - restart_autofs
+    - Restart AutoFS
   when:
     - openldap_server_enable_autofs
 

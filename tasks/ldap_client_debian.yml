@@ -132,7 +132,7 @@
     dest: /etc/default/autofs
     mode: "0755"
   notify:
-    - restart_autofs
+    - Restart AutoFS
   when:
     - openldap_server_enable_autofs
 

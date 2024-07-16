@@ -64,7 +64,7 @@
   ansible.builtin.shell: smbpasswd -w {{ openldap_server_rootpw }}
   when: smbldap_populate | default(False)
 
-- name: Restart samba services
+- name: Restart Samba services
   ansible.builtin.service:
     name: "{{ item }}"
     state: restarted
