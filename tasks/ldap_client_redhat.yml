@@ -32,7 +32,7 @@
   notify:
     - restart_login_services
     - restart_ns_daemons
-    - restart_sssd
+    - Restart SSSD
   when:
     - ansible_distribution_major_version >= "8"
 
@@ -87,18 +87,16 @@
   when:
     - openldap_server_enable_autofs
 
-- ansible.builtin.meta: flush_handlers
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers
+
 - name: Run 'authconfig --enableldap --enableldapauth --enablemkhomedir --update'
   ansible.builtin.command: authconfig --enableldap --enableldapauth --enablemkhomedir --update
   when:
     - run_authconfig | default(False)
     - ansible_distribution_major_version < "8"
-
-#- name: "Run 'authselect select sssd with-mkhomedir with-pamaccess --force' [CentOS 8]"
-#  command: "authselect select sssd with-mkhomedir with-pamaccess --force"
-#  when:
-#    - run_authconfig | default(False)
-#    - ansible_distribution_major_version >= "8"
+  register: run_authconfig
+  changed_when: run_authconfig is success
 
 - name: Create user home directories
   ansible.builtin.file:
@@ -107,7 +105,7 @@
     owner: "{{ item.value.uid }}"
     group: "{{ item.value.gid }}"
     mode: "0755"
-  loop: "{{ ssh_users|default({})|dict2items }}"
+  loop: "{{ ssh_users | default({}) | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
   when:
