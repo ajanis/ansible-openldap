@@ -14,11 +14,11 @@
   ansible.builtin.lineinfile:
     dest: /etc/hosts
     state: present
-    line: "{{ hostvars[item]['ansible_host'] }} {{ openldap_server_domain_name }} {{ openldap_server_domain_name.split('.')[0] }}"
-  loop: "{{ groups['ldap'] | default([]) | unique }}"
+    line: "{{ lookup('dig', item ~ '.' ~ www_domain) }} {{ item }}.{{ www_domain }} {{ item }}"
   when:
     - groups['ldap'] is defined
     - groups['ldap'] | length > 0
+  loop: "{{ groups['ldapservers'] | flatten }}"
   tags:
     - always
 
