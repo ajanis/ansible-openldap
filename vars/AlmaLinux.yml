@@ -53,4 +53,4 @@ openldap_server_db_path: /var/lib/ldap/{{ openldap_server_domain_name }}
 openldap_server_user: ldap
 openldap_server_group: ldap
 openldap_nslcd_group: ldap
-ssh_service: sshd
+sshd_service: sshd

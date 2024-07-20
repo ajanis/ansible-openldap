@@ -52,4 +52,4 @@ openldap_server_user: openldap
 openldap_server_group: openldap
 openldap_nslcd_group: nslcd
 
-ssh_service: ssh
+sshd_service: ssh

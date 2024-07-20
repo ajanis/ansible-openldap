@@ -54,7 +54,7 @@
 - name: Restart SSHD
   listen: restart_login_services
   ansible.builtin.service:
-    name: "{{ ssh_service }}"
+    name: "{{ sshd_service }}"
     state: restarted
     enabled: true
 
