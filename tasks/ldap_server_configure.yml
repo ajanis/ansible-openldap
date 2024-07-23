@@ -148,7 +148,8 @@
   notify:
     - Restart SlapD
 
-- ansible.builtin.meta: flush_handlers
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers
 - name: Stop slapd
   ansible.builtin.service:
     name: slapd
@@ -223,7 +224,9 @@
 - name: Rebuild slapd OLC Directory
   ansible.builtin.shell: slaptest -f {{ openldap_server_app_path }}/slapd.conf -F {{ openldap_server_app_path }}/slapd.d
   become_user: "{{ openldap_server_user }}"
+  become: true
   when: slapd_rebuild | default(False)
+  changed_when: false
 
 - name: Fix slapd.d permissions
   ansible.builtin.file:
@@ -267,9 +270,10 @@
 - name: Add the samba indices
   ansible.builtin.shell: >
     ldapmodify -x -D "cn=admin,cn=config" -w {{ openldap_server_rootpw }}
-    -f {{ smbindices.dest|default( '/tmp/samba_indices.ldif' ) }} && touch {{ openldap_server_app_path }}/smbindices_created
+    -f {{ smbindices.dest | default('/tmp/samba_indices.ldif') }} && touch {{ openldap_server_app_path }}/smbindices_created
   args:
     creates: "{{ openldap_server_app_path }}/smbindices_created"
+  become: true
   become_user: "{{ openldap_server_user }}"
   when:
     - openldap_server_enable_samba
