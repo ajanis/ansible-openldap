@@ -7,8 +7,6 @@
     - "{{ ansible_os_family }}.yml"
   tags:
     - always
-- name: Set up
-  ansible.builtin.setup: {}
 
 - name: Add /etc/hosts entry for ldap server
   ansible.builtin.lineinfile:

@@ -1,9 +1,21 @@
 ---
-- name: Install the openldap client and required Packages for Ubuntu
+- name: Wait for locks
+  ansible.builtin.include_tasks:
+    file: wait_for_locks.yml
+
+- name: Update APT Repos # noqa no-handler
+  ansible.builtin.apt:
+    update_cache: true
+  register: cache_updated
+  until:
+    - cache_updated is not failed
+
+- name: packages-debian | Install APT Packages
   ansible.builtin.apt:
     name: "{{ openldap_client_pkgs }}"
     state: present
-    update_cache: true
+  register: apt_install_result
+  until: apt_install_result is not failed
 
 - name: Install ssh-ldap-pubkey pip package
   ansible.builtin.include_tasks:

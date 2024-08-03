@@ -6,10 +6,10 @@ shared_storage: false
 data_mount_root: /data
 ldap_user_home_directory: homedirs
 openldap_clientconfig: /etc/ldap.conf
-#The ldif file
+# The ldif file
 openldap_server_ldif: domain.ldif
 
-openldap_server_dc: dc={{ ',dc='.join( openldap_server_domain_name.split('.') ) }}
+openldap_server_dc: dc={{ ',dc='.join(openldap_server_domain_name.split('.')) }}
 
 openldap_server_bind_dn: cn=Manager,{{ openldap_server_dc }}
 
