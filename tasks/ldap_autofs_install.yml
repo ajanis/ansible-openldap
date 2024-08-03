@@ -1,16 +1,20 @@
 ---
+- name: Wait for locks
+  ansible.builtin.include_tasks:
+    file: wait_for_locks.yml
+
 - name: Install autofs packages and supporting ldap packages
   ansible.builtin.package:
-    name: "{{ openldap_autofs_packages }}"
+    name: autofs
     state: present
     update_cache: true
   when:
-    - openldap_server_enable_autofs
+    - openldap_server_enable_autofs | default(true)
 
 - name: Copy autofs defaults file
   ansible.builtin.template:
     src: autofs.j2
-    dest: "{{ openldap_autofs_defaults_file }}"
+    dest: /etc/defaults/autofs
     mode: "0755"
   notify:
     - Restart AutoFS
@@ -58,7 +62,6 @@
     line: AuthorizedKeysCommandUser {{ openldap_ldap_pubkey_user }}
   notify:
     - restart_login_services
-  when:
 
 - name: Start rpcbind service
   ansible.builtin.service:
