@@ -1,4 +1,8 @@
 ---
+- name: Wait for locks
+  ansible.builtin.include_tasks:
+    file: wait_for_locks.yml
+
 - name: Install the openldap and required Packages for RedHat
   ansible.builtin.dnf:
     name: "{{ openldap_server_pkgs }}"
