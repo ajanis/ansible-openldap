@@ -32,6 +32,5 @@
     - lockresult.rc == 1
   changed_when:
     - lockresult.rc == 0
-  failed_when: false
   retries: 50
   delay: 10
