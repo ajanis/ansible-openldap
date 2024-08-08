@@ -4,8 +4,8 @@
     cmd: command -v cloud-init
     executable: /bin/bash
   register: cicheck
-  changed_when: false
-  failed_when: false
+  changed_when: cicheck is not failed
+  ignore_errors: true
 
 - name: wait_for_locks | Wait or cloud-init to finish
   community.general.cloud_init_data_facts:
