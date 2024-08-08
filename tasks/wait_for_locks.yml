@@ -1,4 +1,12 @@
 ---
+- name: wait_for_locks | Test for cloud-init
+  ansible.builtin.shell:
+    cmd: command -v cloud-init
+    executable: /bin/bash
+  register: cicheck
+  changed_when: false
+  failed_when: false
+
 - name: wait_for_locks | Wait or cloud-init to finish
   community.general.cloud_init_data_facts:
     filter: status
@@ -8,6 +16,9 @@
     - not ciresult.cloud_init_data_facts.status.v1.stage
   retries: 50
   delay: 10
+  when:
+    - cicheck is defined
+    - cicheck.rc == 0
 
 - name: wait_for_locks | Wait for automatic system updates
   ansible.builtin.shell:
