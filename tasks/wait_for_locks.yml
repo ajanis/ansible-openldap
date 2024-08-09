@@ -1,4 +1,17 @@
 ---
+- name: wait_for_locks | Test for cloud-init
+  ansible.builtin.shell:
+    cmd: command -v cloud-init || true
+    executable: /bin/bash
+  changed_when: false
+
+- name: wait_for_locks | Print cloud-init check
+  ansible.builtin.debug:
+    msg: "{{ cicheck }}"
+  when:
+    - cicheck.rc is defined
+    - cicheck.rc == "0"
+
 - name: wait_for_locks | Wait or cloud-init to finish
   community.general.cloud_init_data_facts:
     filter: status
@@ -8,19 +21,59 @@
     - not ciresult.cloud_init_data_facts.status.v1.stage
   retries: 50
   delay: 10
+  when:
+    - cicheck.rc is defined
+    - cicheck.rc == "0"
 
 - name: wait_for_locks | Wait for automatic system updates
   ansible.builtin.shell:
-    cmd: fuser {{ item }} >/dev/null 2>&1
-  loop:
-    - /var/lib/dpkg/lock
-    - /var/lib/dpkg/lock-frontend
-    - /var/lib/rpm/.rpm.lock
-  register: lockresult
+    cmd: fuser /var/lib/dpkg/lock
+    executable: /bin/bash
+  register: deb_lockresult
   until:
-    - lockresult.rc == 1
-  changed_when:
-    - lockresult.rc == 0
-  failed_when: false
+    - deb_lockresult is not failed
+  failed_when: deb_lockresult.rc == "0"
   retries: 50
   delay: 10
+  when:
+    - ansible_os_family == "Debian"
+- name: wait_for_locks | Print lock check
+  ansible.builtin.debug:
+    msg: "{{ deb_lockresult }}"
+  when:
+    - deb_lockresult is defined
+- name: wait_for_locks | Wait for automatic system updates
+  ansible.builtin.shell:
+    cmd: fuser /var/lib/dpkg/lock-frontend
+    executable: /bin/bash
+  register: deb_felockresult
+  failed_when:
+    - deb_felockresult.rc == "0"
+  until:
+    - deb_felockresult is not failed
+  retries: 50
+  delay: 10
+  when:
+    - ansible_os_family == "Debian"
+- name: wait_for_locks | Print lock check
+  ansible.builtin.debug:
+    msg: "{{ deb_felockresult }}"
+  when:
+    - deb_felockresult is defined
+- name: wait_for_locks | Wait for automatic system updates
+  ansible.builtin.shell:
+    cmd: fuser /var/lib/rpm/.rpm.lock
+    executable: /bin/bash
+  register: rpm_lockresult
+  failed_when: rpm_lockresult.rc == "0"
+  until:
+    - rpm_lockresult is not failed
+  retries: 50
+  delay: 10
+  when:
+    - ansible_os_family == "RedHat"
+- name: wait_for_locks | Print lock check
+  ansible.builtin.debug:
+    msg: "{{ rpm_lockresult }}"
+  when:
+    - rpm_lockresult is defined
