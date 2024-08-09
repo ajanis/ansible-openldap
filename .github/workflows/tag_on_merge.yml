@@ -1,34 +1,41 @@
----
 # This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
 name: Tag on Merge
 
 on:
-  push:
+  pull_request:
     branches:
-      - main
       - master
+    types:
+      - closed
 
 env:
   CI: true
 
+permissions: write-all
+
 jobs:
-  build:
+  version_tag:
+    if: github.event.pull_request.merged == true
+    env:
+      BUMP: |-
+        ${{
+          contains(github.event.pull_request.labels.*.name, 'major') && 'major'
+          || contains(github.event.pull_request.labels.*.name, 'minor') && 'minor'
+          || 'patch'
+        }}
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-      - name: Bump version and push tag
-        uses: anothrNick/github-tag-action@1.36.0
+      - uses: actions/checkout@v3
+        with:
+          ref: master
+          fetch-tags: true
+      - name: Bump version and get tag
+        id: new_version
+        uses: anothrNick/github-tag-action@1.67.0
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          WITH_V: true
-          DEFAULT_BUMP: minor
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        if: steps.commit.outputs.exit_code == 0
-        with:
-          github_token: ${{ secrets.GH_TOKEN }}
-          force: true
-          branch: ${{ github.ref }}
+          WITH_V: 'true'
+          DEFAULT_BUMP: ${{ env.BUMP }}
