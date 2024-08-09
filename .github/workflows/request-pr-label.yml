@@ -1,0 +1,22 @@
+name: 'PR Open: Request Label'
+on:
+  pull_request:
+    branches:
+      - master
+    types:
+      - opened
+jobs:
+  add_comment:
+    if: >-
+      !contains(github.event.pull_request.labels.*.name, 'major') &&
+      !contains(github.event.pull_request.labels.*.name, 'minor') &&
+      !contains(github.event.pull_request.labels.*.path, 'patch')
+    name: Comment requesting versioning label
+    runs-on: ubuntu-latest
+    steps:
+      - uses: mshick/add-pr-comment@v1
+        with:
+          message:
+            Please set a versioning label of either `major`, `minor`, or `patch`
+            to the pull request.
+          repo-token: ${{ secrets.GH_TOKEN }}
