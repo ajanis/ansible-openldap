@@ -25,55 +25,26 @@
     - cicheck.rc is defined
     - cicheck.rc == "0"
 
-- name: wait_for_locks | Wait for automatic system updates
+- name: wait_for_locks | Wait for /var/lib/dpkg/lock
   ansible.builtin.shell:
-    cmd: fuser /var/lib/dpkg/lock
+    cmd: while fuser /var/lib/dpkg/lock; do echo "locked"; sleep 1; done
     executable: /bin/bash
-  register: deb_lockresult
-  until:
-    - deb_lockresult is not failed
-  failed_when: deb_lockresult.rc == "0"
-  retries: 50
-  delay: 10
   when:
     - ansible_os_family == "Debian"
-- name: wait_for_locks | Print lock check
-  ansible.builtin.debug:
-    msg: "{{ deb_lockresult }}"
-  when:
-    - deb_lockresult is defined
-- name: wait_for_locks | Wait for automatic system updates
+  changed_when: false
+
+- name: wait_for_locks | Wait for /var/lib/dpkg/lock-frontend
   ansible.builtin.shell:
-    cmd: fuser /var/lib/dpkg/lock-frontend
+    cmd: while fuser /var/lib/dpkg/lock-frontend; do echo "locked"; sleep 1; done
     executable: /bin/bash
-  register: deb_felockresult
-  failed_when:
-    - deb_felockresult.rc == "0"
-  until:
-    - deb_felockresult is not failed
-  retries: 50
-  delay: 10
   when:
     - ansible_os_family == "Debian"
-- name: wait_for_locks | Print lock check
-  ansible.builtin.debug:
-    msg: "{{ deb_felockresult }}"
-  when:
-    - deb_felockresult is defined
-- name: wait_for_locks | Wait for automatic system updates
+  changed_when: false
+
+- name: wait_for_locks | Wait for /var/lib/rpm/.rpm.lock
   ansible.builtin.shell:
-    cmd: fuser /var/lib/rpm/.rpm.lock
+    cmd: while fuser /var/lib/rpm/.rpm.lock; do echo "locked"; sleep 1; done
     executable: /bin/bash
-  register: rpm_lockresult
-  failed_when: rpm_lockresult.rc == "0"
-  until:
-    - rpm_lockresult is not failed
-  retries: 50
-  delay: 10
   when:
     - ansible_os_family == "RedHat"
-- name: wait_for_locks | Print lock check
-  ansible.builtin.debug:
-    msg: "{{ rpm_lockresult }}"
-  when:
-    - rpm_lockresult is defined
+  changed_when: false
