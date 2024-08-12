@@ -20,27 +20,27 @@
   tags:
     - always
 
-- name: Update sshd config options
-  ansible.builtin.lineinfile:
-    dest: /etc/ssh/sshd_config
-    state: present
-    regexp: ^(?:.+)?{{ item.option }}.*$
-    line: "{{ item.option }} {{ item.value }}"
-  loop:
-    - option: AuthorizedKeysCommand
-      value: /usr/local/bin/ssh-ldap-pubkey-wrapper
-    - option: AuthorizedKeysCommandUser
-      value: nobody
-      # {% if groups['kvm'] is defined and inventory_hostname in groups['kvm'] %}
-      # Match user virsh
-      #     X11Forwarding no
-      #     AllowTcpForwarding no
-      #     PermitTTY no
-      #     ForceCommand nc -q 0 -U /var/run/libvirt/libvirt-sock
-      # {% endif %}
-  notify: restart_login_services
-  when:
-    - openldap_server_enable_sshkeys
+# - name: Update sshd config options
+#   ansible.builtin.lineinfile:
+#     dest: /etc/ssh/sshd_config
+#     state: present
+#     regexp: ^(?:.+)?{{ item.option }}.*$
+#     line: "{{ item.option }} {{ item.value }}"
+#   loop:
+#     - option: AuthorizedKeysCommand
+#       value: /usr/local/bin/ssh-ldap-pubkey-wrapper
+#     - option: AuthorizedKeysCommandUser
+#       value: nobody
+#       # {% if groups['kvm'] is defined and inventory_hostname in groups['kvm'] %}
+#       # Match user virsh
+#       #     X11Forwarding no
+#       #     AllowTcpForwarding no
+#       #     PermitTTY no
+#       #     ForceCommand nc -q 0 -U /var/run/libvirt/libvirt-sock
+#       # {% endif %}
+#   notify: restart_login_services
+#   when:
+#     - openldap_server_enable_sshkeys
 
 - name: Enable pam authentication in ssh server configuration
   ansible.builtin.lineinfile:
