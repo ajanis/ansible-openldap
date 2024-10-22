@@ -11,11 +11,13 @@
   notify:
     - restart_login_services
 
-# - name: Install ssh-ldap-pubkey pip package
-#   ansible.builtin.include_tasks:
-#     file: ssh-ldap-pubkey.yml
-#   when:
-#     - openldap_server_enable_sshkeys | default(true)
+- name: Install ssh-ldap-pubkey pip package
+  ansible.builtin.include_tasks:
+    file: ssh-ldap-pubkey.yml
+  when:
+    - openldap_server_enable_sshkeys | default(true)
+  tags:
+    - openldap-sshd
 
 - name: Copy /etc/ldap.conf for client
   ansible.builtin.template:
