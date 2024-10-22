@@ -17,11 +17,16 @@
   register: apt_install_result
   until: apt_install_result is not failed
 
-# - name: Install ssh-ldap-pubkey pip package
-#   ansible.builtin.include_tasks:
-#     file: ssh-ldap-pubkey.yml
-#   when:
-#     - openldap_server_enable_sshkeys | default(true)
+- name: Install ssh-ldap-pubkey pip package
+  ansible.builtin.include_tasks:
+    file: ssh-ldap-pubkey.yml
+    apply:
+      tags:
+        - openldap-sshd
+  when:
+    - openldap_server_enable_sshkeys | default(true)
+  tags:
+    - openldap-sshd
 
 - name: Create openldap app path
   ansible.builtin.file:

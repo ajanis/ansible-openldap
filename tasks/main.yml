@@ -68,6 +68,9 @@
 - name: Include ldap server install tasks
   ansible.builtin.include_tasks:
     file: ldap_server_install.yml
+    apply:
+      tags:
+        - openldap-server
   when: "'ldapservers' in group_names"
   tags:
     - openldap-server
@@ -75,33 +78,29 @@
 - name: Include LDAP server configration tasks
   ansible.builtin.include_tasks:
     file: ldap_server_configure.yml
+    apply:
+      tags:
+        - openldap-config
   when: "'ldapservers' in group_names"
   tags:
     - openldap-config
 
-- name: Configure LDAP Client [Debian]
+- name: Configure LDAP Client
   ansible.builtin.include_tasks:
-    file: ldap_client_debian.yml
-
-  when:
-    - ansible_os_family == "Debian"
-    - openldap_client_enable
+    file: ldap_client_{{ ansible_os_family | lower }}.yml
+    apply:
+      tags:
+        - openldap-client
   tags:
     - openldap-client
-
-- name: Configure LDAP Client [RedHat]
-  ansible.builtin.include_tasks:
-    file: ldap_client_redhat.yml
-
-  when:
-    - ansible_os_family == "RedHat"
-    - openldap_client_enable
-  tags:
-    - openldap-client
+    - openldap-sshd
 
 - name: Include ldap setup tasks
   ansible.builtin.include_tasks:
     file: ldap_autofs_configure.yml
+    apply:
+      tags:
+        - openldap-automount
   when:
     - openldap_server_enable_autofs
     - "'ldapservers' in group_names"
@@ -110,6 +109,9 @@
 - name: Include ldap account configuration tasks
   ansible.builtin.include_tasks:
     file: ldap_account_configure.yml
+    apply:
+      tags:
+        - openldap-users
   when:
     - openldap_server_enable_posixaccounts
     - "'ldapservers' in group_names"
@@ -119,6 +121,9 @@
 - name: Include Samba tasks
   ansible.builtin.include_tasks:
     file: samba_server.yml
+    apply:
+      tags:
+        - openldap-samba
   when:
     - openldap_server_enable_samba
     - "'samba' in group_names"
@@ -128,6 +133,9 @@
 - name: Include AFPD tasks
   ansible.builtin.include_tasks:
     file: afpd.yml
+    apply:
+      tags:
+        - openldap-afp
   when:
     - openldap_server_enable_afpd
     - "'afpd' in group_names"
