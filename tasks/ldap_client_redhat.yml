@@ -14,6 +14,9 @@
 - name: Install ssh-ldap-pubkey pip package
   ansible.builtin.include_tasks:
     file: ssh-ldap-pubkey.yml
+    apply:
+      tags:
+        - openldap-sshd
   when:
     - openldap_server_enable_sshkeys | default(true)
   tags:
