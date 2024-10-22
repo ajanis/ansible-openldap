@@ -18,15 +18,15 @@
     - groups['ldap'] | length > 0
   loop: "{{ groups['ldapservers'] | flatten }}"
   tags:
-    - always
+    - openldap-hosts
 
 - name: ssh | Update sshd config options
   tags:
-    - always
+    - openldap-sshd
   ansible.builtin.lineinfile:
     dest: /etc/ssh/sshd_config
     state: present
-    regexp: ^(?:#)?{{ item.option }}.*$
+    regexp: ^(?:#)?{{ item.option }}\s.*$
     line: "{{ item.option }} {{ item.value }}"
   loop:
     - option: Include
