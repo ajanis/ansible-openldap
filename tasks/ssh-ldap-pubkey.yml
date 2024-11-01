@@ -1,8 +1,26 @@
 ---
-- name: Install ssh-ldap-pubkey and wrapper script via pipx
-  community.general.pipx:
-    name: ssh-ldap-pubkey
-    state: latest
-  environment:
-    PIPX_HOME: /usr/local/share/pipx
-    PIPX_BIN_DIR: /usr/local/bin
+- name: ssh-ldap-pubkey | Install pipx and ssh-ldap-pubkey package
+  block:
+    - name: Wait for locks
+      ansible.builtin.include_tasks:
+        file: wait_for_locks.yml
+
+    - name: packages-pip | Install pipx
+      ansible.builtin.package:
+        name: pipx
+        state: present
+      environment:
+        PIPX_HOME: /usr/local/share/pipx
+        PIPX_BIN_DIR: /usr/local/bin
+      register: pipx_install
+      until: pipx_install is not failed
+
+    - name: Install ssh-ldap-pubkey and wrapper script via pipx
+      community.general.pipx:
+        name: ssh-ldap-pubkey
+        state: latest
+      environment:
+        PIPX_HOME: /usr/local/share/pipx
+        PIPX_BIN_DIR: /usr/local/bin
+      register: ssh_ldap_pubkey_install
+      until: ssh_ldap_pubkey_install is not failed
