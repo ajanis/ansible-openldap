@@ -33,20 +33,18 @@
     - openldap_server_enable_autofs
 
 - name: Check for ldap root password change
-  ansible.builtin.copy:
-    dest: "{{ openldap_server_app_path }}/rootpw_configured"
-    content: "{{ openldap_server_rootpw | checksum }}"
-    owner: "{{ openldap_server_user }}"
-    group: "{{ openldap_server_group }}"
-    mode: "0755"
+  ansible.builtin.stat:
+    path: "{{ openldap_server_app_path }}/rootpw_configured"
   register: rootpw_updated
 
 - name: Generate the root password for ldap
   ansible.builtin.shell: slappasswd -s {{ openldap_server_rootpw }}
   register: root_password
-  when: rootpw_updated is changed
+  when: not rootpw_updated.stat.exists
+  become: true
   become_user: "{{ openldap_server_user }}"
   no_log: true
+  changed_when: root_password.changed
 
 - name: Copy the slapd.conf configuration file for Redhat
   ansible.builtin.template:
@@ -57,7 +55,7 @@
     mode: "0755"
   when:
     - ansible_os_family == "RedHat"
-    - rootpw_updated is changed
+    - root_password.changed
   notify: slapd rebuild
 
 - name: Copy the slapd.conf configuration file for Ubuntu
@@ -69,7 +67,7 @@
     group: "{{ openldap_server_group }}"
   when:
     - ansible_os_family == "Debian"
-    - rootpw_updated is changed
+    - root_password.changed
   notify: slapd rebuild
 
 - name: Copy the ldap.conf configuration file
@@ -254,8 +252,8 @@
 - name: Add the base domain
   ansible.builtin.shell:
     cmd: >
-      ldapadd -x -D "cn=Manager,{{ openldap_server_dc }}" -w {{ openldap_server_rootpw }}
-      -f {{ rootdn.dest|default( '/tmp/' ~ openldap_server_ldif ) }} && touch {{ openldap_server_app_path }}/rootdn_created
+      ldapadd -x -D "cn=Manager,{{ openldap_server_dc }}" -w {{ openldap_server_rootpw }} -f {{ rootdn.dest|default( '/tmp/' ~ openldap_server_ldif ) }} && touch
+      {{ openldap_server_app_path }}/rootdn_created
     creates: "{{ openldap_server_app_path }}/rootdn_created"
 
 - name: Copy the template for creating samba indices
@@ -269,8 +267,8 @@
 
 - name: Add the samba indices
   ansible.builtin.shell: >
-    ldapmodify -x -D "cn=admin,cn=config" -w {{ openldap_server_rootpw }}
-    -f {{ smbindices.dest | default('/tmp/samba_indices.ldif') }} && touch {{ openldap_server_app_path }}/smbindices_created
+    ldapmodify -x -D "cn=admin,cn=config" -w {{ openldap_server_rootpw }} -f {{ smbindices.dest | default('/tmp/samba_indices.ldif') }} && touch {{ openldap_server_app_path
+    }}/smbindices_created
   args:
     creates: "{{ openldap_server_app_path }}/smbindices_created"
   become: true
