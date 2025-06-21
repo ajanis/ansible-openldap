@@ -14,6 +14,54 @@
         PIPX_BIN_DIR: /usr/local/bin
       register: pipx_install
       until: pipx_install is not failed
+      when:
+        - ansible_distribution != 'Ubuntu' or ansible_distribution_major_version != '24'
+    
+    - name: Apt pipx is obsolete on Ubuntu24
+      block:
+        - name: Wait for locks
+          ansible.builtin.include_tasks:
+            file: wait_for_locks.yml
+
+        - name: Purge pipx from apt
+          ansible.builtin.apt:
+            name: pipx
+            state: absent
+            autoremove: true
+            purge: true
+          environment: 
+            PIPX_HOME: /usr/local/share/pipx
+            PIPX_BIN_DIR: /usr/local/bin
+          register: pipx_uninstall
+          until: pipx_uninstall is not failed
+
+        - name: Install pipx globally at version 1.7.0
+          ansible.builtin.pip:
+            name: pipx==1.7.0
+            executable: pip3
+            break_system_packages: true
+          environment: 
+            PIPX_HOME: /usr/local/share/pipx
+            PIPX_BIN_DIR: /usr/local/bin
+          register: pipx_pip_install
+          until: pipx_pip_install is not failed
+
+        - name: Find pipx path
+          ansible.builtin.command: which pipx
+          register: pipx_path
+          changed_when: false
+          failed_when: pipx_path.rc != 0
+
+        - name: Symlink pipx for global access
+          ansible.builtin.file:
+            src: "{{ pipx_path.stdout }}"
+            dest: "/usr/local/bin/pipx"
+            state: link
+            force: true
+          when:
+            - pipx_path.stdout != '/usr/local/bin/pipx'       
+      when:
+        - ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '24'
 
     - name: Install ssh-ldap-pubkey and wrapper script via pipx
       community.general.pipx:
