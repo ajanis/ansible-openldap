@@ -20,7 +20,7 @@ ldap machine suffix = ou=computers
 ldap user suffix = ou=users
 ldap group suffix = ou=groups
 ldap idmap suffix = ou=Idmap
-ldap admin dn = cn=Manager,{{ openldap_server_dc }}
+ldap admin dn = {{ openldap_server_bind_dn }}
 
 {% if openldap_server_enable_ssl %}
 ldap ssl = on

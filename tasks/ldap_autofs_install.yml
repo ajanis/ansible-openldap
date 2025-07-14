@@ -5,21 +5,17 @@
 
 - name: Install autofs packages and supporting ldap packages
   ansible.builtin.package:
-    name: autofs
+    name: "{{ openldap_autofs_pkgs }}"
     state: present
     update_cache: true
-  when:
-    - openldap_server_enable_autofs | default(true)
 
-- name: Copy autofs defaults file
+- name: Copy autofs default file
   ansible.builtin.template:
     src: autofs.j2
-    dest: /etc/defaults/autofs
+    dest: "{{ '/etc/default/autofs' if ansible_os_family == 'Debian' else '/etc/sysconfig/autofs' }}"
     mode: "0755"
   notify:
-    - Restart AutoFS
-  when:
-    - openldap_server_enable_autofs
+    - Reload AutoFS
 
 - name: Update /etc/autofs_ldap_auth.conf
   ansible.builtin.template:
@@ -27,9 +23,7 @@
     dest: /etc/autofs_ldap_auth.conf
     mode: "0600"
   notify:
-    - Restart AutoFS
-  when:
-    - openldap_server_enable_autofs
+    - Reload AutoFS
 
 - name: Enable pam authentication in ssh server configuration
   ansible.builtin.lineinfile:
@@ -45,31 +39,11 @@
   tags:
     - always
 
-- name: Append ssh-ldap-pubkey wrapper configs to sshd_config
-  ansible.builtin.lineinfile:
-    dest: /etc/ssh/sshd_config
-    state: present
-    line: AuthorizedKeysCommand {{ openldap_ldap_pubkey_wrapper }}
-  notify:
-    - restart_login_services
-  when:
-    - openldap_server_enable_sshkeys
-
-- name: Append ssh-ldap-pubkey user configs to sshd_config
-  ansible.builtin.lineinfile:
-    dest: /etc/ssh/sshd_config
-    state: present
-    line: AuthorizedKeysCommandUser {{ openldap_ldap_pubkey_user }}
-  notify:
-    - restart_login_services
-
 - name: Start rpcbind service
   ansible.builtin.service:
     name: rpcbind
     state: started
     enabled: true
-  when:
-    - openldap_server_enable_autofs
 
 - name: Flush Handlers
   ansible.builtin.meta: flush_handlers
@@ -77,11 +51,5 @@
 - name: Start AutoFS service
   ansible.builtin.service:
     name: autofs
-    state: |-
-      {%- if autofs_needs_restart | default('false') -%}
-        restarted
-      {%- else %}
-        started{%- endif %}
+    state: "{{ 'reloaded' if autofs_needs_restart | default('false') else 'started' }}"
     enabled: true
-  when:
-    - openldap_server_enable_autofs

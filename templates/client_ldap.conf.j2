@@ -1,4 +1,4 @@
-base {{ openldap_server_dc }}
+base {{ openldap_search_base }}
 {% if openldap_server_enable_ssl %}
 uri ldaps://{{ openldap_server_domain_name }}
 {% endif %}

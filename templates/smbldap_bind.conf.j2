@@ -6,7 +6,7 @@
 # master ldap for writing access and a slave ldap server for reading access
 # By default, we will use the same DN (so it will work for standard Samba
 # release)
-slaveDN="cn=Manager,{{ openldap_server_dc }}"
+slaveDN="{{ openldap_server_bind_dn }}"
 slavePw="{{ openldap_server_rootpw }}"
-masterDN="cn=Manager,{{ openldap_server_dc }}"
+masterDN="{{ openldap_server_bind_dn }}"
 masterPw="{{ openldap_server_rootpw }}"

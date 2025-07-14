@@ -4,7 +4,7 @@
     server_uri: "{{ openldap_server_uri }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
-    dn: "{{ users_ou }}"
+    dn: "{{ openldap_user_ou }}"
     objectClass: organizationalUnit
     state: present
   notify:
@@ -15,7 +15,7 @@
     server_uri: "{{ openldap_server_uri }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
-    dn: "{{ groups_ou }}"
+    dn: "{{ openldap_group_ou }}"
     objectClass: organizationalUnit
     state: present
   notify:
@@ -26,7 +26,7 @@
     server_uri: "{{ openldap_server_uri }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
-    dn: cn={{ item.key }},{{ groups_ou }}
+    dn: cn={{ item.key }},{{ openldap_group_ou }}
     objectClass:
       - posixGroup
       - top
@@ -44,7 +44,7 @@
   community.general.ldap_attrs:
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
-    dn: cn={{ item.key }},{{ groups_ou }}
+    dn: cn={{ item.key }},{{ openldap_group_ou }}
     attributes:
       memberUid: "{{ item.value.members }}"
     state: exact
@@ -59,7 +59,7 @@
     server_uri: "{{ openldap_server_uri }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
-    dn: uid={{ item.key }},{{ users_ou }}
+    dn: uid={{ item.key }},{{ openldap_user_ou }}
     objectClass:
       - top
       - posixAccount

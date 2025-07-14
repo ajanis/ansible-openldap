@@ -64,41 +64,6 @@
     - restart_ns_daemons
     - restart_login_services
 
-- name: Autofs packages
-  ansible.builtin.dnf:
-    name: autofs
-    state: present
-    update_cache: true
-  when:
-    - openldap_server_enable_autofs
-
-- name: Start AutoFS service
-  ansible.builtin.service:
-    name: autofs
-    state: started
-    enabled: true
-  when:
-    - openldap_server_enable_autofs
-
-- name: Start rpcbind service
-  ansible.builtin.service:
-    name: rpcbind
-    state: started
-    enabled: true
-
-- name: Copy autofs supporting file
-  ansible.builtin.template:
-    src: autofs.j2
-    dest: /etc/sysconfig/autofs
-    mode: "0644"
-  notify:
-    - Restart AutoFS
-  when:
-    - openldap_server_enable_autofs
-
-- name: Flush handlers
-  ansible.builtin.meta: flush_handlers
-
 - name: Run 'authconfig --enableldap --enableldapauth --enablemkhomedir --update'
   ansible.builtin.command: authconfig --enableldap --enableldapauth --enablemkhomedir --update
   when:
@@ -106,16 +71,3 @@
     - ansible_distribution_major_version < "8"
   register: run_authconfig
   changed_when: run_authconfig is success
-
-- name: Create user home directories
-  ansible.builtin.file:
-    state: directory
-    path: /home/{{ item.key }}
-    owner: "{{ item.value.uid }}"
-    group: "{{ item.value.gid }}"
-    mode: "0755"
-  loop: "{{ ssh_users | default({}) | dict2items }}"
-  loop_control:
-    label: "{{ item.key }}"
-  when:
-    - not openldap_server_enable_autofs

@@ -63,13 +63,13 @@ openldap_server_bind_dn: "cn=Manager,{{ openldap_server_dc }}"
 
 
 # AutoFS configs
-admin_ou: "ou=admin,{{ openldap_server_dc }}"
-groups_ou:     "ou=groups,{{ openldap_server_dc }}"
-users_ou:     "ou=users,{{ openldap_server_dc }}"
-automount_ou: "ou=automount,{{ admin_ou }}"
-auto_master_ou: "ou=auto.master,{{ automount_ou }}"
-auto_data_ou: "ou=auto.data,{{ automount_ou }}"
-auto_home_ou: "ou=auto.home,{{ automount_ou }}"
+openldap_group_ou:     "ou=groups,{{ openldap_server_dc }}"
+openldap_user_ou:     "ou=users,{{ openldap_server_dc }}"
+openldap_autofs_search_base: "{{ openldap_search_base }}"
+openldap_sudo_search_base: "{{ openldap_search_base }}"
+openldap_auto_master_ou: "ou=auto.master,{{ automount_ou }}"
+openldap_auto_data_ou: "ou=auto.data,{{ automount_ou }}"
+openldap_auto_home_ou: "ou=auto.home,{{ automount_ou }}"
 
 data_mount_root: "/data"
 ldap_user_home_directory: "homedirs"

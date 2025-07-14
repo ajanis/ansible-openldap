@@ -13,12 +13,12 @@ modulepath      /usr/lib64/openldap
 
 access to *
                 by self write
-                by dn.base="cn=Manager,{{ openldap_server_dc }}" write
+                by dn.base="{{ openldap_search_base }}" write
                 by * read
 access to attrs=userPassword
                 by self write
                 by anonymous auth
-                by dn.base="cn=Manager,{{ openldap_server_dc}}" write
+                by dn.base="{{ openldap_search_base }}" write
                 by * none
 access to attrs=shadowLastChange
                 by self write

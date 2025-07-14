@@ -1,41 +1,10 @@
 ---
-- name: Admin OU
-  community.general.ldap_entry:
-    server_uri: "{{ openldap_server_uri }}"
-    bind_dn: "{{ openldap_server_bind_dn }}"
-    bind_pw: "{{ openldap_server_rootpw }}"
-    dn: "{{ admin_ou }}"
-    objectClass:
-      - top
-      - organizationalUnit
-    attributes:
-      ou: admin
-    state: present
-  notify:
-    - restart_ns_daemons
-
-- name: Automount OU
-  community.general.ldap_entry:
-    server_uri: "{{ openldap_server_uri }}"
-    bind_dn: "{{ openldap_server_bind_dn }}"
-    bind_pw: "{{ openldap_server_rootpw }}"
-    dn: "{{ automount_ou }}"
-    validate_certs: false
-    objectClass:
-      - top
-      - organizationalUnit
-    attributes:
-      ou: automount
-    state: present
-  notify:
-    - restart_ns_daemons
-
 - name: Create auto.master OU
   community.general.ldap_entry:
     server_uri: "{{ openldap_server_uri }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
-    dn: "{{ auto_master_ou }}"
+    dn: "{{ openldap_auto_master_ou }}"
     objectClass:
       - top
       - automountMap
@@ -50,13 +19,13 @@
     server_uri: "{{ openldap_server_uri }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
-    dn: cn=/home,{{ auto_master_ou }}
+    dn: cn=/home,{{ openldap_auto_master_ou }}
     objectClass:
       - top
       - automount
     attributes:
       cn: /home
-      automountInformation: ldap:ou=auto.home,ou=automount,ou=admin,{{ openldap_server_dc }} --timeout=60 --ghost
+      automountInformation: ldap:ou=auto.home,{{ openldap_autofs_search_base }} --timeout=60 --ghost
     state: present
   notify:
     - restart_ns_daemons
@@ -66,7 +35,7 @@
     server_uri: "{{ openldap_server_uri }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
-    dn: "{{ auto_home_ou }}"
+    dn: "{{ openldap_auto_home_ou }}"
     objectClass:
       - top
       - automountMap
@@ -81,15 +50,15 @@
     server_uri: "{{ openldap_server_uri }}"
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
-    dn: cn={{ item.key }},{{ auto_home_ou }}
+    dn: cn={{ item.key }},{{ openldap_auto_home_ou }}
     objectClass:
       - top
       - automount
     attributes:
       cn: "{{ item.key }}"
       automountInformation: >-
-        -fstype=ceph,{{ cephfs_mount_options }}
-        {{ cephfs_autofs_mount.user }}@{{ cephfs_autofs_mount.fsid }}.{{ cephfs_autofs_mount.fsname }}={{ cephfs_autofs_mount.mount }}/{{ item.key }}
+        -fstype=ceph,{{ cephfs_mount_options }} {{ cephfs_autofs_mount.user }}@{{ cephfs_autofs_mount.fsid }}.{{ cephfs_autofs_mount.fsname }}={{ cephfs_autofs_mount.mount
+        }}/{{ item.key }}
     state: present
   notify:
     - restart_ns_daemons
@@ -100,11 +69,11 @@
 
 - name: Update User home directory CNs if needed
   community.general.ldap_attrs:
-    dn: cn={{ item.key }},{{ auto_home_ou }}
+    dn: cn={{ item.key }},{{ openldap_auto_home_ou }}
     attributes:
       automountInformation: >-
-        -fstype=ceph,{{ cephfs_mount_options }}
-        {{ cephfs_autofs_mount.user }}@{{ cephfs_autofs_mount.fsid }}.{{ cephfs_autofs_mount.fsname }}={{ cephfs_autofs_mount.mount }}/{{ item.key }}
+        -fstype=ceph,{{ cephfs_mount_options }} {{ cephfs_autofs_mount.user }}@{{ cephfs_autofs_mount.fsid }}.{{ cephfs_autofs_mount.fsname }}={{ cephfs_autofs_mount.mount
+        }}/{{ item.key }}
     state: exact
     bind_dn: "{{ openldap_server_bind_dn }}"
     bind_pw: "{{ openldap_server_rootpw }}"
