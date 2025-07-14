@@ -79,7 +79,7 @@
     state: restarted
     enabled: true
 
-- name: Restart AutoFS
+- name: Reload AutoFS
   ansible.builtin.service:
     name: autofs
     state: restarted
@@ -87,6 +87,9 @@
 
 - name: Reload Exports
   ansible.builtin.command: exportfs -ra
+  register: exportfs_reload
+  changed_when: exportfs_reload.changed
+
 - name: Restart Samba
   ansible.builtin.service:
     name: smbd
@@ -116,3 +119,8 @@
   ansible.builtin.service:
     name: netatalk
     state: restarted
+
+- name: Pipx ensurepath
+  ansible.builtin.command: pipx ensurepath
+  register: pipx_ensurepath
+  changed_when: pipx_ensurepath.changed

@@ -36,7 +36,7 @@ rootpw {{ root_password.stdout }}
 
 database        mdb
 suffix          "{{ openldap_server_dc }}"
-rootdn          "cn=Manager,{{ openldap_server_dc }}"
+rootdn          "{{ openldap_server_bind_dn }}"
 rootpw          {{ root_password.stdout }}
 #This directory has to be created and would contain the ldap database.
 directory       {{ openldap_server_db_path }}

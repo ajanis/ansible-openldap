@@ -7,7 +7,7 @@ uid nslcd
 gid {{ openldap_nslcd_group }}
 
 # The search base that will be used for all queries.
-base {{ openldap_server_dc }}
+base {{ openldap_search_base }}
 
 # The location at which the LDAP server(s) should be reachable.
 {% if openldap_server_enable_ssl %}
