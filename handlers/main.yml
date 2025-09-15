@@ -102,11 +102,11 @@
     state: restarted
     enabled: true
 
-- name: Rmbldap Populate
+- name: Smbldap Populate
   ansible.builtin.set_fact:
     smbldap_populate: true
 
-- name: Rlapd Rebuild
+- name: Slapd Rebuild
   ansible.builtin.set_fact:
     slapd_rebuild: true
 

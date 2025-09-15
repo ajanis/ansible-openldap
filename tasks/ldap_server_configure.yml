@@ -222,7 +222,7 @@
   when: slapd_rebuild | default(False)
 
 - name: Rebuild slapd OLC Directory
-  ansible.builtin.shell: slaptest -f {{ openldap_server_app_path }}/slapd.conf -F {{ openldap_server_app_path }}/slapd.d
+  ansible.builtin.shell: slaptest -f {{ openldap_server_app_path }}/slapd.conf -F {{ openldap_server_app_path }}/slapd.d -u
   become_user: "{{ openldap_server_user }}"
   become: true
   when: slapd_rebuild | default(False)
@@ -250,6 +250,13 @@
     var: rootdn
     verbosity: 1
   when: rootdn is defined
+
+- name: Restart Slapd
+  service:
+    name: slapd
+    state: restarted
+  when:
+    - slapd_rebuild | default(False)
 
 - name: Add the base domain
   ansible.builtin.shell:
