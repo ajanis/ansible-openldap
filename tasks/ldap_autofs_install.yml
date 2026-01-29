@@ -40,7 +40,7 @@
     - always
 
 - name: Start rpcbind service
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: rpcbind
     state: started
     enabled: true
@@ -49,7 +49,7 @@
   ansible.builtin.meta: flush_handlers
 
 - name: Start AutoFS service
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: autofs
     state: "{{ 'reloaded' if autofs_needs_restart | default('false') else 'started' }}"
     enabled: true

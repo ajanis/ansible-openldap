@@ -151,7 +151,7 @@
 - name: Flush handlers
   ansible.builtin.meta: flush_handlers
 - name: Stop slapd
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: slapd
     state: stopped
   when: slapd_rebuild | default(False)
@@ -178,7 +178,7 @@
   register: db_config_file
 
 - name: Stop slapd
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: slapd
     state: stopped
   when: not db_config_file.stat.exists | default(False)
@@ -252,7 +252,7 @@
   when: rootdn is defined
 
 - name: Restart Slapd
-  service:
+  ansible.builtin.service:
     name: slapd
     state: restarted
   when:

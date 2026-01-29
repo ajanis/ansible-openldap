@@ -69,7 +69,7 @@
   when: smbldap_populate | default(False)
 
 - name: Restart Samba services
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: "{{ item }}"
     state: restarted
     enabled: true
