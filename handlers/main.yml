@@ -1,6 +1,6 @@
 ---
 - name: Restart IPTables
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: iptables
     state: restarted
     enabled: true
@@ -16,34 +16,34 @@
     mode: "0755"
 - name: Restart SlapD
   listen: restart slapd
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: slapd
     state: restarted
     enabled: true
 
 - name: Restart HTTPD
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: httpd
     state: restarted
     enabled: true
 
 - name: Restart NSCD
   listen: restart_ns_daemons
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: nscd
     state: restarted
     enabled: true
 
 - name: Restart NSLCD
   listen: restart_ns_daemons
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: nslcd
     state: restarted
     enabled: true
 
 - name: Restart SSSD
   listen: restart_ns_daemons
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: sssd
     state: restarted
     enabled: true
@@ -53,10 +53,11 @@
 
 - name: Restart SSHD
   listen: restart_login_services
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: "{{ sshd_service }}"
     state: restarted
     enabled: true
+    daemon_reload: true
 
 - name: Require Authconfig Update
   ansible.builtin.set_fact:
@@ -74,13 +75,13 @@
 #     mode: 0755
 - name: Restart SystemD LoginD
   listen: restart_login_services
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: systemd-logind
     state: restarted
     enabled: true
 
 - name: Reload AutoFS
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: autofs
     state: restarted
     enabled: true
@@ -91,13 +92,13 @@
   changed_when: exportfs_reload.changed
 
 - name: Restart Samba
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: smbd
     state: restarted
     enabled: true
 
 - name: Restart NMBD
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: nmbd
     state: restarted
     enabled: true
@@ -111,12 +112,12 @@
     slapd_rebuild: true
 
 - name: Restart Avahi Daemon
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: avahi-daemon
     state: restarted
 
 - name: Restart Netatalk
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: netatalk
     state: restarted
 

@@ -55,11 +55,11 @@
     - Restart Avahi Daemon
 
 - name: Enable afpd service
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: netatalk
     state: started
 
 - name: Enable avahi service
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: avahi-daemon
     state: started
