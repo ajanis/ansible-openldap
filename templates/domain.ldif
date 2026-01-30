@@ -1,4 +1,0 @@
-dn: {{ openldap_server_dc }}
-objectClass: domain
-dc: {{ openldap_server_domain_name.split('.')[0] }}
-
