@@ -4,6 +4,7 @@
   with_first_found:
     - "{{ ansible_distribution }}{{ ansible_distribution_major_version }}.yml"
     - "{{ ansible_distribution }}.yml"
+    - "{{ ansible_os_family }}{{ ansible_distribution_major_version }}.yml"
     - "{{ ansible_os_family }}.yml"
   tags:
     - always
@@ -14,82 +15,51 @@
     state: present
     line: "{{ lookup('dig', item ~ '.' ~ www_domain) }} {{ item }}.{{ www_domain }} {{ item }}"
   when:
-    - groups['ldap'] is defined
-    - groups['ldap'] | length > 0
+    - groups['ldapservers'] is defined
+    - groups['ldapservers'] | length > 0
   loop: "{{ groups['ldapservers'] | flatten }}"
   tags:
     - openldap-hosts
 
-- name: ssh | Update sshd config options
-  tags:
-    - openldap-sshd
-  ansible.builtin.lineinfile:
-    dest: /etc/ssh/sshd_config
-    state: present
-    regexp: ^(?:#)?{{ item.option }}\s.*$
-    line: "{{ item.option }} {{ item.value }}"
-  loop:
-    - option: Include
-      value: "no"
-    - option: Subsystem
-      value: "{{ 'sftp /usr/libexec/openssh/sftp-server' if ansible_os_family == 'RedHat' else 'sftp /usr/lib/openssh/sftp-server' }}"
-    - option: UsePAM
-      value: "{{ 'no' if ansible_os_family == 'OpenBSD' else 'yes' }}"
-    - option: Port
-      value: "{{ common_sshd_listen_port | default('22') }}"
-    - option: ListenAddress
-      value: "{{ common_sshd_listen_address | default('0.0.0.0') }}"
-    - option: SyslogFacility
-      value: "{{ common_sshd_syslog_facility | default('AUTH') }}"
-    - option: LogLevel
-      value: "{{ common_sshd_log_level | default('INFO') }}"
-    - option: PermitRootLogin
-      value: "{{ common_sshd_permit_root_login | default('prohibit-password') }}"
-    - option: PubkeyAuthentication
-      value: "yes"
-    - option: PasswordAuthentication
-      value: "{{ common_sshd_password_authentication | default('yes') }}"
-    - option: AuthorizedKeysFile
-      value: "{{ common_sshd_authorized_keys_file | default('.ssh/authorized_keys') }}"
-    - option: AllowAgentForwarding
-      value: "yes"
-    - option: X11Forwarding
-      value: "yes"
-    - option: PrintMotd
-      value: "yes"
-    - option: AcceptEnv
-      value: LANG LC_*
-  notify: Restart SSHD
-
-- name: Include ldap server install tasks
-  ansible.builtin.include_tasks:
-    file: ldap_server_install.yml
-    apply:
-      tags:
-        - openldap-server
-  when: "'ldapservers' in group_names"
-  tags:
-    - openldap-server
-
-- name: Include LDAP server configration tasks
-  ansible.builtin.include_tasks:
-    file: ldap_server_configure.yml
-    apply:
-      tags:
-        - openldap-config
-  when: "'ldapservers' in group_names"
-  tags:
-    - openldap-config
-
 - name: Configure LDAP Client
   ansible.builtin.include_tasks:
-    file: ldap_client_{{ ansible_os_family | lower }}.yml
+    file: ldap_client_install.yml
     apply:
       tags:
         - openldap-client
   tags:
     - openldap-client
     - openldap-sshd
+
+- name: ssh | Configure sshd for SSSD authorized keys
+  tags:
+    - openldap-sshd
+  block:
+    - name: ssh | Ensure PAM is enabled for sshd
+      ansible.builtin.lineinfile:
+        dest: /etc/ssh/sshd_config
+        state: present
+        regexp: ^(?:#)?UsePAM\s+.*$
+        line: "UsePAM yes"
+      when:
+        - ansible_system != 'OpenBSD'
+      notify: Restart SSHD
+
+    - name: ssh | AuthorizedKeysCommand via SSSD
+      ansible.builtin.lineinfile:
+        dest: /etc/ssh/sshd_config
+        state: present
+        regexp: ^(?:#)?AuthorizedKeysCommand\s+.*$
+        line: "AuthorizedKeysCommand {{ openldap_ldap_pubkey_wrapper }}"
+      notify: Restart SSHD
+
+    - name: ssh | AuthorizedKeysCommandUser via SSSD
+      ansible.builtin.lineinfile:
+        dest: /etc/ssh/sshd_config
+        state: present
+        regexp: ^(?:#)?AuthorizedKeysCommandUser\s+.*$
+        line: "AuthorizedKeysCommandUser {{ openldap_ldap_pubkey_user | default('nobody') }}"
+      notify: Restart SSHD
 
 - name: Include AutoFS installation tasks
   ansible.builtin.include_tasks:
@@ -98,7 +68,7 @@
       tags:
         - openldap-automount
   when:
-    - openldap_server_enable_autofs | default(false)
+    - shared_storage | default(false) | bool
   tags:
     - openldap-automount
 
@@ -109,43 +79,6 @@
       tags:
         - openldap-automount
   when:
-    - openldap_server_enable_autofs | default(false)
-    - "'ldapservers' in group_names"
+    - openldap_print_server_commands | default(false) | bool
   tags:
     - openldap-automount
-
-- name: Include ldap account configuration tasks
-  ansible.builtin.include_tasks:
-    file: ldap_account_configure.yml
-    apply:
-      tags:
-        - openldap-users
-  when:
-    - openldap_server_enable_posixaccounts
-    - "'ldapservers' in group_names"
-  tags:
-    - openldap-users
-
-- name: Include Samba tasks
-  ansible.builtin.include_tasks:
-    file: samba_server.yml
-    apply:
-      tags:
-        - openldap-samba
-  when:
-    - openldap_server_enable_samba
-    - "'samba' in group_names"
-  tags:
-    - openldap-samba
-
-- name: Include AFPD tasks
-  ansible.builtin.include_tasks:
-    file: afpd.yml
-    apply:
-      tags:
-        - openldap-afp
-  when:
-    - openldap_server_enable_afpd
-    - "'afpd' in group_names"
-  tags:
-    - openldap-afp

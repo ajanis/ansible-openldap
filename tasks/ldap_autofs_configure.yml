@@ -1,88 +1,40 @@
 ---
-- name: Create auto.master OU
-  community.general.ldap_entry:
-    server_uri: "{{ openldap_server_uri }}"
-    bind_dn: "{{ openldap_server_bind_dn }}"
-    bind_pw: "{{ openldap_server_rootpw }}"
-    dn: "{{ openldap_auto_master_ou }}"
-    objectClass:
-      - top
-      - automountMap
-    attributes:
-      ou: auto.master
-    state: present
-  notify:
-    - restart_ns_daemons
+- name: Print LDAP server-side commands (sudo + autofs)
+  ansible.builtin.debug:
+    msg: |
+      This role no longer mutates LDAP server entries directly.
+      Run these commands against your LDAP server (adjust host/DC/bind DN):
 
-- name: Home automount CN
-  community.general.ldap_entry:
-    server_uri: "{{ openldap_server_uri }}"
-    bind_dn: "{{ openldap_server_bind_dn }}"
-    bind_pw: "{{ openldap_server_rootpw }}"
-    dn: cn=/home,{{ openldap_auto_master_ou }}
-    objectClass:
-      - top
-      - automount
-    attributes:
-      cn: /home
-      automountInformation: ldap:ou=auto.home,{{ openldap_autofs_search_base }} --timeout=60 --ghost
-    state: present
-  notify:
-    - restart_ns_daemons
+      Verify sudo rules are visible:
+        ldapsearch -x -H "{{ openldap_server_uri }}" -D "{{ openldap_server_bind_dn }}" -W \
+          -b "{{ openldap_sudo_search_base }}" '(objectClass=sudoRole)' cn sudoUser sudoHost sudoCommand sudoOption
 
-- name: Create auto.home OU
-  community.general.ldap_entry:
-    server_uri: "{{ openldap_server_uri }}"
-    bind_dn: "{{ openldap_server_bind_dn }}"
-    bind_pw: "{{ openldap_server_rootpw }}"
-    dn: "{{ openldap_auto_home_ou }}"
-    objectClass:
-      - top
-      - automountMap
-    attributes:
-      ou: auto.home
-    state: present
-  notify:
-    - restart_ns_daemons
+      Example: create a sudoers OU (if missing):
+        cat > sudoers-ou.ldif <<'LDIF'
+        dn: {{ openldap_sudo_search_base }}
+        objectClass: top
+        objectClass: organizationalUnit
+        ou: sudoers
+        LDIF
+        ldapadd -x -H "{{ openldap_server_uri }}" -D "{{ openldap_server_bind_dn }}" -W -f sudoers-ou.ldif
 
-- name: User Directory CNs
-  community.general.ldap_entry:
-    server_uri: "{{ openldap_server_uri }}"
-    bind_dn: "{{ openldap_server_bind_dn }}"
-    bind_pw: "{{ openldap_server_rootpw }}"
-    dn: cn={{ item.key }},{{ openldap_auto_home_ou }}
-    objectClass:
-      - top
-      - automount
-    attributes:
-      cn: "{{ item.key }}"
-      automountInformation: >-
-        -fstype=ceph,{{ cephfs_mount_options }} {{ cephfs_autofs_mount.user }}@{{ cephfs_autofs_mount.fsid }}.{{ cephfs_autofs_mount.fsname }}={{ cephfs_autofs_mount.mount
-        }}/{{ item.key }}
-    state: present
-  notify:
-    - restart_ns_daemons
-  loop: "{{ ssh_users | default({}) | dict2items }}"
-  when: storage_backend == "cephfs"
-  loop_control:
-    label: "{{ item.key }}"
+      Example: allow %admin full sudo on all hosts:
+        cat > sudo-admin.ldif <<'LDIF'
+        dn: cn=admin,{{ openldap_sudo_search_base }}
+        objectClass: top
+        objectClass: sudoRole
+        cn: admin
+        sudoUser: %admin
+        sudoHost: ALL
+        sudoCommand: ALL
+        sudoOption: !authenticate
+        LDIF
+        ldapadd -x -H "{{ openldap_server_uri }}" -D "{{ openldap_server_bind_dn }}" -W -f sudo-admin.ldif
 
-- name: Update User home directory CNs if needed
-  community.general.ldap_attrs:
-    dn: cn={{ item.key }},{{ openldap_auto_home_ou }}
-    attributes:
-      automountInformation: >-
-        -fstype=ceph,{{ cephfs_mount_options }} {{ cephfs_autofs_mount.user }}@{{ cephfs_autofs_mount.fsid }}.{{ cephfs_autofs_mount.fsname }}={{ cephfs_autofs_mount.mount
-        }}/{{ item.key }}
-    state: exact
-    bind_dn: "{{ openldap_server_bind_dn }}"
-    bind_pw: "{{ openldap_server_rootpw }}"
-  loop: "{{ ssh_users | default({}) | dict2items }}"
-  loop_control:
-    label: "{{ item.key }}"
-  notify:
-    - restart_ns_daemons
-  when:
-    - storage_backend == "cephfs"
-    - ssh_users is defined
-    - ssh_users != None
+      Example: create automount OUs (if missing):
+        ldapsearch -x -H "{{ openldap_server_uri }}" -D "{{ openldap_server_bind_dn }}" -W \
+          -b "{{ openldap_autofs_search_base }}" '(objectClass=automountMap)' ou
+
+      Notes:
+        - Ensure the sudo schema is loaded on the LDAP server.
+        - Consider using a dedicated, restricted bind DN for clients (read-only) instead of the admin DN.
