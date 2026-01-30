@@ -1,54 +1,32 @@
 ---
-openldap_server_pkgs:
-  - slapd
-  - ldap-utils
-  - openssl
-  - python3-pip
-  - libsasl2-dev
-  - python3-dev
-  - libldap2-dev
-  - libssl-dev
-  - python3-pexpect
-  - rpcbind
-  - python3-ldap
-  - python3-ldap3
-  - python3-ecdsa
-
-openldap_python_pkgs:
-  - ssh-ldap-pubkey
-
 openldap_client_pkgs:
-  - libnss-ldapd
-  - libsasl2-dev
-  - python3-dev
-  - libldap-dev
-  - libldap2-dev  - libssl-dev
-  - libpam-ldap
-  - nscd
+  - sssd
+  - sssd-ldap
+  - sssd-tools
+  - libsss-sudo
+  - libnss-sss
+  - libpam-sss
+  - oddjob-mkhomedir
   - ldap-utils
-  - python3-pip
-  - python3-ldap
-  - python3-ldap3
-  - python3-ecdsa
+  - python{{ ansible_facts['python']['version']['major'] }}-dev
+  - python{{ ansible_facts['python']['version']['major'] }}-pip
+  - python{{ ansible_facts['python']['version']['major'] }}-ldap
+  - python{{ ansible_facts['python']['version']['major'] }}-ldap3
+  - python{{ ansible_facts['python']['version']['major'] }}-ecdsa
+  - python{{ ansible_facts['python']['version']['major'] }}-sss
 
 samba_pkgs:
   - smbldap-tools
   - samba
-
-afpd_pkgs:
-  - netatalk
-  - avahi-daemon
-  - samba
-  - libnss-mdns
 
 openldap_server_app_path: /etc/ldap
 openldap_server_db_path: /var/lib/ldap/{{ openldap_server_domain_name }}
 
 openldap_server_user: openldap
 openldap_server_group: openldap
-openldap_nslcd_group: nslcd
 
 sshd_service: ssh
 openldap_autofs_pkgs:
   - autofs
   - autofs-ldap
+  - rpcbind

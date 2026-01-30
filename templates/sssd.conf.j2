@@ -1,50 +1,46 @@
 [sssd]
-{% if shared_storage is defined and shared_storage %}
-services = nss, pam, sudo, autofs
-{% else %}
-services = nss, pam, sudo
-{% endif %}
+services = {{ (['nss','pam','sudo','ssh'] + (['autofs'] if shared_storage | default(false) | bool else [])) | join(',') }}
 config_file_version = 2
 domains = default
 
-{% if shared_storage is defined and shared_storage %}
-[autofs]
-{% endif %}
-
-[sudo]
-
-[nss]
-
-[pam]
-offline_credentials_expiration = 60
-
 [domain/default]
-cache_credentials = True
-ldap_search_base = {{ openldap_search_base }}
 id_provider = ldap
 auth_provider = ldap
-chpass_provider = ldap
 access_provider = ldap
+chpass_provider = ldap
 sudo_provider = ldap
-{% if openldap_server_enable_ssl %}
-ldap_id_use_start_tls = True
-ldap_uri = ldaps://{{ openldap_server_domain_name }}
-ldap_tls_reqcert = demand
-ldap_tls_cacert = {{ ssl_certpath }}
-ldap_tls_cacertdir = {{ ssl_certpath.split('/')[:-1] }}
-{% endif %}
-{% if not openldap_server_enable_ssl %}
-ldap_id_use_start_tls = False
-ldap_uri = ldap://{{ openldap_server_domain_name }}
-{% endif %}
-ldap_default_bind_dn = {{ openldap_server_bind_dn }}
-ldap_default_authtok = {{ openldap_server_rootpw }}
+cache_credentials = True
+ldap_search_base = {{ openldap_search_base }}
+ldap_default_bind_dn = {{ openldap_client_bind_dn | default('cn=monitor,' ~ openldap_search_base) }}
+ldap_default_authtok_type = password
+ldap_default_authtok = {{ openldap_client_bind_pw | default(vault_ldap_monitor_password) }}
 ldap_search_timeout = 50
 ldap_network_timeout = 60
-ldap_sudo_search_base = {{ openldap_sudo_search_base }}
-ldap_access_order = filter
 ldap_access_filter = (objectClass=posixAccount)
-{% if shared_storage is defined and shared_storage %}
+sudo_search_base = {{ openldap_sudo_search_base }}
+ldap_sudo_full_refresh_interval = 86400
+ldap_sudo_smart_refresh_interval = 3600
+ldap_user_ssh_public_key = sshPublicKey
+{% set secure = openldap_secure | default('none') %}
+{% if secure == "starttls" %}
+# StartTLS
+ldap_uri = ldap://{{ openldap_server_domain_name }}
+ldap_id_use_start_tls = True
+ldap_tls_reqcert = demand
+ldap_tls_cacert = {{ ssl_certpath }}
+{% elif secure == "ldaps" %}
+# LDAPS Legacy SSL
+ldap_uri = ldaps://{{ openldap_server_domain_name }}
+ldap_id_use_start_tls = False
+ldap_tls_reqcert = demand
+ldap_tls_cacert = {{ ssl_certpath }}
+{% else %}
+# LDAP without encryption
+ldap_uri = ldap://{{ openldap_server_domain_name }}
+ldap_id_use_start_tls = False
+{% endif %}
+
+{% if shared_storage | default(false) | bool %}
 autofs_provider = ldap
 ldap_autofs_search_base = {{ openldap_autofs_search_base }}
 ldap_autofs_map_object_class = automountMap
@@ -53,3 +49,4 @@ ldap_autofs_map_name = ou
 ldap_autofs_entry_key = cn
 ldap_autofs_entry_value = automountInformation
 {% endif %}
+

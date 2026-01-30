@@ -3,33 +3,32 @@ openldap_client_pkgs:
   - sssd
   - sssd-ldap
   - sssd-tools
+  - libsss-sudo
+  - libnss-sudo
+  - sudo
+  - libnss-sss
+  - libpam-sss
   - oddjob-mkhomedir
-  - oddjob
-  - openldap-clients
-  - libsss_sudo
-  - authselect
-  - openldap-devel
-  - redhat-rpm-config
-  - openldap-clients
-  - gcc
-  - python{{ ansible_facts['python']['version']['major'] }}-devel
+  - ldap-utils
+  - python{{ ansible_facts['python']['version']['major'] }}-dev
   - python{{ ansible_facts['python']['version']['major'] }}-pip
   - python{{ ansible_facts['python']['version']['major'] }}-ldap
   - python{{ ansible_facts['python']['version']['major'] }}-ldap3
   - python{{ ansible_facts['python']['version']['major'] }}-ecdsa
   - python{{ ansible_facts['python']['version']['major'] }}-sss
+
 samba_pkgs:
   - smbldap-tools
   - samba
 
-openldap_server_app_path: /etc/openldap
+openldap_server_app_path: /etc/ldap
 openldap_server_db_path: /var/lib/ldap/{{ openldap_server_domain_name }}
 
-openldap_server_user: ldap
-openldap_server_group: ldap
-sshd_service: sshd
+openldap_server_user: openldap
+openldap_server_group: openldap
 
+sshd_service: ssh
 openldap_autofs_pkgs:
   - autofs
-  - libsss_autofs
+  - autofs-ldap
   - rpcbind

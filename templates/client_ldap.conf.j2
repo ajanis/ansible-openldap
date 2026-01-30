@@ -1,14 +1,19 @@
-base {{ openldap_search_base }}
-{% if openldap_server_enable_ssl %}
-uri ldaps://{{ openldap_server_domain_name }}
+{% set secure = openldap_secure | default('none') %}
+{% if secure == "starttls" %}
+# StartTLS
+URI ldap://{{ openldap_server_domain_name }}
+BASE {{ openldap_search_base }}
+TLS_CACERT {{ ssl_certpath }}
+TLS_REQCERT demand
+{% elif secure == "ldaps" %}
+# LDAPS Legacy SSL
+URI ldaps://{{ openldap_server_domain_name }}
+BASE {{ openldap_search_base }}
+TLS_CACERT {{ ssl_certpath }}
+TLS_REQCERT demand
+{% else %}
+# LDAP without encryption (LAB ONLY)
+URI ldap://{{ openldap_server_domain_name }}
+BASE {{ openldap_search_base }}
 {% endif %}
-{% if not openldap_server_enable_ssl %}
-uri ldap://{{ openldap_server_domain_name }}
-{% endif %}
-ldap_version 3
-binddn {{ openldap_server_bind_dn }}
-bindpw {{ openldap_server_rootpw }}
-pam_password md5
-nss_initgroups_ignoreusers backup,bin,daemon,games,gnats,irc,landscape,libuuid,list,lp,mail,man,messagebus,news,pollinate,proxy,root,sshd,sync,sys,syslog,uucp,www-data
-bind_timelimit 3
-timelimit 3
+LDAP_VERSION 3

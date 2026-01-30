@@ -3,27 +3,11 @@
   ansible.builtin.include_tasks:
     file: wait_for_locks.yml
 
-- name: Install autofs packages and supporting ldap packages
+- name: Install autofs
   ansible.builtin.package:
-    name: "{{ openldap_autofs_pkgs }}"
+    name: autofs
     state: present
     update_cache: true
-
-- name: Copy autofs default file
-  ansible.builtin.template:
-    src: autofs.j2
-    dest: "{{ '/etc/default/autofs' if ansible_os_family == 'Debian' else '/etc/sysconfig/autofs' }}"
-    mode: "0755"
-  notify:
-    - Reload AutoFS
-
-- name: Update /etc/autofs_ldap_auth.conf
-  ansible.builtin.template:
-    src: autofs_ldap_auth.conf.j2
-    dest: /etc/autofs_ldap_auth.conf
-    mode: "0600"
-  notify:
-    - Reload AutoFS
 
 - name: Enable pam authentication in ssh server configuration
   ansible.builtin.lineinfile:
@@ -34,16 +18,16 @@
   notify:
     - restart_login_services
   when:
-    - openldap_server_enable_posixaccounts
     - ansible_system != 'OpenBSD'
   tags:
     - always
 
-- name: Start rpcbind service
+- name: Start rpcbind service (RHEL)
   ansible.builtin.systemd:
     name: rpcbind
     state: started
     enabled: true
+  when: ansible_os_family == 'RedHat'
 
 - name: Flush Handlers
   ansible.builtin.meta: flush_handlers
@@ -51,5 +35,5 @@
 - name: Start AutoFS service
   ansible.builtin.systemd:
     name: autofs
-    state: "{{ 'reloaded' if autofs_needs_restart | default('false') else 'started' }}"
+    state: started
     enabled: true

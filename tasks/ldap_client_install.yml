@@ -1,0 +1,91 @@
+---
+- name: Wait for locks
+  ansible.builtin.include_tasks:
+    file: wait_for_locks.yml
+
+- name: Install SSSD + LDAP client packages
+  ansible.builtin.package:
+    name: "{{ openldap_client_pkgs }}"
+    state: present
+    update_cache: true
+  register: openldap_client_pkg_install
+  until: openldap_client_pkg_install is not failed
+
+- name: Create openldap app path
+  ansible.builtin.file:
+    state: directory
+    dest: "{{ openldap_server_app_path }}"
+    mode: "0755"
+
+- name: Copy ldap.conf (client)
+  ansible.builtin.template:
+    src: client_ldap.conf.j2
+    mode: "0644"
+    dest: "{{ openldap_server_app_path }}/ldap.conf"
+
+- name: Copy /etc/sssd/sssd.conf for client
+  ansible.builtin.template:
+    src: sssd.conf.j2
+    dest: /etc/sssd/sssd.conf
+    owner: root
+    group: root
+    mode: "0600"
+  notify:
+    - restart_login_services
+    - Restart SSSD
+
+- name: Configure NSSwitch for SSSD (passwd/group/shadow)
+  ansible.builtin.lineinfile:
+    path: /etc/nsswitch.conf
+    regexp: "^{{ item.key }}:.*$"
+    line: "{{ item.line }}"
+    state: present
+    backrefs: false
+  loop:
+    - key: passwd
+      line: "{{ 'passwd:     files systemd sss' if ansible_os_family == 'Debian' else 'passwd:     files sss systemd' }}"
+    - key: group
+      line: "{{ 'group:      files systemd sss' if ansible_os_family == 'Debian' else 'group:      files sss systemd' }}"
+    - key: shadow
+      line: "shadow:     files sss"
+    - key: sudoers
+      line: "sudoers:    files sss"
+    - key: automount
+      line: "automount:  files sss"
+  notify:
+    - restart_login_services
+
+- name: Set sudo alternative to classic sudo.ws (Ubuntu 25.10+/26.04)
+  ansible.builtin.command: update-alternatives --set sudo /usr/bin/sudo.ws
+  changed_when: true
+  when: ansible_facts['os_family'] == 'Debian'
+  notify:
+    - restart_login_services
+- name: Configure PAM for SSSD + mkhomedir (Ubuntu)
+  ansible.builtin.command: pam-auth-update --enable mkhomedir --enable sss --force
+  register: pam_auth_update
+  changed_when: "'No changes made' not in (pam_auth_update.stdout | default(''))"
+  when: ansible_os_family == 'Debian'
+  notify:
+    - restart_login_services
+
+- name: Configure PAM for SSSD + mkhomedir (RHEL)
+  ansible.builtin.command: authselect select sssd with-mkhomedir --force
+  register: authselect_select
+  changed_when: "'Profile was selected' in (authselect_select.stdout | default(''))"
+  when: ansible_os_family == 'RedHat'
+  notify:
+    - restart_login_services
+
+- name: Enable oddjobd (RHEL mkhomedir)
+  ansible.builtin.systemd:
+    name: oddjobd
+    state: started
+    enabled: true
+  when: ansible_os_family == 'RedHat'
+
+- name: Ensure SSSD is enabled and running
+  ansible.builtin.systemd:
+    name: sssd
+    state: started
+    enabled: true
