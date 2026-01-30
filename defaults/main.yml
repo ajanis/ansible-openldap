@@ -1,45 +1,28 @@
 ---
-### LDAP SERVER CONFIG
 
-# shared storage flag
+openldap_secure: "none"
 shared_storage: false
-data_mount_root: /data
-ldap_user_home_directory: homedirs
-openldap_clientconfig: /etc/ldap.conf
-# The ldif file
-openldap_server_ldif: domain.ldif
-
-openldap_server_dc: dc={{ ',dc='.join(openldap_server_domain_name.split('.')) }}
+openldap_server_domain_name: "openldap.{{ www_domain }}"
+openldap_server_ip: 10.0.10.100
+openldap_server_dc: dc={{ ',dc='.join(www_domain.split('.')) }}
 openldap_search_base: "{{ openldap_server_dc }}"
+openldap_sudo_search_base: "ou=sudoers,{{ openldap_search_base }}"
+openldap_autofs_search_base: "ou=auto.master,{{ openldap_search_base }}"
+openldap_server_uri: ldap://{{ openldap_server_domain_name }}
 openldap_server_bind_dn: cn=admin,{{ openldap_search_base }}
+openldap_group_ou: "ou=groups,{{ openldap_search_base }}"
+openldap_user_ou: "ou=people,{{ openldap_search_base }}"
+openldap_auto_master_ou: ou=auto.master,{{ openldap_search_base }}
+openldap_auto_data_ou: ou=auto.data,{{ openldap_search_base }}
+openldap_auto_home_ou: ou=auto.home,{{ openldap_search_base }}
+openldap_ldap_pubkey_wrapper: /usr/bin/sss_ssh_authorizedkeys
+openldap_ldap_pubkey_user: nobody
 
 #### LDAP AUTOMOUNT CONFIG
-openldap_group_ou: ou=groups,{{ openldap_search_base }}
-openldap_user_ou: ou=people,{{ openldap_search_base }}
-openldap_autofs_search_base: "{{ openldap_search_base }}"
-openldap_sudo_search_base: "{{ openldap_search_base }}"
-openldap_auto_master_ou: ou=auto.master,{{ openldap_autofs_search_base }}
-auto_data_ou: ou=auto.data,{{ openldap_autofs_search_base }}
-openldap_auto_home_ou: ou=auto.home,{{ openldap_autofs_search_base }}
 
-openldap_server_domain_name: ldap.home.example.com
-openldap_server_ip:
 openldap_server_rootpw: "{{ vault_openldap_server_rootpw }}"
-openldap_server_enable_ssl: false
 
 openldap_server_hosts_entry: "{{ openldap_server_ip }} {{ openldap_server_domain_name }} {{ openldap_server_domain_name.split('.')[0] }}"
-# enable openldap server posix user/group configs
-openldap_server_enable_posixaccounts: true
-# enable ssh key storage schema to openldap server
-openldap_server_enable_sshkeys: true
-# add samba authentication schema to openldap server
-openldap_server_enable_samba: false
-# add apple file protocol auth schema to openldap server
-openldap_server_enable_afpd: false
-# add autofs schema to openldap server
-openldap_server_enable_autofs: false
-# enable openldap client configs
-openldap_client_enable: true
 
 ssl_certpath:
 ssl_keypath:

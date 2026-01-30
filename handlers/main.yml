@@ -47,9 +47,6 @@
     name: sssd
     state: restarted
     enabled: true
-  when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version >= "8"
 
 - name: Restart SSHD
   listen: restart_login_services
