@@ -18,6 +18,10 @@
 
 This roles installs the OpenLDAP server or client the target machine.
 
+This role is currently being overhauled to focus on **client configuration via SSSD** (NSS/PAM/ssh authorized keys + optional autofs + sudo rules lookup). LDAP server provisioning is expected to be handled elsewhere (your Swarm deployment).
+
+For LDAP server-side `sudoRole` / automount examples and commands, see `SSSD-SERVER-COMMANDS.md`.
+
 The following installation / configuration options are available:
 
 - Schema for storing SSH keys in ldap
