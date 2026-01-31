@@ -13,11 +13,7 @@
   ansible.builtin.lineinfile:
     dest: /etc/hosts
     state: present
-    line: "{{ lookup('dig', item ~ '.' ~ www_domain) }} {{ item }}.{{ www_domain }} {{ item }}"
-  when:
-    - groups['ldapservers'] is defined
-    - groups['ldapservers'] | length > 0
-  loop: "{{ groups['ldapservers'] | flatten }}"
+    line: "{{ openldap_server_ip }} {{ openldap_server_domain_name }} {{ openldap_server_domain_name.split('.')[0] }}"
   tags:
     - openldap-hosts
 
@@ -49,7 +45,7 @@
       ansible.builtin.lineinfile:
         dest: /etc/ssh/sshd_config
         state: present
-        regexp: ^(?:#)?AuthorizedKeysCommand\s+.*$
+        regexp: ^#?AuthorizedKeysCommand.*$
         line: "AuthorizedKeysCommand {{ openldap_ldap_pubkey_wrapper }}"
       notify: Restart SSHD
 
@@ -57,7 +53,7 @@
       ansible.builtin.lineinfile:
         dest: /etc/ssh/sshd_config
         state: present
-        regexp: ^(?:#)?AuthorizedKeysCommandUser\s+.*$
+        regexp: ^#?AuthorizedKeysCommandUser.*$
         line: "AuthorizedKeysCommandUser {{ openldap_ldap_pubkey_user | default('nobody') }}"
       notify: Restart SSHD
 

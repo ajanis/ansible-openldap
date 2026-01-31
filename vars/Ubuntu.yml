@@ -20,7 +20,6 @@ samba_pkgs:
   - samba
 
 openldap_server_app_path: /etc/ldap
-openldap_server_db_path: /var/lib/ldap/{{ openldap_server_domain_name }}
 
 openldap_server_user: openldap
 openldap_server_group: openldap
