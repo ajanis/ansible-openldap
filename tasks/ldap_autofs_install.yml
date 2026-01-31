@@ -3,9 +3,9 @@
   ansible.builtin.include_tasks:
     file: wait_for_locks.yml
 
-- name: Install autofs
+- name: Install autofs packages
   ansible.builtin.package:
-    name: autofs
+    name: "{{ openldap_autofs_pkgs }}"
     state: present
     update_cache: true
 
@@ -13,7 +13,7 @@
   ansible.builtin.lineinfile:
     dest: /etc/ssh/sshd_config
     state: present
-    regexp: ^.*UsePam.*$
+    regexp: ^.*UsePAM.*$
     line: UsePAM yes
   notify:
     - restart_login_services
