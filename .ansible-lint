@@ -102,12 +102,12 @@ extra_vars:
 # List of additional kind:pattern to be added at the top of the default
 # match list, first match determines the file kind.
 kinds:
-  - playbook: "**/examples/*.{yml,yaml}"
-  - galaxy: "**/folder/galaxy.yml"
-  - tasks: "**/tasks/*.yml"
-  - vars: "**/vars/*.yml"
-  - meta: "**/meta/main.yml"
-  - yaml: "**/*.yaml-too"
+  - playbook: '**/examples/*.{yml,yaml}'
+  - galaxy: '**/folder/galaxy.yml'
+  - tasks: '**/tasks/*.yml'
+  - vars: '**/vars/*.yml'
+  - meta: '**/meta/main.yml'
+  - yaml: '**/*.yaml-too'
 
 # List of additional collections to allow in only-builtins rule.
 # only_builtins_allow_collections:
@@ -118,7 +118,7 @@ kinds:
 #   - example_module
 
 # Allow setting custom prefix for name[prefix] rule
-task_name_prefix: "{stem} | "
+task_name_prefix: '{stem} | '
 # Complexity related settings
 
 # Limit the depth of the nested blocks:

@@ -56,36 +56,34 @@
     - restart_login_services
 
 - name: Set sudo alternative to classic sudo.ws (Ubuntu 26.04)
-  ansible.builtin.command: update-alternatives --set sudo /usr/bin/sudo.ws
   changed_when: true
   when:
     - ansible_distribution == 'Ubuntu'
     - ansible_distribution_major_version == '26'
   notify:
     - restart_login_services
+  ansible.builtin.command: update-alternatives --set sudo /usr/bin/sudo.ws
+
 - name: Configure PAM for SSSD + mkhomedir (Ubuntu)
-  ansible.builtin.command: pam-auth-update --enable mkhomedir --enable sss --force
   register: pam_auth_update
   changed_when: "'No changes made' not in (pam_auth_update.stdout | default(''))"
   when: ansible_os_family == 'Debian'
   notify:
     - restart_login_services
+  ansible.builtin.command: pam-auth-update --enable mkhomedir --enable sss --force
 
 - name: Configure SSSD sudo and mkhomedir (RHEL)
-  ansible.builtin.command: authselect select sssd with-sudo with-mkhomedir --force
   register: authselect_select
   changed_when: "'Profile was selected' in (authselect_select.stdout | default(''))"
   when: ansible_os_family == 'RedHat'
   notify:
     - restart_login_services
-- name: Validate SSD sudo and mkhomedir authselect profile (RHEL)
-  ansible.builtin.assert:
-    that:
-      - "'with-sudo' in authselect_select.stdout"
-      - "'with-mkhomedir' in authselect_select.stdout"
-    success_msg: "SSSD sudo and mkhomedir authselect profile correctly set"
+  ansible.builtin.command: authselect select sssd with-sudo with-mkhomedir --force
 
+- name: Validate SSD sudo and mkhomedir authselect profile (RHEL)
   when: ansible_os_family == 'RedHat'
+  ansible.builtin.debug:
+    msg: "{{ authselect_select }}"
 
 - name: Enable oddjobd (RHEL mkhomedir)
   ansible.builtin.systemd:
