@@ -12,8 +12,8 @@ sudo_provider = ldap
 cache_credentials = True
 ldap_search_base = {{ openldap_search_base }}
 ldap_default_bind_dn = {{ openldap_client_bind_dn | default('cn=monitor,' ~ openldap_search_base) }}
-ldap_default_authtok_type = password
-ldap_default_authtok = {{ openldap_client_bind_pw | default(vault_ldap_monitor_password) }}
+ldap_default_authtok_type = obfuscated_password
+ldap_default_authtok = {{ openldap_client_bind_pw | default(vault_openldap_obfuscated_password) }}
 ldap_search_timeout = 50
 ldap_network_timeout = 60
 ldap_access_filter = (objectClass=posixAccount)
@@ -21,13 +21,13 @@ sudo_search_base = {{ openldap_sudo_search_base }}
 ldap_sudo_full_refresh_interval = 86400
 ldap_sudo_smart_refresh_interval = 3600
 ldap_user_ssh_public_key = sshPublicKey
-{% set secure = openldap_secure | default('none') %}
+{% set secure = openldap_server_tls_setting | default('none') %}
 {% if secure == "starttls" %}
 # StartTLS
 ldap_uri = ldap://{{ openldap_server_domain_name }}
 ldap_id_use_start_tls = True
 ldap_tls_reqcert = demand
-ldap_tls_cacert = {{ ssl_certpath }}
+ldap_tls_cacert = {{ openldap_ssl_certpath }}
 {% elif secure == "ldaps" %}
 # LDAPS Legacy SSL
 ldap_uri = ldaps://{{ openldap_server_domain_name }}

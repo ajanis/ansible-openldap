@@ -9,13 +9,14 @@ openldap_client_pkgs:
   - libpam-sss
   - oddjob-mkhomedir
   - ldap-utils
+  - authselect
   - python{{ ansible_facts['python']['version']['major'] }}-dev
   - python{{ ansible_facts['python']['version']['major'] }}-pip
   - python{{ ansible_facts['python']['version']['major'] }}-ldap
   - python{{ ansible_facts['python']['version']['major'] }}-ldap3
   - python{{ ansible_facts['python']['version']['major'] }}-ecdsa
   - python{{ ansible_facts['python']['version']['major'] }}-sss
-
+  - authselect
 samba_pkgs:
   - smbldap-tools
   - samba

@@ -7,6 +7,8 @@ openldap_client_pkgs:
   - libnss-sss
   - libpam-sss
   - oddjob-mkhomedir
+  - oddjob
+  - authselect
   - ldap-utils
   - python{{ ansible_facts['python']['version']['major'] }}-dev
   - python{{ ansible_facts['python']['version']['major'] }}-pip
