@@ -1,48 +1,6 @@
 ---
-- name: Restart IPTables
-  ansible.builtin.systemd:
-    name: iptables
-    state: restarted
-    enabled: true
-
-- name: Fix LDAP Permissions
-  listen: restart slapd
-  ansible.builtin.file:
-    path: "{{ openldap_server_app_path }}"
-    state: directory
-    recurse: true
-    owner: "{{ openldap_server_user }}"
-    group: "{{ openldap_server_group }}"
-    mode: "0755"
-- name: Restart SlapD
-  listen: restart slapd
-  ansible.builtin.systemd:
-    name: slapd
-    state: restarted
-    enabled: true
-
-- name: Restart HTTPD
-  ansible.builtin.systemd:
-    name: httpd
-    state: restarted
-    enabled: true
-
-- name: Restart NSCD
-  listen: restart_ns_daemons
-  ansible.builtin.systemd:
-    name: nscd
-    state: restarted
-    enabled: true
-
-- name: Restart NSLCD
-  listen: restart_ns_daemons
-  ansible.builtin.systemd:
-    name: nslcd
-    state: restarted
-    enabled: true
-
 - name: Restart SSSD
-  listen: restart_ns_daemons
+  listen: restart_login_services
   ansible.builtin.systemd:
     name: sssd
     state: restarted
@@ -56,20 +14,6 @@
     enabled: true
     daemon_reload: true
 
-- name: Require Authconfig Update
-  ansible.builtin.set_fact:
-    run_authconfig: true
-  listen: restart_login_services
-
-# - name: fix ldap perms
-#   listen: restart_login_services
-#   file:
-#     path: "{{ openldap_server_app_path }}"
-#     state: directory
-#     recurse: yes
-#     owner: "{{ openldap_server_user }}"
-#     group: "{{ openldap_server_group }}"
-#     mode: 0755
 - name: Restart SystemD LoginD
   listen: restart_login_services
   ansible.builtin.systemd:
@@ -82,43 +26,3 @@
     name: autofs
     state: restarted
     enabled: true
-
-- name: Reload Exports
-  ansible.builtin.command: exportfs -ra
-  register: exportfs_reload
-  changed_when: exportfs_reload.changed
-
-- name: Restart Samba
-  ansible.builtin.systemd:
-    name: smbd
-    state: restarted
-    enabled: true
-
-- name: Restart NMBD
-  ansible.builtin.systemd:
-    name: nmbd
-    state: restarted
-    enabled: true
-
-- name: Smbldap Populate
-  ansible.builtin.set_fact:
-    smbldap_populate: true
-
-- name: Slapd Rebuild
-  ansible.builtin.set_fact:
-    slapd_rebuild: true
-
-- name: Restart Avahi Daemon
-  ansible.builtin.systemd:
-    name: avahi-daemon
-    state: restarted
-
-- name: Restart Netatalk
-  ansible.builtin.systemd:
-    name: netatalk
-    state: restarted
-
-- name: Pipx ensurepath
-  ansible.builtin.command: pipx ensurepath
-  register: pipx_ensurepath
-  changed_when: pipx_ensurepath.changed

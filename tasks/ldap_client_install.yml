@@ -34,26 +34,26 @@
     - restart_login_services
     - Restart SSSD
 
-- name: Configure NSSwitch for SSSD
-  ansible.builtin.lineinfile:
-    path: /etc/nsswitch.conf
-    regexp: "^{{ item.key }}.*$"
-    line: "{{ item.key }}: {{ item.value }}"
-    state: present
-    backrefs: false
-  loop:
-    - key: passwd
-      value: "files sss systemd"
-    - key: group
-      value: "files sss systemd"
-    - key: shadow
-      value: "files sss"
-    - key: sudoers
-      value: "files sss"
-    - key: automount
-      value: "files sss"
-  notify:
-    - restart_login_services
+# - name: Configure NSSwitch for SSSD
+#   ansible.builtin.lineinfile:
+#     path: /etc/nsswitch.conf
+#     regexp: "^{{ item.key }}.*$"
+#     line: "{{ item.key }}: {{ item.value }}"
+#     state: present
+#     backrefs: false
+#   loop:
+#     - key: passwd
+#       value: "files sss systemd"
+#     - key: group
+#       value: "files sss systemd"
+#     - key: shadow
+#       value: "files sss"
+#     - key: sudoers
+#       value: "files sss"
+#     - key: automount
+#       value: "files sss"
+#   notify:
+#     - restart_login_services
 
 - name: Set sudo alternative to classic sudo.ws (Ubuntu 26.04)
   changed_when: true
@@ -66,31 +66,40 @@
 
 - name: Configure PAM for SSSD + mkhomedir (Ubuntu)
   register: pam_auth_update
-  changed_when: "'No changes made' not in (pam_auth_update.stdout | default(''))"
   when: ansible_os_family == 'Debian'
-  notify:
-    - restart_login_services
+  changed_when: false
   ansible.builtin.command: pam-auth-update --enable mkhomedir --enable sss --force
 
+- name: Stat /etc/nssswitch.conf
+  ansible.builtin.stat:
+    path: /etc/nsswitch.conf
+    checksum_algorithm: md5
+    get_checksum: true
+  register: nsswitch_stat_original
+
 - name: Configure SSSD sudo and mkhomedir (RHEL)
-  register: authselect_select
-  changed_when: "'Profile was selected' in (authselect_select.stdout | default(''))"
-  when: ansible_os_family == 'RedHat'
+  changed_when: false
+  ansible.builtin.command: authselect select sssd with-mkhomedir with-pamaccess with-sudo --force
+
+- name: Stat /etc/nssswitch.conf
+  ansible.builtin.stat:
+    path: /etc/nsswitch.conf
+    checksum_algorithm: md5
+    get_checksum: true
+  register: nsswitch_stat_modified
+
+- name: Check if /etc/nsswitch.conf was modified by authselect
+  ansible.builtin.debug:
+    msg: "/etc/nsswitch.conf was modified by authselect"
+  when: nsswitch_stat_original.stat.checksum != nsswitch_stat_modified.stat.checksum
   notify:
     - restart_login_services
-  ansible.builtin.command: authselect select sssd with-sudo with-mkhomedir --force
 
-- name: Validate SSD sudo and mkhomedir authselect profile (RHEL)
-  when: ansible_os_family == 'RedHat'
-  ansible.builtin.debug:
-    msg: "{{ authselect_select }}"
-
-- name: Enable oddjobd (RHEL mkhomedir)
+- name: Enable oddjobd
   ansible.builtin.systemd:
     name: oddjobd
     state: started
     enabled: true
-  when: ansible_os_family == 'RedHat'
 
 - name: Ensure SSSD is enabled and running
   ansible.builtin.systemd:

@@ -1,4 +1,4 @@
-{% set secure = openldap_secure | default('none') %}
+{% set secure = openldap_server_tls_setting | default('none') %}
 {% if secure == "starttls" %}
 # StartTLS
 URI ldap://{{ openldap_server_domain_name }}
