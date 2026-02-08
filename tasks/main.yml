@@ -28,34 +28,33 @@
     - openldap-sshd
 
 - name: ssh | Configure sshd for SSSD authorized keys
+  when:
+    - ansible_system != 'OpenBSD'
   tags:
     - openldap-sshd
   block:
-    - name: ssh | Ensure PAM is enabled for sshd
+    - name: ssh | Remove all lines matching the pattern
+      ansible.builtin.replace:
+        path: "/etc/ssh/sshd_config"
+        regexp: "^#?{{ item.match }}\\s+.*$\\n"
+        replace: ""
+      loop:
+        - match: "AuthorizedKeysCommand"
+          line: "AuthorizedKeysCommand {{ openldap_ldap_pubkey_wrapper }}"
+        - match: "AuthorizedKeysCommandUser"
+          line: "AuthorizedKeysCommandUser {{ openldap_ldap_pubkey_user | default('nobody') }}"
+    - name: ssh | Ensure line is present for PAM authentication
       ansible.builtin.lineinfile:
         dest: /etc/ssh/sshd_config
         state: present
-        regexp: ^(?:#)?UsePAM\s+.*$
-        line: "UsePAM yes"
-      when:
-        - ansible_system != 'OpenBSD'
+        regexp: "^#?{{ item.match }}\\s+.*$\\n"
+        line: "{{ item.line }}"
       notify: Restart SSHD
-
-    - name: ssh | AuthorizedKeysCommand via SSSD
-      ansible.builtin.lineinfile:
-        dest: /etc/ssh/sshd_config
-        state: present
-        regexp: ^#?AuthorizedKeysCommand.*$
-        line: "AuthorizedKeysCommand {{ openldap_ldap_pubkey_wrapper }}"
-      notify: Restart SSHD
-
-    - name: ssh | AuthorizedKeysCommandUser via SSSD
-      ansible.builtin.lineinfile:
-        dest: /etc/ssh/sshd_config
-        state: present
-        regexp: ^#?AuthorizedKeysCommandUser.*$
-        line: "AuthorizedKeysCommandUser {{ openldap_ldap_pubkey_user | default('nobody') }}"
-      notify: Restart SSHD
+      loop:
+        - match: "AuthorizedKeysCommand"
+          line: "AuthorizedKeysCommand {{ openldap_ldap_pubkey_wrapper }}"
+        - match: "AuthorizedKeysCommandUser"
+          line: "AuthorizedKeysCommandUser {{ openldap_ldap_pubkey_user | default('nobody') }}"
 
 - name: Include AutoFS installation tasks
   ansible.builtin.include_tasks:
