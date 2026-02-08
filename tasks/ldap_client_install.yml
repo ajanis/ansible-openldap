@@ -11,6 +11,13 @@
   register: openldap_client_pkg_install
   until: openldap_client_pkg_install is not failed
 
+- name: Remove nscd and nslcd if present
+  ansible.builtin.package:
+    name:
+      - nscd
+      - nslcd
+    state: absent
+
 - name: Create openldap app path
   ansible.builtin.file:
     state: directory
@@ -67,34 +74,17 @@
 - name: Configure PAM for SSSD + mkhomedir (Ubuntu)
   register: pam_auth_update
   when: ansible_os_family == 'Debian'
-  changed_when: false
+  changed_when: true
   ansible.builtin.command: pam-auth-update --enable mkhomedir --enable sss --force
-
-- name: Stat /etc/nssswitch.conf
-  ansible.builtin.stat:
-    path: /etc/nsswitch.conf
-    checksum_algorithm: md5
-    get_checksum: true
-  register: nsswitch_stat_original
-
-- name: Configure SSSD sudo and mkhomedir (RHEL)
-  changed_when: false
-  ansible.builtin.command: authselect select sssd with-mkhomedir with-pamaccess with-sudo --force
-
-- name: Stat /etc/nssswitch.conf
-  ansible.builtin.stat:
-    path: /etc/nsswitch.conf
-    checksum_algorithm: md5
-    get_checksum: true
-  register: nsswitch_stat_modified
-
-- name: Check if /etc/nsswitch.conf was modified by authselect
-  ansible.builtin.debug:
-    msg: "/etc/nsswitch.conf was modified by authselect"
-  when: nsswitch_stat_original.stat.checksum != nsswitch_stat_modified.stat.checksum
   notify:
     - restart_login_services
-
+- name: Configure SSSD sudo and mkhomedir (RHEL)
+  changed_when: true
+  ansible.builtin.command: authselect select sssd with-mkhomedir with-pamaccess with-sudo --force
+  when:
+    - (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version is version('24', '>=')) or ansible_distribution == 'RedHat'
+  notify:
+    - restart_login_services
 - name: Enable oddjobd
   ansible.builtin.systemd:
     name: oddjobd
@@ -104,5 +94,5 @@
 - name: Ensure SSSD is enabled and running
   ansible.builtin.systemd:
     name: sssd
-    state: started
+    state: restarted
     enabled: true
