@@ -21,8 +21,16 @@
     state: restarted
     enabled: true
 
-- name: Reload AutoFS
+- name: Restart AutoFS
+  listen: restart_autofs
   ansible.builtin.systemd:
     name: autofs
     state: restarted
     enabled: true
+
+- name: Update PAM with authselect
+  listen: update_pam_with_authselect
+  command: >-
+    authselect select {{ authselect_profile }}
+    {{ authselect_features | join(' ') }}
+    {% if authselect_force %}--force{% endif %}

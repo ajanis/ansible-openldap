@@ -9,6 +9,21 @@
     state: present
     update_cache: true
 
+- name: Remove previously created autofs file if present
+  ansible.builtin.file:
+    path: /etc/defaults/autofs
+    state: absent
+  notify:
+    - restart_autofs
+
+- name: Include the directory master map
+  ansible.builtin.lineinfile:
+    path: /etc/auto.master
+    regexp: "^\\s*#?\\s*\\+auto\\.master\\s*$"
+    line: "+auto.master"
+  notify:
+    - restart_autofs
+
 - name: Enable pam authentication in ssh server configuration
   ansible.builtin.lineinfile:
     dest: /etc/ssh/sshd_config

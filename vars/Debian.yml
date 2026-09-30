@@ -1,5 +1,4 @@
 ---
-
 openldap_client_pkgs:
   - sssd
   - sssd-ldap
@@ -8,15 +7,17 @@ openldap_client_pkgs:
   - libnss-sss
   - libpam-sss
   - oddjob-mkhomedir
-  - ldap-utils
+  - oddjob
   - authselect
+  - ldap-utils
+  - sudo
   - python{{ ansible_facts['python']['version']['major'] }}-dev
   - python{{ ansible_facts['python']['version']['major'] }}-pip
   - python{{ ansible_facts['python']['version']['major'] }}-ldap
   - python{{ ansible_facts['python']['version']['major'] }}-ldap3
   - python{{ ansible_facts['python']['version']['major'] }}-ecdsa
   - python{{ ansible_facts['python']['version']['major'] }}-sss
-  - authselect
+
 samba_pkgs:
   - smbldap-tools
   - samba
