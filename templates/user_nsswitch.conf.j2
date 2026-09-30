@@ -1,0 +1,29 @@
+{% set conf = authselect_user_nsswitch_conf_defaults | combine(authselect_user_nsswitch_conf|default({}), recursive=true) -%}
+# In order of likelihood of use to accelerate lookup.
+passwd:     {{ conf.passwd }}
+shadow:     {{ conf.shadow }}
+group:      {{ conf.group }}
+hosts:      {{ conf.hosts }}
+services:   {{ conf.services }}
+netgroup:   {{ conf.netgroup }}
+automount:  {{ conf.automount }}
+
+aliases:    {{ conf.aliases }}
+ethers:     {{ conf.ethers }}
+gshadow:    {{ conf.gshadow }}
+{% if "initgroups" in conf %}
+initgroups: {{ conf.initgroups }}
+{% else %}
+# Allow initgroups to default to the setting for group.
+# initgroups: files
+{% endif %}
+networks:   {{ conf.networks }}
+protocols:  {{ conf.protocols }}
+publickey:  {{ conf.publickey }}
+rpc:        {{ conf.rpc }}
+{% if "bootparams" in conf %}
+bootparams: {{ conf.bootparams }}
+{% endif %}
+{% if "netmasks" in conf %}
+netmasks:   {{ conf.netmasks }}
+{% endif %}
