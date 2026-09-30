@@ -17,7 +17,7 @@ openldap_auto_data_ou: ou=auto.data,{{ openldap_search_base }}
 openldap_auto_home_ou: ou=auto.home,{{ openldap_search_base }}
 openldap_ldap_pubkey_wrapper: /usr/bin/sss_ssh_authorizedkeys
 openldap_ldap_pubkey_user: nobody
-
+openldap_tls_reqcert: demand
 #### LDAP AUTOMOUNT CONFIG
 
 openldap_server_rootpw: "{{ vault_openldap_server_rootpw }}"
@@ -37,3 +37,26 @@ openldap_server_country: US
 openldap_server_state: AnyState
 openldap_server_location: AnyCity
 openldap_server_organization: MyCompany
+authselect_user_nsswitch_conf_file: /etc/authselect/user-nsswitch.conf
+authselect_user_nsswitch_conf_defaults:
+  passwd: sss files systemd
+  shadow: files
+  group: sss files systemd
+  hosts: files myhostname resolve [!UNAVAIL=return] dns
+  services: files sss
+  netgroup: sss
+  automount: files sss
+  aliases: files
+  ethers: files
+  gshadow: files
+  # initgroups: files
+  networks: files dns
+  protocols: files
+  publickey: files
+  rpc: files
+  # bootparams: files
+  # netmasks: files
+
+authselect_profile: sssd
+authselect_features: []
+authselect_force: false
