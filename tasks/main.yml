@@ -17,63 +17,37 @@
   tags:
     - openldap-hosts
 
-- name: Configure LDAP Client
+- name: Wait for locks
   ansible.builtin.include_tasks:
-    file: ldap_client_install.yml
+    file: wait_for_locks.yml
+
+- name: Configure client LDAP and SSSD
+  ansible.builtin.include_tasks:
+    file: openldap_client.yml
     apply:
       tags:
         - openldap-client
   tags:
     - openldap-client
-    - openldap-sshd
 
-- name: ssh | Configure sshd for SSSD authorized keys
+- name: Configure SSH server LDAP settings
+  ansible.builtin.include_tasks:
+    file: openldap_sshd.yml
+    apply:
+      tags:
+        - openldap-sshd
   when:
     - ansible_system != 'OpenBSD'
   tags:
     - openldap-sshd
-  block:
-    - name: ssh | Remove all lines matching the pattern
-      ansible.builtin.replace:
-        path: "/etc/ssh/sshd_config"
-        regexp: "^#?{{ item.match }}\\s+.*$\\n"
-        replace: ""
-      loop:
-        - match: "AuthorizedKeysCommand"
-          line: "AuthorizedKeysCommand {{ openldap_ldap_pubkey_wrapper }}"
-        - match: "AuthorizedKeysCommandUser"
-          line: "AuthorizedKeysCommandUser {{ openldap_ldap_pubkey_user | default('nobody') }}"
-    - name: ssh | Ensure line is present for PAM authentication
-      ansible.builtin.lineinfile:
-        dest: /etc/ssh/sshd_config
-        state: present
-        regexp: "^#?{{ item.match }}\\s+.*$\\n"
-        line: "{{ item.line }}"
-      notify: Restart SSHD
-      loop:
-        - match: "AuthorizedKeysCommand"
-          line: "AuthorizedKeysCommand {{ openldap_ldap_pubkey_wrapper }}"
-        - match: "AuthorizedKeysCommandUser"
-          line: "AuthorizedKeysCommandUser {{ openldap_ldap_pubkey_user | default('nobody') }}"
 
 - name: Include AutoFS installation tasks
   ansible.builtin.include_tasks:
-    file: ldap_autofs_install.yml
+    file: openldap_autofs.yml
     apply:
       tags:
         - openldap-automount
   when:
     - shared_storage | default(false) | bool
-  tags:
-    - openldap-automount
-
-- name: Include ldap autofs configuration tasks
-  ansible.builtin.include_tasks:
-    file: ldap_autofs_configure.yml
-    apply:
-      tags:
-        - openldap-automount
-  when:
-    - openldap_print_server_commands | default(false) | bool
   tags:
     - openldap-automount

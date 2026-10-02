@@ -1,52 +1,53 @@
 [sssd]
-services = {{ (['nss','pam','sudo','ssh'] + (['autofs'] if shared_storage | default(false) | bool else [])) | join(',') }}
+services = {{ (['nss','pam','sudo','ssh'] + (['autofs'] if shared_storage | default(False) | bool else [])) | join(',') }}
 config_file_version = 2
 domains = default
 
 [domain/default]
+access_provider = simple
+ldap_access_filter = objectClass=posixAccount
+enumerate = True
+cache_credentials = True
 id_provider = ldap
 auth_provider = ldap
-access_provider = ldap
 chpass_provider = ldap
 sudo_provider = ldap
-cache_credentials = True
-ldap_default_bind_dn = {{ openldap_client_bind_dn | default('cn=monitor,' ~ openldap_search_base) }}
-ldap_default_authtok_type = obfuscated_password
-ldap_default_authtok = {{ openldap_client_bind_pw | default(vault_openldap_obfuscated_password) }}
-ldap_search_base = {{ openldap_search_base }}
-ldap_schema = rfc2307bis
-ldap_access_filter = (objectClass=posixAccount)
-ldap_group_object_class = posixGroup
-ldap_group_member = member
-ldap_user_member_of = memberOf
-ldap_user_ssh_public_key = sshPublicKey
-ldap_search_timeout = 50
-ldap_network_timeout = 60
-ldap_sudo_full_refresh_interval = 86400
-ldap_sudo_smart_refresh_interval = 3600
-
 {% set secure = openldap_server_tls_setting | default('none') %}
 {% if secure == "starttls" %}
 # StartTLS
 ldap_uri = ldap://{{ openldap_server_domain_name }}
 ldap_id_use_start_tls = True
-ldap_tls_reqcert = "{{ openldap_tls_reqcert | default('demand') }}"
+ldap_tls_reqcert = {{ openldap_tls_reqcert | default('demand') }}
 ldap_tls_cacert = {{ openldap_ssl_certpath }}
 {% elif secure == "ldaps" %}
 # LDAPS Legacy SSL
 ldap_uri = ldaps://{{ openldap_server_domain_name }}
 ldap_id_use_start_tls = False
-ldap_tls_reqcert = "{{ openldap_tls_reqcert | default('demand') }}"
+ldap_tls_reqcert = {{ openldap_tls_reqcert | default('demand') }}
 ldap_tls_cacert = {{ ssl_certpath }}
 {% else %}
 # LDAP without encryption
 ldap_uri = ldap://{{ openldap_server_domain_name }}
 ldap_id_use_start_tls = False
 {% endif %}
-
-{% if shared_storage | default(false) | bool %}
+ldap_search_base = {{ openldap_search_base }}
+ldap_search_timeout = 50
+ldap_default_bind_dn = {{ openldap_client_bind_dn | default('cn=readonly,' ~ openldap_search_base) }}
+ldap_default_authtok_type = password
+ldap_default_authtok = {{ vault_ldap_readonly_user_password }}
+ldap_schema = rfc2307bis
+ldap_group_object_class = posixGroup
+ldap_group_member = member
+ldap_user_member_of = memberOf
+ldap_user_ssh_public_key = sshPublicKey
+ldap_network_timeout = 60
+ldap_sudo_full_refresh_interval = 86400
+ldap_sudo_smart_refresh_interval = 3600
+ldap_opt_timeout = 20
+ldap_enumeration_search_timeout = 20
+{% if shared_storage | default(False) | bool %}
 autofs_provider = ldap
-ldap_autofs_search_base = {{ openldap_autofs_search_base }}
+ldap_autofs_search_base = {{ openldap_search_base }}
 ldap_autofs_map_object_class = automountMap
 ldap_autofs_entry_object_class = automount
 ldap_autofs_map_name = automountMapName
