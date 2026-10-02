@@ -1,0 +1,19 @@
+---
+- name: Update SSH Server configuration
+  tags:
+    - openldap-sshd
+  ansible.builtin.lineinfile:
+    dest: /etc/ssh/sshd_config
+    state: present
+    regexp: ^(?:#)?{{ item.option }}\s.*$
+    line: "{{ item.option }} {{ item.value }}"
+    validate: '/usr/sbin/sshd -t -f %s'
+  loop:
+    - option: AuthorizedKeysCommand
+      value: "{{ openldap_ldap_pubkey_wrapper }}"
+    - option: AuthorizedKeysCommandUser
+      value: "{{ openldap_ldap_pubkey_user | default('nobody') }}"
+    - option: UsePAM
+      value: "yes"
+  notify: Restart SSHD
+
