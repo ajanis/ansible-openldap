@@ -19,8 +19,8 @@
 
 - name: Remove previously created autofs file if present
   ansible.builtin.copy:
-    dest: |
-      {% set autofs_pathh = "" %}
+    dest: |-
+      {% set autofs_pathd = "" %}
       {% if ansible_os_family == "RedHat" %}
       {% set autofs_path = "/etc/sysconfig/autofs" %}
       {% elif ansible_os_family == "Debian" %}

@@ -1,19 +1,11 @@
-{% set secure = openldap_server_tls_setting | default('none') %}
-{% if secure == "starttls" %}
-# StartTLS
-URI ldap://{{ openldap_server_domain_name }}
+URI {{ openldap_ldap_uri }}
 BASE {{ openldap_search_base }}
-TLS_CACERT {{ ssl_certpath }}
-TLS_REQCERT demand
-{% elif secure == "ldaps" %}
-# LDAPS Legacy SSL
-URI ldaps://{{ openldap_server_domain_name }}
-BASE {{ openldap_search_base }}
-TLS_CACERT {{ ssl_certpath }}
-TLS_REQCERT demand
-{% else %}
-# LDAP without encryption (LAB ONLY)
-URI ldap://{{ openldap_server_domain_name }}
-BASE {{ openldap_search_base }}
+{% if openldap_ldap_id_use_start_tls | default(false) %}
+{% if openldap_ldap_tls_cacert != none %}
+TLS_CACERT {{ openldap_ldap_tls_cacert }}
+{% endif %}
+{% if openldap_ldap_tls_reqcert != none %}
+TLS_REQCERT {{ openldap_ldap_tls_reqcert }}
+{% endif %}
 {% endif %}
 LDAP_VERSION 3

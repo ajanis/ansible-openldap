@@ -42,6 +42,11 @@
         state: started
         enabled: true
 
+    - name: Remove previously created sssd snippets if present
+      ansible.builtin.file:
+        path: /etc/sssd/conf.d/
+        state: absent
+
     - name: Ensure paths for openldap, sssd and authselect configs exist
       ansible.builtin.file:
         state: directory
@@ -52,28 +57,69 @@
         - "/etc/sssd/conf.d"
         - "/etc/authselect"
 
-    - name: Press LDAP client configuration
+    - name: Install LDAP client configuration
       ansible.builtin.template:
         src: client_ldap.conf.j2
         mode: "0644"
         dest: "{{ openldap_server_app_path }}/ldap.conf"
 
-    - name: Press SSSD configuration
+    # - name: Press SSSD configuration
+    #   ansible.builtin.template:
+    #     src: sssd.conf.j2
+    #     dest: /etc/sssd/sssd.conf
+    #     owner: root
+    #     group: root
+    #     mode: "0600"
+    #     validate: sssctl config-check
+    #   notify:
+    #     - restart_login_services
+
+- name: Generate and validate SSSD configuration
+  block:
+    - name: Install SSSD configuration
       ansible.builtin.template:
         src: sssd.conf.j2
         dest: /etc/sssd/sssd.conf
         owner: root
         group: root
         mode: "0600"
+        backup: true
+      register: sssd_config_updated
       notify:
         - restart_login_services
+        - invalidate_sss_cache
+        - restart_autofs
+    - name: Validate SSSD configuration
+      ansible.builtin.command:
+        cmd: >-
+          sssctl config-check
+      changed_when: false
+      when:
+        - sssd_config_updated is changed
 
-    - name: Remove previously created sssd file if present
-      ansible.builtin.file:
-        path: /etc/sssd/conf.d/90-homelab-ldap-v2.conf
-        state: absent
+  rescue:
+    - name: Restore original SSSD configuration
+      ansible.builtin.copy:
+        remote_src: true
+        src: "{{ sssd_config_updated['backup_file'] }}"
+        dest: /etc/sssd/sssd.conf
+      when:
+        - sssd_config_updated.backup_file is defined
+        - sssd_config_updated is changed
       notify:
         - restart_login_services
+        - invalidate_sss_cache
+        - restart_autofs
+  always:
+    - name: Remove SSSD config backup
+      ansible.builtin.file:
+        path: "{{ sssd_config_updated['backup_file'] }}"
+        state: absent
+      when:
+        - sssd_config_updated.backup_file is defined
+        - sssd_config_updated is changed
+
+
 
 
 - name: PAM configuration via Authselect
@@ -88,6 +134,7 @@
       notify:
         - update_pam_with_authselect
         - restart_login_services
+        - invalidate_sss_cache
         - restart_autofs
 
     - name: Get current authselect config
@@ -115,7 +162,7 @@
           authselect_current_raw.failed
       notify:
         - update_pam_with_authselect
-
+        - invalidate_sss_cache
 
 
 
