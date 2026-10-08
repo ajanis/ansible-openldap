@@ -34,3 +34,8 @@
     authselect select {{ authselect_profile }}
     {{ authselect_features | join(' ') }}
     {% if authselect_force %}--force{% endif %}
+
+- name: Invalidate SSS Cache
+  listen: invalidate_sss_cache
+  command: >-
+    sss_cache -E -A -R

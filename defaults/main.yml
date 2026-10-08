@@ -1,6 +1,5 @@
 ---
-
-openldap_secure: "none"
+# General config helper vars
 shared_storage: false
 openldap_server_domain_name: "openldap.{{ www_domain }}"
 openldap_server_ip: 10.0.10.100
@@ -8,8 +7,11 @@ openldap_server_dc: dc={{ ',dc='.join(www_domain.split('.')) }}
 openldap_search_base: "{{ openldap_server_dc }}"
 openldap_sudo_search_base: "ou=sudoers,{{ openldap_search_base }}"
 openldap_autofs_search_base: "ou=auto.master,{{ openldap_search_base }}"
-openldap_server_uri: ldap://{{ openldap_server_domain_name }}
+openldap_ldap_uri: ldap://{{ openldap_server_domain_name }}:389
 openldap_server_bind_dn: cn=admin,{{ openldap_search_base }}
+openlap_server_bind_password: "bind-password"
+openldap_server_hosts_entry: "{{ openldap_server_ip }} {{ openldap_server_domain_name }} {{ openldap_server_domain_name.split('.')[0] }}"
+openldap_ldap_id_use_start_tls: false
 openldap_group_ou: "ou=groups,{{ openldap_search_base }}"
 openldap_user_ou: "ou=people,{{ openldap_search_base }}"
 openldap_auto_master_ou: ou=auto.master,{{ openldap_search_base }}
@@ -17,26 +19,29 @@ openldap_auto_data_ou: ou=auto.data,{{ openldap_search_base }}
 openldap_auto_home_ou: ou=auto.home,{{ openldap_search_base }}
 openldap_ldap_pubkey_wrapper: /usr/bin/sss_ssh_authorizedkeys
 openldap_ldap_pubkey_user: nobody
-openldap_tls_reqcert: demand
-#### LDAP AUTOMOUNT CONFIG
 
-openldap_server_rootpw: "{{ vault_openldap_server_rootpw }}"
-
-openldap_server_hosts_entry: "{{ openldap_server_ip }} {{ openldap_server_domain_name }} {{ openldap_server_domain_name.split('.')[0] }}"
-
-ssl_certpath:
-ssl_keypath:
-ssl_privkey:
-ssl_certchain:
-ssh_users: {}
-ssh_groups: {}
-smb_shares: []
-nfs_shares: []
-## The self signed ssl parameters
-openldap_server_country: US
-openldap_server_state: AnyState
-openldap_server_location: AnyCity
-openldap_server_organization: MyCompany
+# INI-shaped SSSD configuration, recursively merged over openldap_sssd_conf_defaults.
+openldap_sssd_conf: {}
+openldap_sssd_conf_defaults:
+  sssd:
+    services:
+      - nss
+      - pam
+    domains: default
+  domain/default:
+    ldap_uri: "{{ openldap_ldap_uri }}"
+    ldap_id_use_start_tls: false
+    ldap_search_base: "{{ openldap_search_base }}"
+    ldap_search_timeout: 50
+    ldap_default_bind_dn: "{{ openldap_server_bind_dn }}"
+    ldap_default_authtok_type: password
+    ldap_default_authtok: "{{ openldap_server_bind_password | default('bind-password') }}"
+    ldap_schema: rfc2307
+    ldap_network_timeout: 60
+    ldap_sudo_full_refresh_interval: 86400
+    ldap_sudo_smart_refresh_interval: 3600
+    ldap_opt_timeout: 20
+## Authselect nsswitch options
 authselect_user_nsswitch_conf_file: /etc/authselect/user-nsswitch.conf
 authselect_user_nsswitch_conf_defaults:
   passwd: sss files systemd
